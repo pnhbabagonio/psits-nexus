@@ -1,9 +1,9 @@
 Group 8
-Philip Neel Babagonio
-Ruby Jean Solomon
-Baililian Sali
-Mark Laurence Abdina
-Adrian Michael Demillo
+-Philip Neel Babagonio
+-Ruby Jean Solomon
+-Baililian Sali
+-Mark Laurence Abdina
+-Adrian Michael Demillo
 
 
 # Project Setup Instructions
