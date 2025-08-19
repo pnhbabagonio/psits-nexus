@@ -18,7 +18,7 @@ To set up and run this project, follow these steps:
    - - If you are using **Herd**, clone it inside the `Herd` folder.
    ```bash
    git clone <repository-url>
-   cd RizGroup/app
+   cd psits-nexus
    ```
 
 2. **Install dependencies**
