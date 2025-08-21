@@ -5,7 +5,11 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
+<<<<<<< HEAD
 import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+=======
+import { BookOpen, Folder, LayoutGrid, CreditCard, Calendar, BarChart3, HelpCircle, Globe } from 'lucide-vue-next';
+>>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -14,10 +18,34 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
+<<<<<<< HEAD
+=======
+    {
+        title: 'Payments',
+        href: '/payments',
+        icon: CreditCard,
+    },
+    {
+        title: 'Events',
+        href: '/events',
+        icon: Calendar,
+    },
+    {
+        title: 'Reports',
+        href: '/reports',
+        icon: BarChart3,
+    },
+    {
+        title: 'Help & Support',
+        href: '/support',
+        icon: HelpCircle,
+    },
+>>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
 ];
 
 const footerNavItems: NavItem[] = [
     {
+<<<<<<< HEAD
         title: 'Github Repo',
         href: 'https://github.com/laravel/vue-starter-kit',
         icon: Folder,
@@ -25,6 +53,15 @@ const footerNavItems: NavItem[] = [
     {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#vue',
+=======
+        title: 'PSITS Portal',
+        href: 'https://psits-nexus.github.io/portal',
+        icon: Globe,
+    },
+    {
+        title: 'Platform Guide',
+        href: 'https://psits-nexus.github.io/guide',
+>>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
         icon: BookOpen,
     },
 ];
@@ -54,4 +91,8 @@ const footerNavItems: NavItem[] = [
         </SidebarFooter>
     </Sidebar>
     <slot />
+<<<<<<< HEAD
 </template>
+=======
+</template>
+>>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
