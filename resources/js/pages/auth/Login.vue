@@ -23,11 +23,7 @@ const togglePasswordVisibility = () => {
 </script>
 
 <template>
-<<<<<<< HEAD
     <AuthBase title="Welcome back" description="Sign in to your account to continue">
-=======
-    <AuthBase title="Welcome back" description="Sign in to your PSITS Nexus account to continue">
->>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
         <Head title="Log in" />
 
         <div v-if="status" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
