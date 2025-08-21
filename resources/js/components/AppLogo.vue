@@ -7,6 +7,10 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
         <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
     </div>
     <div class="ml-1 grid flex-1 text-left text-sm">
+<<<<<<< HEAD
         <span class="mb-0.5 truncate leading-tight font-semibold">Laravel Starter Kit</span>
+=======
+        <span class="mb-0.5 truncate leading-tight font-semibold">PSITS - Nexus</span>
+>>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
     </div>
 </template>
