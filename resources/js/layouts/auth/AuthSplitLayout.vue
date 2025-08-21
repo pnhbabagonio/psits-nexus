@@ -78,25 +78,36 @@ defineProps<{
 
                     <div class="group flex items-center space-x-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg> -->
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-white group-hover:text-emerald-200 transition-colors">Lightning Fast</h3>
-                            <p class="text-sm text-blue-100/70">Optimized performance for instant access</p>
+                            <h3 class="font-semibold text-white group-hover:text-emerald-200 transition-colors">Financial Monitoring</h3>
+                            <p class="text-sm text-blue-100/70">Easily manage and oversee your finances.</p>
                         </div>
                     </div>
 
                     <div class="group flex items-center space-x-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg> -->
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-white group-hover:text-violet-200 transition-colors">User Focused</h3>
-                            <p class="text-sm text-blue-100/70">Designed with your experience in mind</p>
+                            <h3 class="font-semibold text-white group-hover:text-violet-200 transition-colors">Event Updates</h3>
+                            <p class="text-sm text-blue-100/70">Stay informed with the latest ativities, programs, and announcements</p>
                         </div>
                     </div>
                 </div>
