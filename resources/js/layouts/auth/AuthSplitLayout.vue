@@ -50,19 +50,11 @@ defineProps<{
                 <div class="space-y-6 mb-12">
                     <h2 class="text-4xl font-bold leading-tight tracking-tight">
                         <span class="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
-<<<<<<< HEAD
                             Welcome to PSITS Nexus
                         </span>
                     </h2>
                     <p class="text-lg text-blue-100/80 leading-relaxed font-light">
                         Experience an easier way to access payment records, monitor finances, and stay up to date on society events and announcements.
-=======
-                            Welcome to the Future
-                        </span>
-                    </h2>
-                    <p class="text-lg text-blue-100/80 leading-relaxed font-light">
-                        Experience seamless authentication with enterprise-grade security and modern design principles.
->>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
                     </p>
                 </div>
 
@@ -70,7 +62,6 @@ defineProps<{
                 <div class="space-y-4 mb-12">
                     <div class="group flex items-center space-x-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
-<<<<<<< HEAD
                             <!-- <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                             </svg> -->
@@ -82,34 +73,11 @@ defineProps<{
                         <div>
                             <h3 class="font-semibold text-white group-hover:text-blue-200 transition-colors">Payment Records</h3>
                             <p class="text-sm text-blue-100/70">Fast and efficient way to track all your payments</p>
-=======
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-white group-hover:text-blue-200 transition-colors">Secure Authentication</h3>
-                            <p class="text-sm text-blue-100/70">Military-grade encryption and security protocols</p>
->>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
                         </div>
                     </div>
 
                     <div class="group flex items-center space-x-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
-<<<<<<< HEAD
-                            <!-- <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg> -->
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <line x1="18" y1="20" x2="18" y2="10"></line>
-                                <line x1="12" y1="20" x2="12" y2="4"></line>
-                                <line x1="6" y1="20" x2="6" y2="14"></line>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-white group-hover:text-emerald-200 transition-colors">Financial Monitoring</h3>
-                            <p class="text-sm text-blue-100/70">Easily manage and oversee your finances.</p>
-=======
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
@@ -117,27 +85,11 @@ defineProps<{
                         <div>
                             <h3 class="font-semibold text-white group-hover:text-emerald-200 transition-colors">Lightning Fast</h3>
                             <p class="text-sm text-blue-100/70">Optimized performance for instant access</p>
->>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
                         </div>
                     </div>
 
                     <div class="group flex items-center space-x-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg">
-<<<<<<< HEAD
-                            <!-- <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                            </svg> -->
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                <line x1="16" y1="2" x2="16" y2="6"></line>
-                                <line x1="8" y1="2" x2="8" y2="6"></line>
-                                <line x1="3" y1="10" x2="21" y2="10"></line>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-white group-hover:text-violet-200 transition-colors">Event Updates</h3>
-                            <p class="text-sm text-blue-100/70">Stay informed with the latest ativities, programs, and announcements</p>
-=======
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                             </svg>
@@ -145,7 +97,6 @@ defineProps<{
                         <div>
                             <h3 class="font-semibold text-white group-hover:text-violet-200 transition-colors">User Focused</h3>
                             <p class="text-sm text-blue-100/70">Designed with your experience in mind</p>
->>>>>>> f0faa7218f40f1b5eaaae6e30ca122c99aa743ea
                         </div>
                     </div>
                 </div>
