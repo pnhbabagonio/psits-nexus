@@ -70,28 +70,50 @@ const dateRange = ref({ start: '2025-01-01', end: '2025-08-01' })
       </div>
 
       <!-- Date Range Selector -->
-      <Card>
-        <CardHeader>
-          <CardTitle>Custom Date Range</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="flex items-center gap-4">
-            <div>
-              <label class="text-sm font-medium">Start Date</label>
-              <input type="date" v-model="dateRange.start" class="border rounded-lg px-2 py-1" />
-            </div>
-            <div>
-              <label class="text-sm font-medium">End Date</label>
-              <input type="date" v-model="dateRange.end" class="border rounded-lg px-2 py-1" />
-            </div>
-            <button
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-            >
-              Apply
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+<Card class="rounded-2xl shadow-md">
+  <CardHeader>
+    <CardTitle class="text-gray-800 dark:text-gray-200">Custom Date Range</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div class="flex flex-wrap items-end gap-4">
+      <!-- Start Date -->
+      <div class="flex flex-col">
+        <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+          Start Date
+        </label>
+        <input
+          type="date"
+          v-model="dateRange.start"
+          class="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600
+                 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200
+                 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      <!-- End Date -->
+      <div class="flex flex-col">
+        <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+          End Date
+        </label>
+        <input
+          type="date"
+          v-model="dateRange.end"
+          class="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600
+                 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200
+                 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      <!-- Apply Button -->
+      <button
+        class="bg-blue-600 text-white px-5 py-2 rounded-xl shadow-sm
+               hover:bg-blue-700 dark:hover:bg-blue-500 transition"
+      >
+        Apply
+      </button>
+    </div>
+  </CardContent>
+</Card>
     </div>
   </AppLayout>
 </template>
