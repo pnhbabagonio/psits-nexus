@@ -72,7 +72,7 @@ const financialManagementItems = [
         title: 'Financial Reports',
         href: '/financial-reports',
         icon: Clipboard,
-    },
+    },  
     {
         title: 'Expenses Tracking',
         href: '/expenses-tracking',
