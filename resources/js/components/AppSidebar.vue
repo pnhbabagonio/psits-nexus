@@ -16,7 +16,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, CreditCard, Calendar, BarChart3, HelpCircle, Globe, User, Users, UserPlus, Shield, ChevronRight } from 'lucide-vue-next';
+import { BookOpen, LayoutGrid, CreditCard, Calendar, BarChart3, HelpCircle, Globe, User, Users, UserPlus, Shield, ChevronRight, PiggyBank, PhilippinePeso, Clipboard } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -24,11 +24,6 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
-    },
-    {
-        title: 'Payments',
-        href: '/payments',
-        icon: CreditCard,
     },
     {
         title: 'Events',
@@ -65,6 +60,25 @@ const mainNavItems: NavItem[] = [
 //         icon: Shield,
 //     },
 // ];
+
+// Financial management sub-items
+const financialManagementItems = [
+    {
+        title: 'Transactions',  
+        href: '/transactions',
+        icon: PiggyBank,
+    },
+    {
+        title: 'Financial Reports',
+        href: '/financial-reports',
+        icon: Clipboard,
+    },
+    {
+        title: 'Expenses Tracking',
+        href: '/expenses-tracking',
+        icon: PhilippinePeso,
+    },
+]
 
 const footerNavItems: NavItem[] = [
     {
@@ -139,6 +153,31 @@ const footerNavItems: NavItem[] = [
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
+
+                <!-- Collapsible Financial Management -->
+                <Collapsible class="group/collapsible">
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger as-child>
+                            <SidebarMenuButton>
+                                <CreditCard />
+                                <span>Financial Management</span>
+                                <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenuSub>
+                                <SidebarMenuSubItem v-for="subItem in financialManagementItems" :key="subItem.title">
+                                    <SidebarMenuButton as-child size="sm">
+                                        <Link :href="subItem.href">
+                                            <component :is="subItem.icon" />
+                                            <span>{{ subItem.title }}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
+                    </SidebarMenuItem>
+                </Collapsible>
 
                 <!-- Remaining nav items -->
                 <SidebarMenuItem v-for="item in mainNavItems.slice(1)" :key="item.title">
