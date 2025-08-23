@@ -21,59 +21,69 @@
           class="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1"
         />
 
-        <select v-model="filterType" class="px-4 py-2 rounded-xl border border-gray-300">
-          <option value="">All Types</option>
-          <option value="payment">Payment</option>
-          <option value="expense">Expense</option>
-          <option value="membership">Membership</option>
-        </select>
+<select
+  v-model="filterType"
+  class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
+         bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200
+         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+         transition"
+>
+  <option value="">All Types</option>
+  <option value="payment">Payment</option>
+  <option value="expense">Expense</option>
+  <option value="membership">Membership</option>
+</select>
+
 
         <input
-          type="date"
-          v-model="filterDate"
-          class="px-4 py-2 rounded-xl border border-gray-300"
-        />
-      </div>
+              type="date"
+              v-model="filterDate"
+              class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 
+         bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 
+         focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+    </div>
 
       <!-- Transactions Table -->
-      <div class="overflow-x-auto rounded-2xl shadow">
-        <table class="min-w-full text-left">
-          <thead>
-            <tr class="bg-gray-800 text-gray-300">  
-              <th class="px-6 py-3">Date</th>
-              <th class="px-6 py-3">Type</th>
-              <th class="px-6 py-3">Description</th>
-              <th class="px-6 py-3">Amount</th>
-              <th class="px-6 py-3">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(tx, index) in filteredTransactions"
-              :key="index"
-              class="border-b border-gray-300 hover:bg-gray-700 transition text-white"
->
-
-              <td class="px-6 py-3">{{ tx.date }}</td>
-              <td class="px-6 py-3 capitalize">{{ tx.type }}</td>
-              <td class="px-6 py-3">{{ tx.description }}</td>
-              <td class="px-6 py-3 font-semibold text-green-700">₱{{ tx.amount }}</td>
-              <td class="px-6 py-3">
-                <span
-                  :class="[
-                    'px-3 py-1 rounded-full text-sm text-gray',
-                    tx.status === 'Completed' ? 'bg-green-500' :
-                    tx.status === 'Pending' ? 'bg-yellow-500' : 'bg-red-500'
-                  ]"
-                >
-                  {{ tx.status }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
+<div class="overflow-x-auto rounded-2xl shadow">
+  <table class="min-w-full text-left">
+    <thead>
+      <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm uppercase">
+        <th class="px-6 py-3">Date</th>
+        <th class="px-6 py-3">Type</th>
+        <th class="px-6 py-3">Description</th>
+        <th class="px-6 py-3">Amount</th>
+        <th class="px-6 py-3">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="(tx, index) in filteredTransactions"
+        :key="index"
+        class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+      >
+        <td class="px-6 py-3 text-gray-700 dark:text-gray-200">{{ tx.date }}</td>
+        <td class="px-6 py-3 capitalize text-gray-700 dark:text-gray-200">{{ tx.type }}</td>
+        <td class="px-6 py-3 text-gray-700 dark:text-gray-200">{{ tx.description }}</td>
+        <td class="px-6 py-3 font-semibold text-green-600 dark:text-green-400">
+          ₱{{ tx.amount }}
+        </td>
+        <td class="px-6 py-3">
+          <span
+            :class="[ 
+              'px-3 py-1 rounded-full text-xs font-semibold',
+              tx.status === 'Completed' ? 'bg-green-500 text-white' :
+              tx.status === 'Pending' ? 'bg-yellow-500 text-white' : 
+              'bg-red-500 text-white'
+            ]"
+          >
+            {{ tx.status }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
       <!-- Pagination -->
       <div class="flex justify-between items-center mt-6 text-sm text-gray-600">
         <p>
