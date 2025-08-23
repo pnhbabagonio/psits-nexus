@@ -43,23 +43,23 @@ const mainNavItems: NavItem[] = [
 ];
 
 // User Management sub-items
-const userManagementItems = [
-    {
-        title: 'All Users',
-        href: '/users',
-        icon: Users,
-    },
-    {
-        title: 'Add User',
-        href: '/users/create',
-        icon: UserPlus,
-    },
-    {
-        title: 'User Roles',
-        href: '/users/roles',
-        icon: Shield,
-    },
-];
+// const userManagementItems = [
+//     {
+//         title: 'All Users',
+//         href: '/users',
+//         icon: Users,
+//     },
+//     {
+//         title: 'Add User',
+//         href: '/users/create',
+//         icon: UserPlus,
+//     },
+//     {
+//         title: 'User Roles',
+//         href: '/users/roles',
+//         icon: Shield,
+//     },
+// ];
 
 // Financial management sub-items
 const financialManagementItems = [
@@ -119,7 +119,7 @@ const footerNavItems: NavItem[] = [
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 
-                <!-- Collapsible User Management -->
+                <!-- Collapsible User Management
                 <Collapsible class="group/collapsible">
                     <SidebarMenuItem>
                         <CollapsibleTrigger as-child>
@@ -142,7 +142,17 @@ const footerNavItems: NavItem[] = [
                             </SidebarMenuSub>
                         </CollapsibleContent>
                     </SidebarMenuItem>
-                </Collapsible>
+                </Collapsible> -->
+
+                <!-- User Management (simple tab, no collapsible) -->
+                <SidebarMenuItem>
+                    <SidebarMenuButton as-child>
+                        <Link :href="route('user-management')">
+                            <User />
+                            <span>User Management</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 <!-- Collapsible Financial Management -->
                 <Collapsible class="group/collapsible">
