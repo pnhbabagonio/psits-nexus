@@ -400,12 +400,12 @@ function editUser(user: any) {
       <h2 class="text-xl font-bold mb-4">User Details</h2>
       <p><strong>Name:</strong> {{ selectedUser.name }}</p>
       <p><strong>Email:</strong> {{ selectedUser.email }}</p>
-      <p><strong>Student ID:</strong> {{ selectedUser.studentId }}</p>
+      <p><strong>Student ID:</strong> {{ selectedUser.student_id }}</p>
       <p><strong>Program:</strong> {{ selectedUser.program }}</p>
       <p><strong>Year:</strong> {{ selectedUser.year }}</p>
       <p><strong>Role:</strong> {{ selectedUser.role }}</p>
       <p><strong>Status:</strong> {{ selectedUser.status }}</p>
-      <p><strong>Last Login:</strong> {{ selectedUser.lastLogin }}</p>
+      <p><strong>Last Login:</strong> {{ selectedUser.last_login }}</p>
       <div class="flex justify-end mt-4">
         <button @click="isViewUserOpen = false" class="px-3 py-2 bg-gray-700 rounded">Close</button>
       </div>
