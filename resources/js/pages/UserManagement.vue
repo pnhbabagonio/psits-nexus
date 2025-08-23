@@ -16,60 +16,66 @@ const perPage = 10
 const page = usePage()
 const users = ref(Array.isArray(page.props.users) ? page.props.users : [])
 
-// Form for adding new user
+// Add User Form
 const newUserForm = useForm({
-  name: '',
-  email: '',
-  studentId: '',
-  program: '',
-  year: '',
-  role: 'Member',
-  status: 'active',
-  lastLogin: new Date().toISOString().split('T')[0],
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    email: '',
+    studentId: '',
+    program: '',
+    year: '',
+    role: 'Member',
+    status: 'active',
+    lastLogin: new Date().toISOString().split('T')[0],
 })
 
-// Form for editing user
+// Edit User Form
 const editUserForm = useForm({
-  id: null,
-  name: '',
-  email: '',
-  studentId: '',
-  program: '',
-  year: '',
-  role: '',
-  status: '',
-  lastLogin: '',
+    id: null,
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    email: '',
+    studentId: '',
+    program: '',
+    year: '',
+    role: '',
+    status: '',
+    lastLogin: '',
 })
 
 function saveNewUser() {
-  newUserForm.post(route('users.store'), {
-    preserveScroll: true,
-    onSuccess: () => {
-      isAddUserOpen.value = false
-      newUserForm.reset()
-      // Refresh users data
-      router.reload({ only: ['users'] })
-    },
-    onError: (errors) => {
-      console.error('Error saving user:', errors)
-    }
-  })
+    // Combine names before sending
+    const fullName = `${newUserForm.firstName} ${newUserForm.middleName} ${newUserForm.lastName}`.replace(/\s+/g, ' ').trim()
+
+    newUserForm.transform((data) => ({
+        ...data,
+        name: fullName,   // send as `name`
+    })).post(route('users.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+        isAddUserOpen.value = false
+        newUserForm.reset()
+        router.reload({ only: ['users'] })
+        },
+    })
 }
 
 function updateUser() {
   if (!selectedUser.value) return
-  
-  editUserForm.put(route('users.update', selectedUser.value.id), {
+  const fullName = `${editUserForm.firstName} ${editUserForm.middleName} ${editUserForm.lastName}`.replace(/\s+/g, ' ').trim()
+
+  editUserForm.transform((data) => ({
+    ...data,
+    name: fullName,   // send as `name`
+  })).put(route('users.update', selectedUser.value.id), {
     preserveScroll: true,
     onSuccess: () => {
       isEditUserOpen.value = false
       selectedUser.value = null
-      // Refresh users data
       router.reload({ only: ['users'] })
     },
-    onError: (errors) => {
-      console.error('Error updating user:', errors)
-    }
   })
 }
 
@@ -99,17 +105,23 @@ function viewUser(user: any) {
 }
 
 function editUser(user: any) {
-  selectedUser.value = { ...user }
-  editUserForm.id = user.id
-  editUserForm.name = user.name
-  editUserForm.email = user.email
-  editUserForm.studentId = user.student_id
-  editUserForm.program = user.program
-  editUserForm.year = user.year
-  editUserForm.role = user.role
-  editUserForm.status = user.status
-  editUserForm.lastLogin = user.last_login
-  isEditUserOpen.value = true
+    selectedUser.value = { ...user }
+    editUserForm.id = user.id
+
+    // Split stored full name into parts (simple split)
+    const nameParts = user.name.split(' ')
+    editUserForm.firstName = nameParts[0] || ''
+    editUserForm.middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : ''
+    editUserForm.lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : ''
+
+    editUserForm.email = user.email
+    editUserForm.studentId = user.student_id
+    editUserForm.program = user.program
+    editUserForm.year = user.year
+    editUserForm.role = user.role
+    editUserForm.status = user.status
+    editUserForm.lastLogin = user.last_login
+    isEditUserOpen.value = true
 }
 </script>
 
@@ -150,9 +162,17 @@ function editUser(user: any) {
         
         <!-- Name -->
         <div>
-            <label class="block text-sm font-medium">Full Name</label>
-            <input v-model="newUserForm.name" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
-            <div v-if="newUserForm.errors.name" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.name }}</div>
+            <label class="block text-sm font-medium">First Name</label>
+            <input v-model="newUserForm.firstName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
+            <div v-if="newUserForm.errors.firstName" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.firstName }}</div>
+
+            <label class="block text-sm font-medium">Middle Name</label>
+            <input v-model="newUserForm.middleName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" />
+            <div v-if="newUserForm.errors.middleName" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.middleName }}</div>
+
+            <label class="block text-sm font-medium">Last Name</label>
+            <input v-model="newUserForm.lastName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
+            <div v-if="newUserForm.errors.lastName" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.lastName }}</div>
         </div>
 
         <!-- Email -->
@@ -426,9 +446,17 @@ function editUser(user: any) {
     <form @submit.prevent="updateUser" class="space-y-4">
       <!-- Name -->
       <div>
-        <label class="block text-sm font-medium">Full Name</label>
-        <input v-model="editUserForm.name" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
-        <div v-if="editUserForm.errors.name" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.name }}</div>
+        <label class="block text-sm font-medium">First Name</label>
+        <input v-model="editUserForm.firstName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
+        <div v-if="editUserForm.errors.firstName" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.firstName }}</div>
+
+        <label class="block text-sm font-medium">Middle Name</label>
+        <input v-model="editUserForm.middleName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" />
+        <div v-if="editUserForm.errors.middleName" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.middleName }}</div>
+
+        <label class="block text-sm font-medium">Last Name</label>
+        <input v-model="editUserForm.lastName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
+        <div v-if="editUserForm.errors.lastName" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.lastName }}</div>
       </div>
 
       <!-- Email -->
