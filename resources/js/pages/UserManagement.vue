@@ -1,16 +1,22 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Head, useForm, usePage, router } from '@inertiajs/vue3'
-import { Plus, Pencil, Trash } from 'lucide-vue-next'
+import { Plus, Pencil, Trash, ChevronDown } from 'lucide-vue-next'
+import Sidebar from '@/components/AppSidebar.vue' 
+
+// =====================
+// Search & Filters
+// =====================
 
 const isAddUserOpen = ref(false)
 const isViewUserOpen = ref(false)
 const isEditUserOpen = ref(false)
+const isFilterOpen = ref(false) // for dropdown toggle
 const selectedUser = ref<any>(null)
 
 // Pagination state
 const currentPage = ref(1)
-const perPage = 10
+const perPage = ref(10) 
 
 // Use data from Laravel backend
 const page = usePage()
@@ -46,12 +52,11 @@ const editUserForm = useForm({
 })
 
 function saveNewUser() {
-    // Combine names before sending
     const fullName = `${newUserForm.firstName} ${newUserForm.middleName} ${newUserForm.lastName}`.replace(/\s+/g, ' ').trim()
 
     newUserForm.transform((data) => ({
         ...data,
-        name: fullName,   // send as `name`
+        name: fullName,
     })).post(route('users.store'), {
         preserveScroll: true,
         onSuccess: () => {
@@ -63,52 +68,102 @@ function saveNewUser() {
 }
 
 function updateUser() {
-  if (!selectedUser.value) return
-  const fullName = `${editUserForm.firstName} ${editUserForm.middleName} ${editUserForm.lastName}`.replace(/\s+/g, ' ').trim()
+    if (!selectedUser.value) return
+    const fullName = `${editUserForm.firstName} ${editUserForm.middleName} ${editUserForm.lastName}`.replace(/\s+/g, ' ').trim()
 
-  editUserForm.transform((data) => ({
-    ...data,
-    name: fullName,   // send as `name`
-  })).put(route('users.update', selectedUser.value.id), {
-    preserveScroll: true,
-    onSuccess: () => {
-      isEditUserOpen.value = false
-      selectedUser.value = null
-      router.reload({ only: ['users'] })
-    },
-  })
+    editUserForm.transform((data) => ({
+        ...data,
+        name: fullName,
+    })).put(route('users.update', selectedUser.value.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+        isEditUserOpen.value = false
+        selectedUser.value = null
+        router.reload({ only: ['users'] })
+        },
+    })
 }
 
 function deleteUser(userId: number | string) {
-  if (confirm('Are you sure you want to delete this user?')) {
-    router.delete(route('users.destroy', userId), {
-      preserveScroll: true,
-      onSuccess: () => {
-        // Refresh users data
-        router.reload({ only: ['users'] })
-      }
-    })
+    if (confirm('Are you sure you want to delete this user?')) {
+        router.delete(route('users.destroy', userId), {
+        preserveScroll: true,
+        onSuccess: () => {
+            router.reload({ only: ['users'] })
+        }
+        })
+    }
+}
+
+// =====================
+// Search & Filters
+// =====================
+// Filter dropdown ref
+const filterDropdown = ref(null)
+
+// Handle clicks outside the filter dropdown
+function handleClickOutside(event: Event) {
+  if (filterDropdown.value && !filterDropdown.value.contains(event.target)) {
+    isFilterOpen.value = false
   }
 }
 
-// Pagination computed
-const totalPages = computed(() => Math.ceil(users.value.length / perPage))
-const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  return users.value.slice(start, start + perPage)
+// Add event listener when component mounts
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
 })
 
+// Remove event listener when component unmounts
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+
+const searchQuery = ref('')
+const filters = ref({
+    program: '',
+    year: '',
+    role: '',
+    status: '',
+})
+
+const filteredUsers = computed(() => {
+    return users.value.filter((user) => {
+        const matchesSearch =
+        user.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        (user.student_id || '').toLowerCase().includes(searchQuery.value.toLowerCase())
+
+        const matchesProgram = filters.value.program ? user.program === filters.value.program : true
+        const matchesYear = filters.value.year ? user.year === filters.value.year : true
+        const matchesRole = filters.value.role ? user.role === filters.value.role : true
+        const matchesStatus = filters.value.status ? user.status === filters.value.status : true
+
+        return matchesSearch && matchesProgram && matchesYear && matchesRole && matchesStatus
+    })
+})
+
+// =====================
+// Pagination (based on filtered users)
+// =====================
+const totalPages = computed(() => Math.ceil(filteredUsers.value.length / perPage.value))
+const paginatedUsers = computed(() => {
+    const start = (currentPage.value - 1) * perPage.value
+    return filteredUsers.value.slice(start, start + perPage.value)
+})
+
+// =====================
 // Action handlers
+// =====================
 function viewUser(user: any) {
-  selectedUser.value = user
-  isViewUserOpen.value = true
+    selectedUser.value = user
+    isViewUserOpen.value = true
 }
 
 function editUser(user: any) {
     selectedUser.value = { ...user }
     editUserForm.id = user.id
 
-    // Split stored full name into parts (simple split)
     const nameParts = user.name.split(' ')
     editUserForm.firstName = nameParts[0] || ''
     editUserForm.middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : ''
@@ -123,27 +178,109 @@ function editUser(user: any) {
     editUserForm.lastLogin = user.last_login
     isEditUserOpen.value = true
 }
+
+watch([searchQuery, filters], () => {
+  currentPage.value = 1
+}, { deep: true })
 </script>
 
-<template>
-    <Head title="User Management" />
-    <div class="p-6 space-y-6">
-        
-        <!-- Header -->
-        <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold">User Management</h1>
-            <p class="text-gray-400">Manage member directory, roles, and access permissions</p>
-        </div>
 
-        <button
-            @click="isAddUserOpen = true"
-            class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700"
-        >
-            <Plus class="w-4 h-4" />
-            Add User
-        </button>
-        </div>
+<template>
+    <Sidebar>
+    <Head title="User Management" />
+  
+    <div class="p-6 space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold">User Management</h1>
+        <p class="text-gray-400">Manage member directory, roles, and access permissions</p>
+      </div>
+
+      <button
+        @click="isAddUserOpen = true"
+        class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700"
+      >
+        <Plus class="w-4 h-4" />
+        Add User
+      </button>
+    </div>
+
+    <!-- Search + Filter (Dropdown) -->
+    <div class="flex items-center gap-4 mb-4">
+      <!-- Search Input -->
+      <div class="flex-1">
+        <input 
+          v-model="searchQuery"
+          type="text" 
+          placeholder="Search by name, student ID, or email..." 
+          class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2"
+        />
+      </div>
+
+    <div class="relative" ref="filterDropdown">
+    <button 
+      @click="isFilterOpen = !isFilterOpen"
+      class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+    >
+      <span>Filter</span>
+      <ChevronDown 
+        class="w-4 h-4 transition-transform" 
+        :class="{ 'rotate-180': isFilterOpen }" 
+      />
+    </button>
+
+    <!-- Dropdown content -->
+    <div 
+      v-if="isFilterOpen" 
+      class="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-4 z-[9999] space-y-3"
+    >
+      <select v-model="filters.program" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
+        <option value="">All Programs</option>
+        <option value="Library and Information Science">Library and Information Science</option>
+        <option value="Computer Science">Computer Science</option>
+        <option value="Information System">Information System</option>
+      </select>
+
+      <select v-model="filters.year" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
+        <option value="">All Years</option>
+        <option value="1st Year">1st Year</option>
+        <option value="2nd Year">2nd Year</option>
+        <option value="3rd Year">3rd Year</option>
+        <option value="4th Year">4th Year</option>
+        <option value="5th Year">5th Year</option>
+      </select>
+
+      <select v-model="filters.role" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
+        <option value="">All Roles</option>
+        <option value="Member">Member</option>
+        <option value="Officer">Officer</option>
+      </select>
+
+      <select v-model="filters.status" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+
+      <button 
+        @click="
+          filters.program = '';
+          filters.year = '';
+          filters.role = '';
+          filters.status = '';
+          searchQuery = '';
+        "
+        class="w-full px-3 py-1 bg-gray-700 text-sm text-white rounded hover:bg-gray-600 mt-2"
+      >
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+</div>
+
+
 
     <!-- Add User Modal -->
     <div v-if="isAddUserOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -373,7 +510,15 @@ function editUser(user: any) {
     
         <!-- Pagination -->
     <div class="flex justify-between items-center mt-4 text-sm text-gray-400 p-6 space-y-6">
-        <p>Showing {{ Math.min(paginatedUsers.length, perPage) }} of {{ users.length }} users (page {{ currentPage }} of {{ totalPages }})</p>
+        <p>
+        Showing 
+        {{ (currentPage - 1) * perPage + 1 }} 
+        – 
+        {{ Math.min(currentPage * perPage, filteredUsers.length) }} 
+        of {{ filteredUsers.length }} users 
+        (page {{ currentPage }} of {{ totalPages }})
+        </p>
+
         <div class="flex gap-2">
             <button
             @click="currentPage = Math.max(1, currentPage - 1)"
@@ -535,4 +680,5 @@ function editUser(user: any) {
     </form>
   </div>
 </div>
+</Sidebar>   
 </template>

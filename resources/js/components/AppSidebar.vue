@@ -47,25 +47,6 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-// User Management sub-items
-// const userManagementItems = [
-//     {
-//         title: 'All Users',
-//         href: '/users',
-//         icon: Users,
-//     },
-//     {
-//         title: 'Add User',
-//         href: '/users/create',
-//         icon: UserPlus,
-//     },
-//     {
-//         title: 'User Roles',
-//         href: '/users/roles',
-//         icon: Shield,
-//     },
-// ];
-
 const footerNavItems: NavItem[] = [
     {
         title: 'PSITS Portal',
