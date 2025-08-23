@@ -6,10 +6,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
-// app/Models/User.php
-
-// Add this import at the top of the file, under the others
 use App\Notifications\QueuedResetPasswordNotification;
 
 class User extends Authenticatable
