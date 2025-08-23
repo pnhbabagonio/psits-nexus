@@ -213,7 +213,6 @@ function editUser(user: any) {
             >
                 <option value="Member">Member</option>
                 <option value="Officer">Officer</option>
-                <option value="Admin">Admin</option>
             </select>
             <div v-if="newUserForm.errors.role" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.role }}</div>
             </div>
@@ -307,7 +306,6 @@ function editUser(user: any) {
                 'px-2 py-1 rounded-full text-xs': true,
                 'bg-blue-500/20 text-blue-300': user.role === 'Member',
                 'bg-green-500/20 text-green-300': user.role === 'Officer',
-                'bg-purple-500/20 text-purple-300': user.role === 'Admin'
             }">
                 {{ user.role }}
             </span>
@@ -477,7 +475,6 @@ function editUser(user: any) {
           <select v-model="editUserForm.role" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2">
             <option value="Member">Member</option>
             <option value="Officer">Officer</option>
-            <option value="Admin">Admin</option>
           </select>
           <div v-if="editUserForm.errors.role" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.role }}</div>
         </div>
