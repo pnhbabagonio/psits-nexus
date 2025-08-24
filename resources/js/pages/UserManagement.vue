@@ -615,7 +615,7 @@ watch([searchQuery, filters], () => {
       <!-- Name -->
       <div>
         <label class="block text-sm font-medium">First Name</label>
-        <input v-model="editUserForm.firstName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
+        <input v-model="editUserForm.firstName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" />
         <div v-if="editUserForm.errors.firstName" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.firstName }}</div>
 
         <label class="block text-sm font-medium">Middle Name</label>
@@ -623,7 +623,7 @@ watch([searchQuery, filters], () => {
         <div v-if="editUserForm.errors.middleName" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.middleName }}</div>
 
         <label class="block text-sm font-medium">Last Name</label>
-        <input v-model="editUserForm.lastName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
+        <input v-model="editUserForm.lastName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" />
         <div v-if="editUserForm.errors.lastName" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.lastName }}</div>
       </div>
 

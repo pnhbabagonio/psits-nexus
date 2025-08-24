@@ -1,4 +1,4 @@
-<!-- SIDEBAR AND NAV BAR-->
+<!-- SIDEBAR AND NAV-->
 
 <script setup lang="ts">
 import AppSidebar from '@/Components/AppSidebar.vue'
