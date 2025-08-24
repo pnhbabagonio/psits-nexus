@@ -85,33 +85,8 @@ const footerNavItems: NavItem[] = [
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-                
-                <!-- Collapsible User Management
-                <Collapsible class="group/collapsible">
-                    <SidebarMenuItem>
-                        <CollapsibleTrigger as-child>
-                            <SidebarMenuButton>
-                                <User />
-                                <span>User Management</span>
-                                <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                            </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                            <SidebarMenuSub>
-                                <SidebarMenuSubItem v-for="subItem in userManagementItems" :key="subItem.title">
-                                    <SidebarMenuButton as-child size="sm">
-                                        <Link :href="subItem.href">
-                                            <component :is="subItem.icon" />
-                                            <span>{{ subItem.title }}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuSubItem>
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </SidebarMenuItem>
-                </Collapsible> -->
 
-                <!-- User Management (simple tab, no collapsible) -->
+                <!-- User Management -->
                 <SidebarMenuItem>
                     <SidebarMenuButton as-child>
                         <Link :href="route('user-management')">

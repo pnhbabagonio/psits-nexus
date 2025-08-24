@@ -2,7 +2,8 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Head, useForm, usePage, router } from '@inertiajs/vue3'
 import { Plus, Pencil, Trash, ChevronDown } from 'lucide-vue-next'
-import Sidebar from '@/components/AppSidebar.vue' 
+import { type BreadcrumbItem } from '@/types';
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 // =====================
 // Search & Filters
@@ -13,6 +14,18 @@ const isViewUserOpen = ref(false)
 const isEditUserOpen = ref(false)
 const isFilterOpen = ref(false) // for dropdown toggle
 const selectedUser = ref<any>(null)
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+    },
+    // NAVBAR TITLE
+    {
+        title: 'User Management',
+        href: '/user-management',
+    },
+];
 
 // Pagination state
 const currentPage = ref(1)
@@ -186,10 +199,10 @@ watch([searchQuery, filters], () => {
 
 
 <template>
-    <Sidebar>
-    <Head title="User Management" />
+    <AppLayout :breadcrumbs="breadcrumbs">
+  <Head title="User Management" />
   
-    <div class="p-6 space-y-6">
+  <div class="p-6 space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
@@ -408,23 +421,7 @@ watch([searchQuery, filters], () => {
     
 </div>
 
-<!-- ROWS PER PAGE -->
 <div class="p-6 space-y-6">
-    <div class="flex justify-start mb-4 gap-4">
-        <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-400">Rows per page:</span>
-            <select 
-                v-model="perPage" 
-                class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm"
-                @change="currentPage = 1"
-                >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-            </select>
-        </div>
-    </div>
 
     <!-- Table -->
     <div class="overflow-x-auto rounded-lg shadow border border-gray-700">
@@ -508,53 +505,79 @@ watch([searchQuery, filters], () => {
     </div>
 </div>
     
-        <!-- Pagination -->
-    <div class="flex justify-between items-center mt-4 text-sm text-gray-400 p-6 space-y-6">
-        <p>
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-4 text-sm text-gray-400 p-6">
+
+    <!-- Left: Info text -->
+    <p>
         Showing 
         {{ (currentPage - 1) * perPage + 1 }} 
         – 
         {{ Math.min(currentPage * perPage, filteredUsers.length) }} 
         of {{ filteredUsers.length }} users 
         (page {{ currentPage }} of {{ totalPages }})
-        </p>
+    </p>
 
-        <div class="flex gap-2">
-            <button
+    <!-- Right: Rows per page + Pagination -->
+    <div class="flex items-center gap-6">
+
+        <!-- Rows per page -->
+        <div class="flex items-center gap-2">
+        <span class="text-sm text-gray-400">Rows per page:</span>
+        <select 
+            v-model="perPage" 
+            class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm"
+            @change="currentPage = 1"
+        >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+        </div>
+
+        <!-- Pagination buttons -->
+        <div class="flex gap-2 items-center">
+        <!-- Previous -->
+        <button
             @click="currentPage = Math.max(1, currentPage - 1)"
             :disabled="currentPage === 1"
             class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50"
-            >
+        >
             Previous
+        </button>
+
+        <!-- Page numbers -->
+        <div v-for="page in totalPages" :key="page">
+            <button
+            v-if="Math.abs(page - currentPage) <= 2 || page === 1 || page === totalPages"
+            @click="currentPage = page"
+            :class="[
+                'px-3 py-1 rounded',
+                currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
+            ]"
+            >
+            {{ page }}
             </button>
-                
-                <!-- Show limited page numbers for better UI with many pages -->
-                <template v-for="page in totalPages" :key="page">
-                <button
-                    v-if="Math.abs(page - currentPage) <= 2 || page === 1 || page === totalPages"
-                    @click="currentPage = page"
-                    :class="[ 'px-3 py-1 rounded',
-                    currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
-                    ]"
-                >
-                    {{ page }}
-                </button>
-                <span 
-                    v-else-if="Math.abs(page - currentPage) === 3" 
-                    class="px-2 py-1 text-gray-500"
-                >
-                    ...
-                </span>
-                </template>
-                
-                <button
-                @click="currentPage = Math.min(totalPages, currentPage + 1)"
-                :disabled="currentPage === totalPages"
-                class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50"
-                >
-                Next
-                </button>
+            <span 
+            v-else-if="Math.abs(page - currentPage) === 3" 
+            class="px-2 py-1 text-gray-500"
+            >
+            ...
+            </span>
         </div>
+
+        <!-- Next -->
+        <button
+            @click="currentPage = Math.min(totalPages, currentPage + 1)"
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50"
+        >
+            Next
+        </button>
+        </div>
+
+    </div>
     </div>
 
   <!-- View User Modal -->
@@ -680,5 +703,5 @@ watch([searchQuery, filters], () => {
     </form>
   </div>
 </div>
-</Sidebar>   
+</AppLayout>
 </template>
