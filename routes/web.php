@@ -12,6 +12,19 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('transactions', function () {
+    return Inertia::render('TransactionHistory'); 
+    //this should match resources/js/Pages/TransactionHistory.vue
+})->middleware(['auth', 'verified'])->name('transactions');
+
+Route::get('financial-reports', function(){
+    return Inertia::render('FinancialReports');
+})->middleware(['auth', 'verified'])->name('financial-reports');
+
+Route::get('expenses-tracking', function(){
+    return Inertia::render('ExpenseTracking');
+})->middleware(['auth', 'verified'])->name('expenses-tracking');
+
 // User management routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('user-management', [UserController::class, 'index'])->name('user-management');
