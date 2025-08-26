@@ -36,3 +36,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
+// Platform Guide page
+Route::get('platform-guide', function () {
+    return Inertia::render('PlatformGuide'); 
+    // This should match resources/js/Pages/PlatformGuide.vue
+})->middleware(['auth', 'verified'])->name('platform-guide');
