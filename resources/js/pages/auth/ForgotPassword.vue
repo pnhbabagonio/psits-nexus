@@ -25,7 +25,7 @@ defineProps<{
             <Form method="post" :action="route('password.email')" v-slot="{ errors, processing }">
                 <div class="grid gap-2">
                     <Label for="email">Email address</Label>
-                    <Input id="email" type="email" name="email" autocomplete="off" autofocus placeholder="email@example.com" />
+                    <Input id="email" type="email" name="email" autocomplete="on" autofocus placeholder="email@example.com" />
                     <InputError :message="errors.email" />
                 </div>
 
@@ -38,7 +38,7 @@ defineProps<{
             </Form>
 
             <div class="space-x-1 text-center text-sm text-muted-foreground">
-                <span>Or, return to</span>
+                <span>Go back to,</span>
                 <TextLink :href="route('login')">log in</TextLink>
             </div>
         </div>
