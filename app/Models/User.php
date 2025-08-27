@@ -11,9 +11,6 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-<<<<<<< HEAD
-    // ... your existing fillable, hidden, casts methods ...
-=======
     /**
      * The attributes that are mass assignable.
      *
@@ -30,7 +27,6 @@ class User extends Authenticatable
     'status',
     'last_login', 
     ];
->>>>>>> f051cdd9295d8bb62643759c26b5bb84a7dfe03d
 
     /**
      * Send the password reset notification.
