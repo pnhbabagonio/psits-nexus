@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\EventController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -31,6 +32,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('users', [UserController::class, 'store'])->name('users.store');
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+});
+
+// Event Management routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('events', [EventController::class, 'index'])->name('events.index');
+    Route::get('events/{id}', [EventController::class, 'show'])->name('events.show');
+    Route::get('event-attendees', [EventController::class, 'attendees'])->name('events.attendees');
+    Route::get('event-analysis', [EventController::class, 'analysis'])->name('events.analysis');
 });
 
 
