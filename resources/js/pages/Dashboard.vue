@@ -1,11 +1,4 @@
-// Mock recent transactions
-const recentTransactions = [
-    { id: 1, description: 'Membership Fee - John Doe', amount: 500.00, date: '2025-01-20', type: 'membership', method: 'QR Code' },
-    { id: 2, description: 'Event Registration - Jane Smith', amount: 300.00, date: '2025-01-19', type: 'event', method: 'QR Code' },
-    { id: 3, description: 'Workshop Fee - Mike Johnson', amount: 250.00, date: '2025-01-18', type: 'workshop', method: 'QR Code' },
-    { id: 4, description: 'Annual Dues - Sarah Lee', amount: 800.00, date: '2025-01-17', type: 'membership', method: 'QR Code' },
-    { id: 5, description: 'Seminar Fee - Alex Chen', amount: 150.00, date: '2025-01-16', type: 'seminar', method: 'QR Code' }
-];<script setup lang="ts">
+<script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';

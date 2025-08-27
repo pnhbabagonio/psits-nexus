@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import NavFooter from '@/components/NavFooter.vue';
-import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { 
     Sidebar, 
@@ -17,7 +16,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BookOpen, LayoutGrid, CreditCard, Calendar, BarChart3, HelpCircle, Globe, User, Users, UserPlus, Shield, ChevronRight, PiggyBank, PhilippinePeso, Clipboard } from 'lucide-vue-next';
+<<<<<<< HEAD
 import AppLogo from './AppLogo.vue';
+=======
+import AppLogo from '@/components/AppLogo.vue';
+>>>>>>> f76fdf5187dfaf8ed4d52a0fc82d39007a2165c0
 
 const mainNavItems: NavItem[] = [
     {
@@ -26,11 +29,14 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+<<<<<<< HEAD
         title: 'Events',
         href: '/events',
         icon: Calendar,
     },
     {
+=======
+>>>>>>> f76fdf5187dfaf8ed4d52a0fc82d39007a2165c0
         title: 'Reports',
         href: '/reports',
         icon: BarChart3,
@@ -42,6 +48,7 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
+<<<<<<< HEAD
 // User Management sub-items
 // const userManagementItems = [
 //     {
@@ -60,6 +67,8 @@ const mainNavItems: NavItem[] = [
 //         icon: Shield,
 //     },
 // ];
+=======
+>>>>>>> f76fdf5187dfaf8ed4d52a0fc82d39007a2165c0
 
 // Financial management sub-items
 const financialManagementItems = [
@@ -78,7 +87,29 @@ const financialManagementItems = [
         href: '/expenses-tracking',
         icon: PhilippinePeso,
     },
+<<<<<<< HEAD
 ]
+=======
+];
+
+const eventManagementItems = [
+    {
+        title: 'Event Creation',
+        href: '/events',
+        icon: Calendar,
+    },
+    {
+        title: 'Attendance Management',
+        href: '/events/create',
+        icon: UserPlus,
+    },
+    {
+        title: 'Event Analytics',
+        href: '/events/analytics',
+        icon: BarChart3,
+    }
+];
+>>>>>>> f76fdf5187dfaf8ed4d52a0fc82d39007a2165c0
 
 const footerNavItems: NavItem[] = [
     {
@@ -88,7 +119,11 @@ const footerNavItems: NavItem[] = [
     },
     {
         title: 'Platform Guide',
+<<<<<<< HEAD
         href: '/guide',
+=======
+        href: '/platform-guide',
+>>>>>>> f76fdf5187dfaf8ed4d52a0fc82d39007a2165c0
         icon: BookOpen,
     },
 ];
@@ -154,6 +189,34 @@ const footerNavItems: NavItem[] = [
                     </SidebarMenuItem>
                 </Collapsible>
 
+<<<<<<< HEAD
+=======
+                <!-- Collapsible Event Management -->
+                <Collapsible class="group/collapsible">
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger as-child>
+                            <SidebarMenuButton>
+                                <Calendar />
+                                <span>Event Management</span>
+                                <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenuSub>
+                                <SidebarMenuSubItem v-for="subItem in eventManagementItems" :key="subItem.title">
+                                    <SidebarMenuButton as-child size="sm">
+                                        <Link :href="subItem.href">
+                                            <component :is="subItem.icon" />
+                                            <span>{{ subItem.title }}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
+                    </SidebarMenuItem>
+                </Collapsible>
+
+>>>>>>> f76fdf5187dfaf8ed4d52a0fc82d39007a2165c0
                 <!-- Remaining nav items -->
                 <SidebarMenuItem v-for="item in mainNavItems.slice(1)" :key="item.title">
                     <SidebarMenuButton as-child>
