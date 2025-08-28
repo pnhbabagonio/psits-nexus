@@ -27,11 +27,15 @@ const dateRange = ref({ start: '2025-01-01', end: '2025-08-01' })
 
 <template>
   <AppLayout :breadcrumbs="breadcrumbs">
-    <Head title="Financial Reports" />
+  <Head title="Financial Reports" />  
 
-    <div class="p-6 space-y-6">
-      <!-- Page Title -->
+  <div class="p-6 space-y-6">
+    <!-- Page Title -->
+    <div class="space-y-1">
       <h1 class="text-2xl font-semibold">Financial Reports</h1>
+      <p class="text-gray-400">View and analyze all financial reports</p>
+    </div>
+
       <!-- Add your financial reports content here -->
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
