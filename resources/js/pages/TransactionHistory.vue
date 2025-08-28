@@ -1,10 +1,15 @@
 <template>
-  <AppLayout>
-    <div class="p-6">
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <Head title="Transaction History" />
+
+    <div class="p-6 space-y-6">
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold">Transaction History</h1>
-        
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold">Transaction History</h1>
+          <p class="text-gray-400">View and track all financial transactions</p>
+        </div>
+
         <!-- Export Buttons -->
         <div class="flex space-x-2">
           <button class="px-4 py-2 bg-blue-600 rounded-xl hover:bg-blue-700 text-white">Export CSV</button>
@@ -100,7 +105,22 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import { Head } from '@inertiajs/vue3'
+import { type BreadcrumbItem } from '@/types';
 import { ref, computed } from 'vue'
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+    },
+    // NAVBAR TITLE
+    {
+        title: 'Financial Management',
+        href: '/financial-management',
+    },
+];
+
 
 const searchQuery = ref("")
 const filterType = ref("")

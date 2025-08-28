@@ -3,7 +3,7 @@ import { Head, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { Plus, Users2, CalendarCheck2, CalendarDays, Award } from 'lucide-vue-next'
 import { type BreadcrumbItem } from '@/types';
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -80,7 +80,7 @@ function openEvent(eventId: number) {
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs"></AppLayout>
+    <AppLayout :breadcrumbs="breadcrumbs">
   <div class="min-h-screen px-6 py-6 md:px-8 md:py-8">
     <Head title="Event Management" />
 
