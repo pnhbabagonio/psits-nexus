@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { ChevronDown, Pencil, Plus, Trash } from 'lucide-vue-next';
@@ -116,13 +116,16 @@ function deleteUser(userId: number | string) {
 // Search & Filters
 // =====================
 // Filter dropdown ref
-const filterDropdown = ref(null);
+// Filter dropdown ref — type it as the actual element
+const filterDropdown = ref<HTMLDivElement | null>(null);
 
 // Handle clicks outside the filter dropdown
-function handleClickOutside(event: Event) {
-    if (filterDropdown.value && !filterDropdown.value.contains(event.target)) {
-        isFilterOpen.value = false;
-    }
+function handleClickOutside(event: MouseEvent) {
+  const el = filterDropdown.value;
+  // event.target is EventTarget | null, so narrow it to Node before using .contains
+  if (el && event.target instanceof Node && !el.contains(event.target)) {
+    isFilterOpen.value = false;
+  }
 }
 
 // Add event listener when component mounts
