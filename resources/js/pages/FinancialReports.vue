@@ -5,8 +5,8 @@ import { BarChart, LineChart, PieChart } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 // Example reactive data (replace later with backend props)
-const incomeData = [5000, 7000, 6000, 8000, 7500];
-const expenseData = [3000, 4000, 3500, 4500, 4200];
+// const incomeData = [5000, 7000, 6000, 8000, 7500];
+// const expenseData = [3000, 4000, 3500, 4500, 4200];
 const budgetProgress = 65;
 const dateRange = ref({ start: '2025-01-01', end: '2025-08-01' });
 </script>
