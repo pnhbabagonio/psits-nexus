@@ -1,8 +1,22 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import { Head } from '@inertiajs/vue3'
+import { type BreadcrumbItem } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { BarChart, LineChart, PieChart } from 'lucide-vue-next'
 import { ref } from 'vue'
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+    },
+    // NAVBAR TITLE
+    {
+        title: 'Financial Management',
+        href: '/financial-management',
+    },
+];
 
 // Example reactive data (replace later with backend props)
 const incomeData = [5000, 7000, 6000, 8000, 7500]
@@ -12,10 +26,13 @@ const dateRange = ref({ start: '2025-01-01', end: '2025-08-01' })
 </script>
 
 <template>
-  <AppLayout title="Financial Reports">
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <Head title="Financial Reports" />
+
     <div class="p-6 space-y-6">
       <!-- Page Title -->
       <h1 class="text-2xl font-semibold">Financial Reports</h1>
+      <!-- Add your financial reports content here -->
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Income Summary -->
