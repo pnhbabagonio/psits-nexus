@@ -1,6 +1,20 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import { Head } from '@inertiajs/vue3'
+import { type BreadcrumbItem } from '@/types';
 import { ref } from 'vue'
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+    },
+    // NAVBAR TITLE
+    {
+        title: 'Financial Management',
+        href: '/financial-management',
+    },
+];
 
 const expenses = ref([
   {
@@ -33,12 +47,15 @@ const categories = ['Travel', 'Meals', 'Office Supplies', 'Utilities', 'Other']
 </script>
 
 <template>
-  <AppLayout title="Expense Tracking">
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <Head title="Expense Tracking" />
+
     <div class="p-6 space-y-6">
       <!-- Page Title -->
-      <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">
-        Expense Tracking
-      </h1>
+      <div>
+        <h1 class="text-2xl font-semibold">Expense Tracking</h1>
+        <p class="text-gray-400">Track and monitor all expenses and financial activities</p>
+      </div>
 
       <!-- Expense Entry Form -->
       <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md space-y-4">
