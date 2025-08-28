@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\QueuedResetPasswordNotification; // Changed this line
 use Illuminate\Support\Facades\Notification;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -19,7 +19,7 @@ test('reset password link can be requested', function () {
 
     $this->post('/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class);
+    Notification::assertSentTo($user, QueuedResetPasswordNotification::class); // Changed this line
 });
 
 test('reset password screen can be rendered', function () {
@@ -29,7 +29,7 @@ test('reset password screen can be rendered', function () {
 
     $this->post('/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
+    Notification::assertSentTo($user, QueuedResetPasswordNotification::class, function ($notification) { // Changed this line
         $response = $this->get('/reset-password/'.$notification->token);
 
         $response->assertStatus(200);
@@ -45,7 +45,7 @@ test('password can be reset with valid token', function () {
 
     $this->post('/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+    Notification::assertSentTo($user, QueuedResetPasswordNotification::class, function ($notification) use ($user) { // Changed this line
         $response = $this->post('/reset-password', [
             'token' => $notification->token,
             'email' => $user->email,
