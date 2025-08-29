@@ -293,8 +293,6 @@ watch([searchQuery, filters], () => {
 
 </div>
 
-
-
     <!-- Add User Modal -->
     <div v-if="isAddUserOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-slate-900 p-6 rounded-lg w-full max-w-lg shadow-lg">
