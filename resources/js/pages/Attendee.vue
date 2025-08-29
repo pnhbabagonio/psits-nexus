@@ -4,7 +4,6 @@ import { Head, Link } from '@inertiajs/vue3'
 import { Users, UserCheck, QrCode, UserX, Filter, X, Download } from 'lucide-vue-next'
 import { type BreadcrumbItem } from '@/types'
 import AppLayout from '@/layouts/AppLayout.vue'
-// import AttendeeForm from '@/components/AttendanceForm.vue'
 
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
@@ -237,8 +236,7 @@ const formatDate = (dateStr: string) => {
                         <X class="w-4 h-4" /> Clear Filters
                     </button>
                 </div>
-                </div>
-
+            </div>
 
                 <!-- Attendee List -->
                 <div class="bg-gray-900 rounded-2xl shadow overflow-hidden mb-8">
