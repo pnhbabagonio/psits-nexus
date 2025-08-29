@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { ChevronDown, Pencil, Plus, Trash } from 'lucide-vue-next';
+import { ChevronDown, Pencil, Trash } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 // =====================
@@ -219,10 +219,9 @@ watch(
                     <p class="text-gray-400">Manage member directory, roles, and access permissions</p>
                 </div>
 
-<<<<<<< HEAD
-    <!-- Search + Filter (Dropdown) -->
-    <div class="flex items-center gap-4 mb-4">
-      <!-- Search Input -->
+    <!-- Search + Filter (Dropdown) 
+     <div class="flex items-center gap-4 mb-4">
+       Search Input 
       <div class="flex-1">
         <input 
           v-model="searchQuery"
@@ -244,7 +243,7 @@ watch(
       />
     </button>
 
-    <!-- Dropdown content -->
+     Dropdown content 
     <div 
       v-if="isFilterOpen" 
       class="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-4 z-[9999] space-y-3"
@@ -292,16 +291,16 @@ watch(
     </div>
   </div>
 
-</div>
-
-    <!-- Add User Modal -->
+</div> -->
+<!-- 
+    Add User Modal
     <div v-if="isAddUserOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-slate-900 p-6 rounded-lg w-full max-w-lg shadow-lg">
         <h2 class="text-xl font-semibold mb-4">Add User</h2>
 
-        <!-- form -->
+        form 
         <form @submit.prevent="saveNewUser" class="space-y-4">
-        <!-- ERROR DISPLAY -->
+        ERROR DISPLAY 
         <div v-if="newUserForm.errors && Object.keys(newUserForm.errors).length" class="p-3 bg-red-900 text-red-200 rounded">
             <p class="font-semibold">Please fix the following errors:</p>
             <ul class="list-disc list-inside mt-1">
@@ -309,7 +308,7 @@ watch(
             </ul>
         </div>
         
-        <!-- Name -->
+       Name 
         <div>
             <label class="block text-sm font-medium">First Name</label>
             <input v-model="newUserForm.firstName" type="text" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
@@ -324,14 +323,14 @@ watch(
             <div v-if="newUserForm.errors.lastName" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.lastName }}</div>
         </div>
 
-        <!-- Email -->
+         Email 
         <div>
             <label class="block text-sm font-medium">Email</label>
             <input v-model="newUserForm.email" type="email" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2" required />
             <div v-if="newUserForm.errors.email" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.email }}</div>
         </div>
 
-        <!-- Student ID -->
+      Student ID 
         <div>
             <label class="block text-sm font-medium mb-1">Student ID</label>
             <input 
@@ -342,7 +341,7 @@ watch(
             <div v-if="newUserForm.errors.studentId" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.studentId }}</div>
         </div>
 
-        <!-- Program + Year -->
+     Program + Year
         <div class="flex gap-4">
             <div class="w-1/2">
             <label class="block text-sm font-medium mb-1">Program</label>
@@ -355,7 +354,6 @@ watch(
                 <option value="Information System">Information System</option>
             </select>
             <div v-if="newUserForm.errors.program" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.program }}</div>
-=======
                 <button
                     @click="isAddUserOpen = true"
                     class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
@@ -363,12 +361,11 @@ watch(
                     <Plus class="h-4 w-4" />
                     Add User
                 </button>
->>>>>>> 7bb47dc75cab79cde749d428a0b41c4f39c52f08
-            </div>
+            </div> -->
 
             <!-- Search + Filter (Dropdown) -->
             <div class="mb-4 flex items-center gap-4">
-                <!-- Search Input -->
+                 <!-- Search Input  -->
                 <div class="flex-1">
                     <input
                         v-model="searchQuery"
@@ -384,7 +381,7 @@ watch(
                         <ChevronDown class="h-4 w-4 transition-transform" :class="{ 'rotate-180': isFilterOpen }" />
                     </button>
 
-                    <!-- Dropdown content -->
+                     <!-- Dropdown content  -->
                     <div
                         v-if="isFilterOpen"
                         class="absolute right-0 z-[9999] mt-2 w-64 space-y-3 rounded-lg border border-gray-700 bg-gray-900 p-4 shadow-lg"
@@ -431,16 +428,16 @@ watch(
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> 
 
             <!-- Add User Modal -->
             <div v-if="isAddUserOpen" class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
                 <div class="w-full max-w-lg rounded-lg bg-slate-900 p-6 shadow-lg">
                     <h2 class="mb-4 text-xl font-semibold">Add User</h2>
 
-                    <!-- form -->
+                     <!-- form  -->
                     <form @submit.prevent="saveNewUser" class="space-y-4">
-                        <!-- ERROR DISPLAY -->
+                         <!-- ERROR DISPLAY  -->
                         <div v-if="newUserForm.errors && Object.keys(newUserForm.errors).length" class="rounded bg-red-900 p-3 text-red-200">
                             <p class="font-semibold">Please fix the following errors:</p>
                             <ul class="mt-1 list-inside list-disc">
@@ -448,7 +445,7 @@ watch(
                             </ul>
                         </div>
 
-                        <!-- Name -->
+                         <!-- Name  -->
                         <div>
                             <label class="block text-sm font-medium">First Name</label>
                             <input
@@ -477,7 +474,7 @@ watch(
                             <div v-if="newUserForm.errors.lastName" class="mt-1 text-sm text-red-500">{{ newUserForm.errors.lastName }}</div>
                         </div>
 
-                        <!-- Email -->
+                         <!-- Email -->
                         <div>
                             <label class="block text-sm font-medium">Email</label>
                             <input
@@ -489,7 +486,7 @@ watch(
                             <div v-if="newUserForm.errors.email" class="mt-1 text-sm text-red-500">{{ newUserForm.errors.email }}</div>
                         </div>
 
-                        <!-- Student ID -->
+                         <!-- Student ID -->
                         <div>
                             <label class="mb-1 block text-sm font-medium">Student ID</label>
                             <input
@@ -500,7 +497,7 @@ watch(
                             <div v-if="newUserForm.errors.studentId" class="mt-1 text-sm text-red-500">{{ newUserForm.errors.studentId }}</div>
                         </div>
 
-                        <!-- Program + Year -->
+                        <!-- Program + Year  -->
                         <div class="flex gap-4">
                             <div class="w-1/2">
                                 <label class="mb-1 block text-sm font-medium">Program</label>
@@ -527,7 +524,7 @@ watch(
                             </div>
                         </div>
 
-                        <!-- Role + Status -->
+                         <!-- Role + Status  -->
                         <div class="flex gap-4">
                             <div class="w-1/2">
                                 <label class="mb-1 block text-sm font-medium">Role</label>
@@ -862,6 +859,10 @@ watch(
                     </div>
                 </form>
             </div>
+            </div>
+            </div>
+        <!-- </div>
         </div>
+        </div> -->
     </AppLayout>
 </template>

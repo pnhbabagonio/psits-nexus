@@ -5,13 +5,8 @@ import AppSidebar from '@/Components/AppSidebar.vue';
 import AppSidebarHeader from '@/Components/AppSidebarHeader.vue';
 
 defineProps<{
-<<<<<<< HEAD
   breadcrumbs?: Array<{ title: string; href: string }>
 }>()
-=======
-    breadcrumbs?: Array<{ label: string; href: string }>;
-}>();
->>>>>>> 7bb47dc75cab79cde749d428a0b41c4f39c52f08
 </script>
 
 <template>
