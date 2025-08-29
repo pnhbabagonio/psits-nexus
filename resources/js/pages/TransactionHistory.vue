@@ -1,130 +1,121 @@
 <template>
-  <AppLayout>
-    <div class="p-6">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold">Transaction History</h1>
-        
-        <!-- Export Buttons -->
-        <div class="flex space-x-2">
-          <button class="px-4 py-2 bg-blue-600 rounded-xl hover:bg-blue-700 text-white">Export CSV</button>
-          <button class="px-4 py-2 bg-green-600 rounded-xl hover:bg-green-700 text-white">Export PDF</button>
+    <AppLayout>
+        <div class="p-6">
+            <!-- Header -->
+            <div class="mb-6 flex items-center justify-between">
+                <h1 class="text-2xl font-semibold">Transaction History</h1>
+
+                <!-- Export Buttons -->
+                <div class="flex space-x-2">
+                    <button class="rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Export CSV</button>
+                    <button class="rounded-xl bg-green-600 px-4 py-2 text-white hover:bg-green-700">Export PDF</button>
+                </div>
+            </div>
+
+            <!-- Filters + Search -->
+            <div class="mb-6 flex flex-wrap gap-4">
+                <input
+                    type="text"
+                    v-model="searchQuery"
+                    placeholder="Search transactions..."
+                    class="flex-1 rounded-xl border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+
+                <select
+                    v-model="filterType"
+                    class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+                >
+                    <option value="">All Types</option>
+                    <option value="payment">Payment</option>
+                    <option value="expense">Expense</option>
+                    <option value="membership">Membership</option>
+                </select>
+
+                <input
+                    type="date"
+                    v-model="filterDate"
+                    class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+                />
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="overflow-x-auto rounded-2xl shadow">
+                <table class="min-w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-100 text-sm text-gray-700 uppercase dark:bg-gray-800 dark:text-gray-300">
+                            <th class="px-6 py-3">Date</th>
+                            <th class="px-6 py-3">Type</th>
+                            <th class="px-6 py-3">Description</th>
+                            <th class="px-6 py-3">Amount</th>
+                            <th class="px-6 py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="(tx, index) in filteredTransactions"
+                            :key="index"
+                            class="border-b border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                        >
+                            <td class="px-6 py-3 text-gray-700 dark:text-gray-200">{{ tx.date }}</td>
+                            <td class="px-6 py-3 text-gray-700 capitalize dark:text-gray-200">{{ tx.type }}</td>
+                            <td class="px-6 py-3 text-gray-700 dark:text-gray-200">{{ tx.description }}</td>
+                            <td class="px-6 py-3 font-semibold text-green-600 dark:text-green-400">₱{{ tx.amount }}</td>
+                            <td class="px-6 py-3">
+                                <span
+                                    :class="[
+                                        'rounded-full px-3 py-1 text-xs font-semibold',
+                                        tx.status === 'Completed'
+                                            ? 'bg-green-500 text-white'
+                                            : tx.status === 'Pending'
+                                              ? 'bg-yellow-500 text-white'
+                                              : 'bg-red-500 text-white',
+                                    ]"
+                                >
+                                    {{ tx.status }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <div class="mt-6 flex items-center justify-between text-sm text-gray-600">
+                <p>Showing {{ filteredTransactions.length }} of {{ transactions.length }} transactions</p>
+                <div class="flex space-x-2">
+                    <button class="rounded bg-gray-300 px-3 py-1 hover:bg-gray-400">Prev</button>
+                    <button class="rounded bg-gray-300 px-3 py-1 hover:bg-gray-400">Next</button>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <!-- Filters + Search -->
-      <div class="flex flex-wrap gap-4 mb-6">
-        <input
-          type="text"
-          v-model="searchQuery"
-          placeholder="Search transactions..."
-          class="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1"
-        />
-
-<select
-  v-model="filterType"
-  class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
-         bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200
-         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-         transition"
->
-  <option value="">All Types</option>
-  <option value="payment">Payment</option>
-  <option value="expense">Expense</option>
-  <option value="membership">Membership</option>
-</select>
-
-
-        <input
-              type="date"
-              v-model="filterDate"
-              class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 
-         bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 
-         focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-    </div>
-
-      <!-- Transactions Table -->
-<div class="overflow-x-auto rounded-2xl shadow">
-  <table class="min-w-full text-left">
-    <thead>
-      <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm uppercase">
-        <th class="px-6 py-3">Date</th>
-        <th class="px-6 py-3">Type</th>
-        <th class="px-6 py-3">Description</th>
-        <th class="px-6 py-3">Amount</th>
-        <th class="px-6 py-3">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="(tx, index) in filteredTransactions"
-        :key="index"
-        class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-      >
-        <td class="px-6 py-3 text-gray-700 dark:text-gray-200">{{ tx.date }}</td>
-        <td class="px-6 py-3 capitalize text-gray-700 dark:text-gray-200">{{ tx.type }}</td>
-        <td class="px-6 py-3 text-gray-700 dark:text-gray-200">{{ tx.description }}</td>
-        <td class="px-6 py-3 font-semibold text-green-600 dark:text-green-400">
-          ₱{{ tx.amount }}
-        </td>
-        <td class="px-6 py-3">
-          <span
-            :class="[ 
-              'px-3 py-1 rounded-full text-xs font-semibold',
-              tx.status === 'Completed' ? 'bg-green-500 text-white' :
-              tx.status === 'Pending' ? 'bg-yellow-500 text-white' : 
-              'bg-red-500 text-white'
-            ]"
-          >
-            {{ tx.status }}
-          </span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-      <!-- Pagination -->
-      <div class="flex justify-between items-center mt-6 text-sm text-gray-600">
-        <p>
-          Showing {{ filteredTransactions.length }} of {{ transactions.length }} transactions
-        </p>
-        <div class="flex space-x-2">
-          <button class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Prev</button>
-          <button class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Next</button>
-        </div>
-      </div>
-    </div>
-  </AppLayout>
+    </AppLayout>
 </template>
 
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue'
-import { ref, computed } from 'vue'
+import AppLayout from '@/layouts/AppLayout.vue';
+import { computed, ref } from 'vue';
 
-const searchQuery = ref("")
-const filterType = ref("")
-const filterDate = ref("")
+const searchQuery = ref('');
+const filterType = ref('');
+const filterDate = ref('');
 
 // Sample Data
 const transactions = ref([
-  { date: "2025-08-01", type: "payment", description: "Membership Fee", amount: 500, status: "Completed" },
-  { date: "2025-08-05", type: "expense", description: "Event Supplies", amount: 1200, status: "Completed" },
-  { date: "2025-08-08", type: "payment", description: "Donation", amount: 800, status: "Pending" },
-  { date: "2025-08-12", type: "membership", description: "New Member", amount: 450, status: "Completed" },
-])
+    { date: '2025-08-01', type: 'payment', description: 'Membership Fee', amount: 500, status: 'Completed' },
+    { date: '2025-08-05', type: 'expense', description: 'Event Supplies', amount: 1200, status: 'Completed' },
+    { date: '2025-08-08', type: 'payment', description: 'Donation', amount: 800, status: 'Pending' },
+    { date: '2025-08-12', type: 'membership', description: 'New Member', amount: 450, status: 'Completed' },
+]);
 
 // Filtering Logic
 const filteredTransactions = computed(() => {
-  return transactions.value.filter((tx) => {
-    const matchesSearch =
-      tx.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      tx.type.toLowerCase().includes(searchQuery.value.toLowerCase())
+    return transactions.value.filter((tx) => {
+        const matchesSearch =
+            tx.description.toLowerCase().includes(searchQuery.value.toLowerCase()) || tx.type.toLowerCase().includes(searchQuery.value.toLowerCase());
 
-    const matchesType = filterType.value ? tx.type === filterType.value : true
-    const matchesDate = filterDate.value ? tx.date === filterDate.value : true
+        const matchesType = filterType.value ? tx.type === filterType.value : true;
+        const matchesDate = filterDate.value ? tx.date === filterDate.value : true;
 
-    return matchesSearch && matchesType && matchesDate
-  })
-})
+        return matchesSearch && matchesType && matchesDate;
+    });
+});
 </script>

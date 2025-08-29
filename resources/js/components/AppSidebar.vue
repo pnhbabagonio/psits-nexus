@@ -1,22 +1,36 @@
 <script setup lang="ts">
+import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavUser from '@/components/NavUser.vue';
-import { 
-    Sidebar, 
-    SidebarContent, 
-    SidebarFooter, 
-    SidebarHeader, 
-    SidebarMenu, 
-    SidebarMenuButton, 
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
     SidebarMenuItem,
     SidebarMenuSub,
-    SidebarMenuSubItem
+    SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, LayoutGrid, CreditCard, Calendar, BarChart3, HelpCircle, Globe, User, Users, UserPlus, Shield, ChevronRight, PiggyBank, PhilippinePeso, Clipboard } from 'lucide-vue-next';
-import AppLogo from '@/components/AppLogo.vue';
+import {
+    BarChart3,
+    BookOpen,
+    Calendar,
+    ChevronRight,
+    Clipboard,
+    CreditCard,
+    Globe,
+    HelpCircle,
+    LayoutGrid,
+    PhilippinePeso,
+    PiggyBank,
+    User,
+    Users,
+} from 'lucide-vue-next';
 
 const mainNavItems: NavItem[] = [
     {
@@ -44,7 +58,7 @@ const mainNavItems: NavItem[] = [
 // Financial management sub-items
 const financialManagementItems = [
     {
-        title: 'Transactions',  
+        title: 'Transactions',
         href: '/transactions',
         icon: PiggyBank,
     },
@@ -52,7 +66,7 @@ const financialManagementItems = [
         title: 'Financial Reports',
         href: '/financial-reports',
         icon: Clipboard,
-    },  
+    },
     {
         title: 'Expenses Tracking',
         href: '/expenses-tracking',
@@ -69,12 +83,12 @@ const eventManagementItems = [
     },
     {
         title: 'Attendee Management',
-        href: '/event-attendees',   
+        href: '/event-attendees',
         icon: Users,
     },
     {
         title: 'Event Analysis',
-        href: '/event-analysis',   
+        href: '/event-analysis',
         icon: BarChart3,
     },
 ];
