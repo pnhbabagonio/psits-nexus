@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
-// use App\Http\Controllers\AttendeeController;
+use App\Http\Controllers\AttendeeController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -38,6 +38,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Event Management Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('events', EventController::class);
+});
+
+// Attendee Management Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/attendees', [AttendeeController::class, 'index'])->name('attendees');
+    Route::post('/attendees', [AttendeeController::class, 'store'])->name('attendees.store');
+    Route::get('/attendees/export', [AttendeeController::class, 'export'])->name('attendees.export');
 });
 
 require __DIR__.'/settings.php';

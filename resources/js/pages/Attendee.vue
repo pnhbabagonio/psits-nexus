@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
+import { Users, UserCheck, QrCode, UserX, Filter, X, Download } from 'lucide-vue-next'
 import { type BreadcrumbItem } from '@/types'
 import AppLayout from '@/layouts/AppLayout.vue'
+// import AttendeeForm from '@/components/AttendanceForm.vue'
 
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
@@ -28,8 +30,6 @@ const props = defineProps<{ attendees: Attendee[] }>()
 
 // UI state
 const showFilters = ref(false)
-const showAddModal = ref(false)
-
 
 // Filters & search
 const search = ref('')
@@ -71,247 +71,224 @@ const manualCheckins = computed(() => props.attendees.filter(a => a.status === '
 const qrCheckins = computed(() => props.attendees.filter(a => a.status === 'present' && a.checkin_type === 'qr').length)
 const totalAbsent = computed(() => props.attendees.filter(a => a.status === 'absent').length)
 
-
-// Add attendee form (Inertia useForm handles state + errors)
-const form = useForm<Attendee>({
-    first_name: '',
-    middle_name: '',
-    last_name: '',
-    email: '',
-    date: '',
-    status: 'present',
-    checkin_type: null,
-    checkin_time: '',
-})
-
-
-const onChangeStatus = () => {
-    if (form.status === 'absent') {
-        form.checkin_type = null
-        form.checkin_time = ''
-    }
-}
-
-
-const submit = () => {
-// Simple front-end validation parallel to backend rules
-    if (!form.first_name || !form.last_name || !form.email || !form.date || !form.status) {
-        alert('Please fill in all required fields')
-        return
-    }
-    if (form.status === 'present' && !form.checkin_type) {
-        alert('Please select a check-in type')
-        return
-    }
-
-    form.post(route('attendees.store'), {
-        onSuccess: () => {
-            showAddModal.value = false
-            form.reset()
-        },
-    })
-}
-
 // Helpers
 const initials = (a: Attendee) => {
     const parts = [a.first_name, a.last_name].filter(Boolean)
     return parts.map(p => p[0]).join('').toUpperCase()
 }
-</script>
 
+const clearFilters = () => {
+  filters.status = ''
+  filters.from = ''
+  filters.to = ''
+  search.value = ''
+}
+
+const formatDate = (dateStr: string) => {
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' }
+  return new Date(dateStr).toLocaleDateString(undefined, options)
+}
+</script>
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-    <Head title="Attendee Management - PSITS Tech Summit 2025" />
-        <div class="min-h-screen bg-gray-100">
+        <Head title="Attendee Management - PSITS Tech Summit 2025" />
+        <div class="min-h-screen bg-gray-950">
             <div class="max-w-7xl mx-auto px-4 py-8">
-                <!-- Header with Export Button -->
+
+                <!-- Header -->
                 <div class="mb-8 flex justify-between items-center">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Attendee Management</h1>
-                        <p class="text-gray-600">Manage registrations and check-ins for PSITS Tech Summit 2025</p>
+                        <h1 class="text-3xl font-bold text-white">Attendee Management</h1>
+                        <p class="text-gray-400">
+                        Manage registrations and check-ins for PSITS Tech Summit 2025
+                        </p>
                     </div>
-                        <Link :href="route('attendees.export')" class="px-4 py-2 border border-gray-300 rounded-md flex items-center text-gray-700 bg-white hover:bg-gray-50">
-                        <i class="fas fa-download mr-2"></i>
-                        Export
-                        </Link>
+                    <Link
+                        :href="route('attendees.export')"
+                        class="px-4 py-2 text-sm font-medium border border-gray-600 rounded-lg flex items-center text-gray-200 bg-gray-800 hover:bg-gray-700"
+                    >
+                        <Download class="w-4 h-4 mr-2" /> Export
+                    </Link>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gray-900 rounded-2xl shadow p-6 flex items-center">
+                        <div
+                        class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 mr-4"
+                        >
+                            <Users class="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Total Present</p>
+                            <p class="text-3xl font-bold text-white">{{ totalPresent }}</p>
+                        </div>
                     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
-                    <i class="fas fa-users text-xl"></i>
+                    <div class="bg-gray-900 rounded-2xl shadow p-6 flex items-center">
+                        <div
+                        class="w-12 h-12 rounded-full bg-green-600/20 flex items-center justify-center text-green-400 mr-4"
+                        >
+                            <UserCheck class="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Manual Check-ins</p>
+                            <p class="text-3xl font-bold text-white">{{ manualCheckins }}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900 rounded-2xl shadow p-6 flex items-center">
+                        <div
+                        class="w-12 h-12 rounded-full bg-purple-600/20 flex items-center justify-center text-purple-400 mr-4"
+                        >
+                            <QrCode class="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">QR Check-ins</p>
+                            <p class="text-3xl font-bold text-white">{{ qrCheckins }}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900 rounded-2xl shadow p-6 flex items-center">
+                        <div
+                        class="w-12 h-12 rounded-full bg-red-600/20 flex items-center justify-center text-red-400 mr-4"
+                        >
+                            <UserX class="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Absent</p>
+                            <p class="text-3xl font-bold text-white">{{ totalAbsent }}</p>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Search + Filter + Add Toolbar -->
+                <div class="flex flex-wrap items-center gap-2 mb-6">
+                    <!-- Search -->
+                    <div class="flex-1 min-w-[200px]">
+                        <input
+                        v-model="search"
+                        type="text"
+                        placeholder="Search by name or email"
+                        class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
+                    <!-- Filter Toggle -->
                     <div>
-                        <p class="text-sm text-gray-500">Total Present</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ totalPresent }}</p>
+                        <button
+                        @click="showFilters = !showFilters"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                        >
+                        <Filter class="w-4 h-4" /> Filter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Collapsible Filter Section -->
+                <div v-if="showFilters" class="p-6 border border-gray-700 bg-gray-900 rounded-2xl mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Status -->
+                    <div class="flex flex-col">
+                        <label for="status" class="text-sm text-gray-300 mb-1">Status</label>
+                        <select
+                            id="status"
+                            v-model="filters.status"
+                            class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                        >
+                            <option value="">All Status</option>
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                            <option value="qr">QR Check-in</option>
+                            <option value="manual">Manual Check-in</option>
+                        </select>
+                    </div>
+
+                    <!-- Date From -->
+                    <div class="flex flex-col">
+                    <label for="dateFrom" class="text-sm text-gray-300 mb-1">Date From</label>
+                    <input
+                        id="dateFrom"
+                        v-model="filters.from"
+                        type="date"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                    />
+                    </div>
+
+                    <!-- Date To -->
+                    <div class="flex flex-col">
+                    <label for="dateTo" class="text-sm text-gray-300 mb-1">Date To</label>
+                    <input
+                        id="dateTo"
+                        v-model="filters.to"
+                        type="date"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                    />
+                    </div>
+                </div>
+
+                <!-- Clear Filters -->
+                <div class="mt-4 flex justify-end">
+                    <button
+                    @click="clearFilters"
+                    class="w-full md:w-auto rounded border border-gray-600 bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-2 text-sm font-medium flex items-center gap-2 focus:ring-2 focus:ring-blue-500"
+                    >
+                        <X class="w-4 h-4" /> Clear Filters
+                    </button>
+                </div>
+                </div>
+
+
+                <!-- Attendee List -->
+                <div class="bg-gray-900 rounded-2xl shadow overflow-hidden mb-8">
+                    <div class="px-6 py-4 border-b border-gray-700">
+                        <h2 class="text-lg font-semibold text-white">Attendee List</h2>
+                    </div>
+
+                    <!-- Attendee Items -->
+                    <div class="divide-y divide-gray-700">
+                        <div
+                            v-for="attendee in filtered"
+                            :key="attendee.id"
+                            class="px-6 py-4 flex items-center hover:bg-gray-800"
+                        >
+                            <div
+                                class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-200 font-semibold mr-4"
+                            >
+                                {{ initials(attendee) }}
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="text-base font-medium text-white">
+                                {{ attendee.first_name }} {{ attendee.last_name }}
+                                </h3>
+                                <p class="text-sm text-gray-400">{{ attendee.email }}</p>
+                                <p class="text-xs text-gray-600">{{ formatDate(attendee.date) }}</p>
+                            </div>
+                            <div class="ml-4">
+                                <!-- Absent -->
+                                <span
+                                v-if="attendee.status === 'absent'"
+                                class="px-2 py-1 rounded-full bg-gray-700 text-gray-300 text-xs font-medium"
+                                >
+                                Absent
+                                </span>
+
+                                <!-- Present -->
+                                <span
+                                v-else
+                                class="px-2 py-1 rounded-full bg-green-700/20 text-green-400 text-xs font-medium flex items-center"
+                                ><component
+                                    :is="attendee.checkin_type === 'qr' ? QrCode : UserCheck"
+                                    class="w-3 h-3 mr-1"
+                                />
+                                    {{ attendee.checkin_type === 'qr' ? 'QR' : 'Manual' }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-4">
-                    <i class="fas fa-user-check text-xl"></i>
-                </div>
-            <div>
-                <p class="text-sm text-gray-500">Manual Check-ins</p>
-                <p class="text-2xl font-bold text-gray-900">{{ manualCheckins }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-4">
-                <i class="fas fa-qrcode text-xl"></i>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500">QR Check-ins</p>
-                <p class="text-2xl font-bold text-gray-900">{{ qrCheckins }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mr-4">
-                <i class="fas fa-user-times text-xl"></i>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500">Absent</p>
-                <p class="text-2xl font-bold text-gray-900">{{ totalAbsent }}</p>
-            </div>
-        </div>
-    </div>
-    <!-- Attendee List Section -->
-    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
-        <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <h2 class="text-lg font-medium text-gray-900 mb-4 sm:mb-0">Attendee List</h2>
-            <div class="flex flex-wrap gap-2">
-                <button @click="showFilters = !showFilters" class="px-4 py-2 border border-gray-300 rounded-md flex items-center text-gray-700 bg-white hover:bg-gray-50">
-                    <i class="fas fa-filter mr-2"></i> Filter
-                </button>
-                <button @click="showAddModal = true" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-                    <i class="fas fa-plus mr-2"></i> Add Attendee
-                </button>
-            </div>
-        </div>
-    <!-- Search Bar -->
-    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <div class="relative max-w-xs">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="fas fa-search text-gray-400"></i>
-            </div>
-            <input v-model="search" type="text" placeholder="Search attendees..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        </div>
-    </div>
-    <!-- Filter Options -->
-    <div v-show="showFilters" class="px-6 py-4 bg-gray-50 border-b border-gray-200 transition-all">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select v-model="filters.status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">All Statuses</option>
-                    <option value="present">Present</option>
-                    <option value="absent">Absent</option>
-                    <option value="qr">QR Check-in</option>
-                    <option value="manual">Manual Check-in</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-                <input type="date" v-model="filters.from" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-                <input type="date" v-model="filters.to" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="flex items-end">
-                <button @click="/* optional: trigger any filter action */" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full">
-                Apply Filters
-                </button>
-            </div>
-        </div>
-    </div>
-    <!-- Attendee List -->
-    <div class="divide-y divide-gray-200">
-        <div v-for="attendee in filtered" :key="attendee.id" class="px-6 py-4 flex items-center">
-            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold mr-4">
-                {{ initials(attendee) }}
-            </div>
-            <div class="flex-grow">
-                <h3 class="text-base font-medium text-gray-900">{{ attendee.first_name }} {{ attendee.last_name }}</h3>
-                <p class="text-sm text-gray-500">{{ attendee.email }}</p>
-            </div>
-            <div class="ml-4">
-                <span v-if="attendee.status === 'absent'" class="px-2 py-1 rounded-full bg-gray-100 text-gray-800 text-sm font-medium">Absent</span>
-                <span v-else class="status-badge bg-green-100 text-green-800 text-sm font-medium flex items-center">
-                <i :class="attendee.checkin_type === 'qr' ? 'fas fa-qrcode mr-1' : 'fas fa-user-check mr-1'"></i>
-                Checked in at {{ attendee.checkin_time || 'N/A' }}
-                </span>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Add Attendee Modal -->
-<div v-if="showAddModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-xl font-medium text-gray-900">Add New Attendee</h3>
-        </div>
-    <div class="px-6 py-4">
-        <form @submit.prevent="submit" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-                    <input v-model="form.first_name" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
-                <input v-model="form.middle_name" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-                <input v-model="form.last_name" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            </div>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-            <input v-model="form.email" type="email" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
-            <input v-model="form.date" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
-            <select v-model="form.status" @change="onChangeStatus" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <option value="present">Present</option>
-                <option value="absent">Absent</option>
-            </select>
-        </div>
-        <div v-if="form.status === 'present'">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Check-in Type *</label>
-            <select v-model="form.checkin_type" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <option value="">Select type</option>
-                <option value="qr">QR Check-in</option>
-                <option value="manual">Manual Check-in</option>
-            </select>
-        </div>
-        <div v-if="form.status === 'present'">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Check-in Time</label>
-            <input v-model="form.checkin_time" type="time" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        </form>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-            <button @click="showAddModal = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
-            <button @click="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Attendee</button>
-        </div>
-                </div>
-            </div>
-        </div>
-        </div>
         </div>
     </AppLayout>
 </template>

@@ -38,11 +38,6 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
-    // {
-    //     title: 'Events',
-    //     href: '/events',
-    //     icon: Calendar,
-    // },
     {
         title: 'Reports',
         href: '/reports',
@@ -83,12 +78,12 @@ const eventManagementItems = [
     },
     {
         title: 'Attendee Management',
-        href: '/event-attendees',
+        href: '/attendees',
         icon: Users,
     },
     {
         title: 'Event Analysis',
-        href: '/event-analysis',
+        href: '/analysis',
         icon: BarChart3,
     },
 ];

@@ -232,16 +232,16 @@ watch([searchQuery, filters], () => {
       </div>
 
     <div class="relative" ref="filterDropdown">
-    <button 
-      @click="isFilterOpen = !isFilterOpen"
-      class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
-    >
-      <span>Filter</span>
-      <ChevronDown 
-        class="w-4 h-4 transition-transform" 
-        :class="{ 'rotate-180': isFilterOpen }" 
-      />
-    </button>
+      <button 
+        @click="isFilterOpen = !isFilterOpen"
+        class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+      >
+        <span>Filter</span>
+        <ChevronDown 
+          class="w-4 h-4 transition-transform" 
+          :class="{ 'rotate-180': isFilterOpen }" 
+        />
+      </button>
 
     <!-- Dropdown content -->
     <div 
