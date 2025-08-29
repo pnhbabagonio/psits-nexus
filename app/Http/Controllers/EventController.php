@@ -77,4 +77,10 @@ class EventController extends Controller
 
         return redirect()->back()->with('success', "Event #{$id} updated successfully (mock).");
     }
+    public function destroy($id)
+    {
+        // pretend the event was deleted
+        return redirect()->route('events.index')
+            ->with('success', "Event #{$id} deleted successfully (mock).");
+    }
 }
