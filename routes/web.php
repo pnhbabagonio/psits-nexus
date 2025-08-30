@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AttendeeController;
+use App\Http\Controllers\AnalyticsController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -46,6 +47,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/attendees', [AttendeeController::class, 'store'])->name('attendees.store');
     Route::get('/attendees/export', [AttendeeController::class, 'export'])->name('attendees.export');
 });
+
+// Event Analytics Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+    Route::get('/analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
+});
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

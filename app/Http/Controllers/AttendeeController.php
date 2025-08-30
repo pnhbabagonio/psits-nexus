@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -94,11 +94,46 @@ class AttendeeController extends Controller
     }
 
     /**
-     * Export attendees (mock only)
-     */
-    public function export()
+    * Export attendees (mock only)
+    */
+    public function export(): StreamedResponse
     {
-        // Just pretend an export happened
-        return redirect()->back()->with('success', 'Attendees exported (mock).');
+        $attendees = $this->mockAttendees;
+
+        $csv = fopen('php://temp', 'r+');
+
+        // Header row
+        fputcsv($csv, [
+            'ID',
+            'First Name',
+            'Middle Name',
+            'Last Name',
+            'Email',
+            'Status',
+            'Check-in Type',
+            'Check-in Time',
+            'Date'
+        ]);
+
+        // Data rows
+        foreach ($attendees as $attendee) {
+            fputcsv($csv, [
+                $attendee['id'],
+                $attendee['first_name'],
+                $attendee['middle_name'] ?? '',
+                $attendee['last_name'],
+                $attendee['email'],
+                ucfirst($attendee['status']),
+                $attendee['checkin_type'] ?? '',
+                $attendee['checkin_time'] ?? '',
+                $attendee['date'],
+            ]);
+        }
+
+        rewind($csv);
+
+        return response()->streamDownload(function () use ($csv) {
+            fpassthru($csv);
+        }, 'attendees.csv', ['Content-Type' => 'text/csv']);
     }
 }

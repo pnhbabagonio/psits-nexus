@@ -1,8 +1,19 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
 import { Users, UserCheck, QrCode, UserX, Filter, X, Download } from 'lucide-vue-next'
 import { type BreadcrumbItem } from '@/types'
+
+// Define Attendee type locally if not exported from '@/types'
+type Attendee = {
+    id: number
+    first_name: string
+    last_name: string
+    email: string
+    status: 'present' | 'absent'
+    checkin_type?: 'qr' | 'manual'
+    date: string
+}
 import AppLayout from '@/layouts/AppLayout.vue'
 
 // Breadcrumbs
@@ -10,19 +21,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Attendee', href: '/attendees' },
 ]
-
-// Types
-export type Attendee = {
-    id?: number
-    first_name: string
-    middle_name?: string | null
-    last_name: string
-    email: string
-    status: 'present' | 'absent'
-    checkin_type?: 'qr' | 'manual' | null
-    checkin_time?: string | null // HH:MM
-    date: string // YYYY-MM-DD
-}
 
 const props = defineProps<{ attendees: Attendee[] }>()
 
@@ -103,12 +101,13 @@ const formatDate = (dateStr: string) => {
                         Manage registrations and check-ins for PSITS Tech Summit 2025
                         </p>
                     </div>
-                    <Link
-                        :href="route('attendees.export')"
-                        class="px-4 py-2 text-sm font-medium border border-gray-600 rounded-lg flex items-center text-gray-200 bg-gray-800 hover:bg-gray-700"
+                    <a
+                        href="/analytics/export"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-500 px-4 py-2 text-sm font-medium"
                     >
-                        <Download class="w-4 h-4 mr-2" /> Export
-                    </Link>
+                        <Download class="w-4 h-4" />
+                        Export
+                    </a>
                 </div>
 
                 <!-- Stats Cards -->

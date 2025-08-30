@@ -82,8 +82,8 @@ const eventManagementItems = [
         icon: Users,
     },
     {
-        title: 'Event Analysis',
-        href: '/analysis',
+        title: 'Event Analytics',
+        href: '/analytics',
         icon: BarChart3,
     },
 ];
