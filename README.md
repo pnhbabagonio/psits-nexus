@@ -93,7 +93,7 @@ APP_URL=http://psits-nexus.test # IMPORTANT: Must match your local URL
 DB_CONNECTION=sqlite
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=database/database.sqlite
+DB_DATABASE=laravel
 DB_USERNAME=root
 DB_PASSWORD=password
 
