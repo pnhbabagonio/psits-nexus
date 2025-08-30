@@ -32,6 +32,7 @@ Route::get('expenses-tracking', function(){
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('user-management', [UserController::class, 'index'])->name('user-management');
     Route::post('users', [UserController::class, 'store'])->name('users.store');
+    Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
@@ -54,12 +55,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
 });
 
-
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
-
 // Platform Guide page
 Route::get('platform-guide', function () {
     return Inertia::render('PlatformGuide'); 
     // This should match resources/js/Pages/PlatformGuide.vue
 })->middleware(['auth', 'verified'])->name('platform-guide');
+
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
