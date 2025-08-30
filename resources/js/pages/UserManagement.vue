@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Head, useForm, usePage, router } from '@inertiajs/vue3'
 import { Plus, Pencil, Trash, ChevronDown } from 'lucide-vue-next'
 import { type BreadcrumbItem } from '@/types';
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 // =====================
 // Search & Filters
@@ -116,7 +116,10 @@ const filterDropdown = ref(null)
 
 // Handle clicks outside the filter dropdown
 function handleClickOutside(event: Event) {
-  if (filterDropdown.value && !filterDropdown.value.contains(event.target)) {
+  if (
+    filterDropdown.value &&
+    !(filterDropdown.value as HTMLElement).contains(event.target as Node)
+  ) {
     isFilterOpen.value = false
   }
 }
