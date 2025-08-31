@@ -386,6 +386,7 @@ watch([searchQuery, filters], () => {
             >
                 <option value="Member">Member</option>
                 <option value="Officer">Officer</option>
+                <option value="Admin">Admin</option>
             </select>
             <div v-if="newUserForm.errors.role" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.role }}</div>
             </div>
@@ -463,6 +464,7 @@ watch([searchQuery, filters], () => {
                 'px-2 py-1 rounded-full text-xs': true,
                 'bg-blue-500/20 text-blue-300': user.role === 'Member',
                 'bg-green-500/20 text-green-300': user.role === 'Officer',
+                'bg-red-500/20 text-red-300': user.role === 'Admin'
             }">
                 {{ user.role }}
             </span>
@@ -674,6 +676,8 @@ watch([searchQuery, filters], () => {
           <select v-model="editUserForm.role" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2">
             <option value="Member">Member</option>
             <option value="Officer">Officer</option>
+            <option value="Admin">Admin</option>
+
           </select>
           <div v-if="editUserForm.errors.role" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.role }}</div>
         </div>
