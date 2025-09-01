@@ -35,7 +35,7 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
         //Check if user is not admin
-        if ($user->role !== 'admin'){
+        if ($user->role !== 'Admin') {
             Auth::logout();
             return back()->withErrors(['email'=> 'Access restricted. Adminstrative access only.']);
         }

@@ -22,6 +22,75 @@ import {
     Users,
 } from 'lucide-vue-next';
 
+// Define props interface
+interface Props {
+    financialSummary: {
+        totalBalance: number;
+        membershipFees: number;
+        monthlyExpenses: number;
+        totalMembers: number;
+    };
+    recentTransactions: Array<{
+        id: number;
+        description: string;
+        amount: number;
+        date: string;
+        type: string;
+        method: string;
+    }>;
+    qrAnalytics: {
+        totalScans: number;
+        successfulPayments: number;
+        failedScans: number;
+        averagePaymentAmount: number;
+    };
+    engagementData: {
+        activeMembers: number;
+        eventAttendance: number;
+        paymentCompliance: number;
+        platformUsage: number;
+    };
+    calendarEvents: Array<{
+        date: number;
+        title: string;
+        type: string;
+    }>;
+    announcements: Array<{
+        id: number;
+        title: string;
+        content: string;
+        date: string;
+        priority: string;
+    }>;
+    notificationCount: number;
+}
+
+// Define props with default values for development
+const props = withDefaults(defineProps<Props>(), {
+    financialSummary: () => ({
+        totalBalance: 0,
+        membershipFees: 0,
+        monthlyExpenses: 0,
+        totalMembers: 0,
+    }),
+    recentTransactions: () => [],
+    qrAnalytics: () => ({
+        totalScans: 0,
+        successfulPayments: 0,
+        failedScans: 0,
+        averagePaymentAmount: 0,
+    }),
+    engagementData: () => ({
+        activeMembers: 0,
+        eventAttendance: 0,
+        paymentCompliance: 0,
+        platformUsage: 0,
+    }),
+    calendarEvents: () => [],
+    announcements: () => [],
+    notificationCount: () => 0,
+});
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -29,54 +98,10 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Mock notification count
-const notificationCount = 3;
-
-// Mock recent transactions
-const recentTransactions = [
-    { id: 1, description: 'Membership Fee - John Doe', amount: 500.0, date: '2025-01-20', type: 'membership', method: 'QR Code' },
-    { id: 2, description: 'Event Registration - Jane Smith', amount: 300.0, date: '2025-01-19', type: 'event', method: 'QR Code' },
-    { id: 3, description: 'Workshop Fee - Mike Johnson', amount: 250.0, date: '2025-01-18', type: 'workshop', method: 'QR Code' },
-    { id: 4, description: 'Annual Dues - Sarah Lee', amount: 800.0, date: '2025-01-17', type: 'membership', method: 'QR Code' },
-    { id: 5, description: 'Seminar Fee - Alex Chen', amount: 150.0, date: '2025-01-16', type: 'seminar', method: 'QR Code' },
-];
-
-// Mock financial and engagement data
-const financialSummary = {
-    totalBalance: 125750.5,
-    membershipFees: 45230.0,
-    monthlyExpenses: 28350.75,
-    totalMembers: 284,
-};
-
-// Mock QR scan analytics
-const qrAnalytics = {
-    totalScans: 1247,
-    successfulPayments: 1180,
-    failedScans: 67,
-    averagePaymentAmount: 425.75,
-};
-
-// Mock engagement data
-const engagementData = {
-    activeMembers: 195,
-    eventAttendance: 82.5,
-    paymentCompliance: 94.2,
-    platformUsage: 78.9,
-};
-
 // Current date
 const currentDate = new Date();
 const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
 const currentYear = currentDate.getFullYear();
-
-// Mock calendar events for current month
-const calendarEvents = [
-    { date: 22, title: 'Tech Talk: AI in Business', type: 'workshop' },
-    { date: 25, title: 'General Assembly Meeting', type: 'meeting' },
-    { date: 28, title: 'Membership Fee Deadline', type: 'deadline' },
-    { date: 30, title: 'Industry Night 2025', type: 'event' },
-];
 
 // Generate calendar days for current month
 const getDaysInMonth = (date: Date) => {
@@ -96,7 +121,7 @@ const getDaysInMonth = (date: Date) => {
 
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-        const dayEvents = calendarEvents.filter((event) => event.date === day);
+        const dayEvents = props.calendarEvents.filter((event) => event.date === day);
         days.push({
             day,
             hasEvent: dayEvents.length > 0,
@@ -109,13 +134,6 @@ const getDaysInMonth = (date: Date) => {
 };
 
 const calendarDays = getDaysInMonth(currentDate);
-
-// Mock announcements
-const announcements = [
-    { id: 1, title: 'New Payment System Live', content: 'QR-based payment system is now fully operational', date: '2025-01-20', priority: 'high' },
-    { id: 2, title: 'Membership Drive Extended', content: 'Extended deadline for new member registration', date: '2025-01-19', priority: 'medium' },
-    { id: 3, title: 'System Maintenance Notice', content: 'Scheduled maintenance on Jan 25, 2025', date: '2025-01-18', priority: 'low' },
-];
 
 const quickActions = [
     {
@@ -272,7 +290,7 @@ const quickActions = [
                                     <span class="text-sm font-medium">Success Rate</span>
                                 </div>
                                 <p class="text-2xl font-bold text-green-600">
-                                    {{ ((qrAnalytics.successfulPayments / qrAnalytics.totalScans) * 100).toFixed(1) }}%
+                                    {{ qrAnalytics.totalScans > 0 ? ((qrAnalytics.successfulPayments / qrAnalytics.totalScans) * 100).toFixed(1) : 0 }}%
                                 </p>
                             </div>
                             <div class="rounded-lg bg-muted/50 p-4">
@@ -311,7 +329,7 @@ const quickActions = [
                                 <div class="h-2 w-full rounded-full bg-muted">
                                     <div
                                         class="h-2 rounded-full bg-blue-500"
-                                        :style="{ width: (engagementData.activeMembers / financialSummary.totalMembers) * 100 + '%' }"
+                                        :style="{ width: financialSummary.totalMembers > 0 ? (engagementData.activeMembers / financialSummary.totalMembers) * 100 + '%' : '0%' }"
                                     ></div>
                                 </div>
                             </div>
@@ -382,6 +400,11 @@ const quickActions = [
                                 <div class="font-semibold text-green-600">+₱{{ transaction.amount.toLocaleString() }}</div>
                             </div>
                         </div>
+                        <!-- Show message when no transactions -->
+                        <div v-if="recentTransactions.length === 0" class="text-center py-8 text-muted-foreground">
+                            <QrCode class="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p>No recent transactions found</p>
+                        </div>
                     </div>
 
                     <!-- Interactive Calendar -->
@@ -438,6 +461,11 @@ const quickActions = [
                                 <span class="font-medium">{{ event.date }}</span>
                                 <span>{{ event.title }}</span>
                             </div>
+                            <!-- Show message when no events -->
+                            <div v-if="calendarEvents.length === 0" class="text-center py-4 text-muted-foreground text-xs">
+                                <Calendar class="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                <p>No upcoming events</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -469,6 +497,11 @@ const quickActions = [
                             <p class="mb-2 text-xs text-muted-foreground">{{ announcement.content }}</p>
                             <p class="text-xs text-muted-foreground">{{ announcement.date }}</p>
                         </div>
+                    </div>
+                    <!-- Show message when no announcements -->
+                    <div v-if="announcements.length === 0" class="text-center py-8 text-muted-foreground">
+                        <Megaphone class="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No announcements available</p>
                     </div>
                 </div>
             </div>

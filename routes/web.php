@@ -5,15 +5,22 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AttendeeController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\DashboardController; // Add this import
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Replace the dashboard closure with controller
+Route::get('dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
+
+// Add API route for dashboard stats
+Route::get('dashboard/stats', [DashboardController::class, 'getStats'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard.stats');
 
 Route::get('transactions', function () {
     return Inertia::render('TransactionHistory'); 

@@ -43,7 +43,7 @@ class UserController extends Controller
             'studentId'  => ['nullable','string','max:50','unique:users,student_id'],
             'program'    => ['required','string','max:255'],
             'year'       => ['required','string','max:50'],
-            'role'       => ['required','in:Member,Officer'],
+            'role'       => ['required','in:Member,Officer,Admin'], // Added Admin here
             'status'     => ['required','in:active,inactive'],
             'lastLogin'  => ['nullable','date'],
         ]);
@@ -86,7 +86,7 @@ class UserController extends Controller
             'studentId'  => ['nullable','string','max:50', Rule::unique('users', 'student_id')->ignore($user->id)],
             'program'    => ['required','string','max:255'],
             'year'       => ['required','string','max:50'],
-            'role'       => ['required','in:Member,Officer'],
+            'role'       => ['required','in:Member,Officer,Admin'], // Added Admin here too
             'status'     => ['required','in:active,inactive'],
             'lastLogin'  => ['nullable','date'],
         ]);
