@@ -15,7 +15,7 @@ test('users can authenticate using the login screen', function () {
     $user = User::factory()->create([
         'email' => 'admin@example.com',
         'password' => Hash::make('password'),
-        'role' => 'admin', // Add this line - make user an admin
+        'role' => 'Admin', // Add this line - make user an admin
     ]);
 
     $response = $this->post('/login', [
