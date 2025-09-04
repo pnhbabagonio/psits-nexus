@@ -45,7 +45,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Help & Support',
-        href: '/support',
+        href: '/help-support',
         icon: HelpCircle,
     },
 ];
