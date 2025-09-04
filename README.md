@@ -5,6 +5,10 @@ Group 8
 -Mark Laurence Abdina
 -Adrian Michael Demillo
 
+  >>>>>TO LOGIN<<<<<<<<
+USE THIS ADMIN USER SEEDER
+>>>>>Email: admin@test.com
+>>>>>Password: password123
 
 # Project Setup Instructions
 
