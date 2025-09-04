@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { ref } from 'vue';
+import { type BreadcrumbItem } from '@/types'
+
+
+const breadcrumbs: BreadcrumbItem[] = [
+  { title: 'Dashboard', href: '/dashboard' },
+  { title: 'Expense Tracking', href: '/expenses-tracking' },
+]
 
 const expenses = ref([
     {
@@ -33,7 +40,7 @@ const categories = ['Travel', 'Meals', 'Office Supplies', 'Utilities', 'Other'];
 </script>
 
 <template>
-    <AppLayout title="Expense Tracking">
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-6">
             <!-- Page Title -->
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Expense Tracking</h1>
