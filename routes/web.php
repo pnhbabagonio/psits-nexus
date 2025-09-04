@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use Inertia\Inertia;
+use App\Http\Controllers\HelpSupportController; // ← Add this import
+
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -14,15 +17,15 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('transactions', function () {
-    return Inertia::render('TransactionHistory'); 
+    return Inertia::render('TransactionHistory');
     //this should match resources/js/Pages/TransactionHistory.vue
 })->middleware(['auth', 'verified'])->name('transactions');
 
-Route::get('financial-reports', function(){
+Route::get('financial-reports', function () {
     return Inertia::render('FinancialReports');
 })->middleware(['auth', 'verified'])->name('financial-reports');
 
-Route::get('expenses-tracking', function(){
+Route::get('expenses-tracking', function () {
     return Inertia::render('ExpenseTracking');
 })->middleware(['auth', 'verified'])->name('expenses-tracking');
 
@@ -42,12 +45,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('event-analysis', [EventController::class, 'analysis'])->name('events.analysis');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/help-support', [HelpSupportController::class, 'index'])
+        ->name('help-support.index')
+        ->middleware(['auth', 'verified']);
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+
+    Route::post('/help-support', [HelpSupportController::class, 'store'])
+        ->name('help-support.store')
+        ->middleware(['auth', 'verified']);
+});
+
+
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
 
 // Platform Guide page
 Route::get('platform-guide', function () {
-    return Inertia::render('PlatformGuide'); 
+    return Inertia::render('PlatformGuide');
     // This should match resources/js/Pages/PlatformGuide.vue
 })->middleware(['auth', 'verified'])->name('platform-guide');
