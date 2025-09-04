@@ -71,6 +71,8 @@ When you pull new changes, run the following as needed:
    ```bash
    php artisan migrate
    ```
+<<<<<<< HEAD
+=======
 
    
 # For the mail to function
@@ -112,3 +114,4 @@ last
 ``` bash
    php artisan config:clear
 ```
+>>>>>>> f76fdf5187dfaf8ed4d52a0fc82d39007a2165c0

@@ -1,22 +1,36 @@
 <script setup lang="ts">
+import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavUser from '@/components/NavUser.vue';
-import { 
-    Sidebar, 
-    SidebarContent, 
-    SidebarFooter, 
-    SidebarHeader, 
-    SidebarMenu, 
-    SidebarMenuButton, 
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
     SidebarMenuItem,
     SidebarMenuSub,
-    SidebarMenuSubItem
+    SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, LayoutGrid, CreditCard, Calendar, BarChart3, HelpCircle, Globe, User, Users, UserPlus, Shield, ChevronRight, PiggyBank, PhilippinePeso, Clipboard } from 'lucide-vue-next';
-import AppLogo from '@/components/AppLogo.vue';
+import {
+    BarChart3,
+    BookOpen,
+    Calendar,
+    ChevronRight,
+    Clipboard,
+    CreditCard,
+    Globe,
+    HelpCircle,
+    LayoutGrid,
+    PhilippinePeso,
+    PiggyBank,
+    User,
+    Users,
+} from 'lucide-vue-next';
 
 const mainNavItems: NavItem[] = [
     {
@@ -36,11 +50,10 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-
 // Financial management sub-items
 const financialManagementItems = [
     {
-        title: 'Transactions',  
+        title: 'Transactions',
         href: '/transactions',
         icon: PiggyBank,
     },
@@ -48,7 +61,7 @@ const financialManagementItems = [
         title: 'Financial Reports',
         href: '/financial-reports',
         icon: Clipboard,
-    },  
+    },
     {
         title: 'Expenses Tracking',
         href: '/expenses-tracking',
@@ -56,22 +69,23 @@ const financialManagementItems = [
     },
 ];
 
+// Event Management sub-items
 const eventManagementItems = [
     {
-        title: 'Event Creation',
+        title: 'Events',
         href: '/events',
         icon: Calendar,
     },
     {
-        title: 'Attendance Management',
-        href: '/events/create',
-        icon: UserPlus,
+        title: 'Attendee Management',
+        href: '/attendees',
+        icon: Users,
     },
     {
         title: 'Event Analytics',
-        href: '/events/analytics',
+        href: '/analytics',
         icon: BarChart3,
-    }
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -82,7 +96,7 @@ const footerNavItems: NavItem[] = [
     },
     {
         title: 'Platform Guide',
-        href: '/platform-guide',
+        href: '/guide',
         icon: BookOpen,
     },
 ];

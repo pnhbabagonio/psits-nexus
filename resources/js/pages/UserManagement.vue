@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Head, useForm, usePage, router } from '@inertiajs/vue3'
 import { Plus, Pencil, Trash, ChevronDown } from 'lucide-vue-next'
 import { type BreadcrumbItem } from '@/types';
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 // =====================
 // Search & Filters
@@ -116,7 +116,10 @@ const filterDropdown = ref(null)
 
 // Handle clicks outside the filter dropdown
 function handleClickOutside(event: Event) {
-  if (filterDropdown.value && !filterDropdown.value.contains(event.target)) {
+  if (
+    filterDropdown.value &&
+    !(filterDropdown.value as HTMLElement).contains(event.target as Node)
+  ) {
     isFilterOpen.value = false
   }
 }
@@ -232,16 +235,16 @@ watch([searchQuery, filters], () => {
       </div>
 
     <div class="relative" ref="filterDropdown">
-    <button 
-      @click="isFilterOpen = !isFilterOpen"
-      class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
-    >
-      <span>Filter</span>
-      <ChevronDown 
-        class="w-4 h-4 transition-transform" 
-        :class="{ 'rotate-180': isFilterOpen }" 
-      />
-    </button>
+      <button 
+        @click="isFilterOpen = !isFilterOpen"
+        class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+      >
+        <span>Filter</span>
+        <ChevronDown 
+          class="w-4 h-4 transition-transform" 
+          :class="{ 'rotate-180': isFilterOpen }" 
+        />
+      </button>
 
     <!-- Dropdown content -->
     <div 
@@ -383,6 +386,7 @@ watch([searchQuery, filters], () => {
             >
                 <option value="Member">Member</option>
                 <option value="Officer">Officer</option>
+                <option value="Admin">Admin</option>
             </select>
             <div v-if="newUserForm.errors.role" class="text-red-500 text-sm mt-1">{{ newUserForm.errors.role }}</div>
             </div>
@@ -460,6 +464,7 @@ watch([searchQuery, filters], () => {
                 'px-2 py-1 rounded-full text-xs': true,
                 'bg-blue-500/20 text-blue-300': user.role === 'Member',
                 'bg-green-500/20 text-green-300': user.role === 'Officer',
+                'bg-red-500/20 text-red-300': user.role === 'Admin'
             }">
                 {{ user.role }}
             </span>
@@ -671,6 +676,8 @@ watch([searchQuery, filters], () => {
           <select v-model="editUserForm.role" class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2">
             <option value="Member">Member</option>
             <option value="Officer">Officer</option>
+            <option value="Admin">Admin</option>
+
           </select>
           <div v-if="editUserForm.errors.role" class="text-red-500 text-sm mt-1">{{ editUserForm.errors.role }}</div>
         </div>

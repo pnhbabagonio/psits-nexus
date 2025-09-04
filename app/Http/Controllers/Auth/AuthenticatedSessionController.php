@@ -31,7 +31,14 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $request->session()->regenerate();
+        session()->regenerate();
+
+        $user = Auth::user();
+        //Check if user is not admin
+        if ($user->role !== 'Admin') {
+            Auth::logout();
+            return back()->withErrors(['email'=> 'Access restricted. Adminstrative access only.']);
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
