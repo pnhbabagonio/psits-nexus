@@ -3,166 +3,126 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Head } from '@inertiajs/vue3'
 import { type BreadcrumbItem } from '@/types'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { BarChart, LineChart, PieChart } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { BarChart } from "lucide-vue-next"
 import { ref } from 'vue'
-
-// ✅ Chart.js + vue-chartjs imports
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  ChartOptions
-} from 'chart.js'
-import { Line, Bar } from 'vue-chartjs'
-
-// register needed chart components
-ChartJS.register(
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  PointElement
-)
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: '/dashboard' },
   { title: 'Financial Management', href: '/financial-management' },
 ]
 
-// Example data
-const incomeData = [5000, 7000, 6000, 8000, 7500]
-const expenseData = [3000, 4000, 3500, 4500, 4200]
-const budgetProgress = 65
+const budgetProgress = ref(65)
 const dateRange = ref({ start: '2025-01-01', end: '2025-08-01' })
 
-// ✅ Chart Data
-const lineData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-  datasets: [
-    {
-      label: 'Income',
-      data: incomeData,
-      borderColor: '#22c55e',
-      backgroundColor: 'rgba(34,197,94,0.2)',
-      tension: 0.3,
-      fill: true,
-    },
-  ],
-}
+// Sample data for charts
+const studentData = [
+  { name: "Jan", payment: 2200 },
+  { name: "Feb", payment: 1800 },
+  { name: "Mar", payment: 2000 },
+  { name: "Apr", payment: 2500 },
+  { name: "May", payment: 1900 }
+]
 
-const barData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-  datasets: [
-    {
-      label: 'Expenses',
-      data: expenseData,
-      backgroundColor: '#ef4444',
-    },
-  ],
-}
+// Largest payment value
+const maxValue = Math.max(...studentData.map(m => m.payment))
 
-// ✅ Chart Options (typed to avoid TS errors)
-const lineOptions: ChartOptions<'line'> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: true },
-    tooltip: {
-      mode: 'index',
-      intersect: false,
-    },
-  },
-  scales: {
-    x: { ticks: { color: '#888' }, grid: { display: false } },
-    y: { beginAtZero: true, ticks: { color: '#888' }, grid: { display: true } },
-  },
-}
+// Steps for Y axis (every 500 pesos)
+const stepSize = 500
+const ySteps = Array.from(
+  { length: Math.ceil(maxValue / stepSize) + 1 },
+  (_, i) => maxValue - i * stepSize
+)
 
-const barOptions: ChartOptions<'bar'> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: true },
-    tooltip: {
-      mode: 'index',
-      intersect: false,
-    },
-  },
-  scales: {
-    x: { ticks: { color: '#888' }, grid: { display: false } },
-    y: { beginAtZero: true, ticks: { color: '#888' }, grid: { display: true } },
-  },
-}
 </script>
 
 <template>
   <AppLayout :breadcrumbs="breadcrumbs">
-    <Head title="Financial Reports" />  
+    <Head title="Financial Reports" />
 
     <div class="p-6 space-y-6">
       <!-- Page Title -->
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Financial Reports</h1>
-        <p class="text-gray-600 dark:text-gray-400">View and analyze all financial reports</p>
+        <h1 class="text-2xl font-bold text-foreground">Financial Reports</h1>
+        <p class="text-muted-foreground">View and analyze all financial reports</p>
       </div>
 
       <!-- Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Income Summary (Line Chart) -->
-        <Card class="rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition">
-          <CardHeader>
-            <CardTitle class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-              <BarChart class="w-5 h-5 text-green-500 dark:text-green-400" /> Income Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Monthly Income Trend</p>
-            <div class="bg-gray-100 dark:bg-gray-800 rounded-lg h-40">
-              <Line :data="lineData" :options="lineOptions" />
-            </div>
-          </CardContent>
-        </Card>
+        <!-- Student Payments -->
+<Card class="rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition">
+  <CardHeader>
+    <CardTitle class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+      <BarChart class="w-5 h-5 text-green-500 dark:text-green-400" /> Student Payments
+    </CardTitle>
+  </CardHeader>
 
-        <!-- Expense Tracking (Bar Chart) -->
-        <Card class="rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition">
+  <CardContent>
+    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+      Total amount collected per month
+    </p>
+
+    <div class="relative w-full h-64 grid grid-cols-[40px_1fr]">
+      <!-- Y Axis -->
+      <div class="flex flex-col justify-between text-xs text-gray-500 dark:text-gray-400 pr-2">
+        <span v-for="step in ySteps" :key="step">
+          ₱{{ step.toLocaleString() }}
+        </span>
+      </div>
+
+      <!-- Bars -->
+      <div class="relative flex items-end space-x-6">
+        <div
+          v-for="month in studentData"
+          :key="month.name"
+          class="flex-1 flex flex-col items-center"
+        >
+          <!-- Bar -->
+          <div
+            class="bg-green-500 dark:bg-green-400 w-8 rounded shadow-sm transition-all"
+            :style="{ height: ((month.payment / maxValue) * 100) + '%' }"
+          ></div>
+
+          <!-- Month Label -->
+          <span class="text-xs mt-2 text-gray-600 dark:text-gray-400 font-medium">
+            {{ month.name }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
+
+        <!-- Expense Tracking -->
+        <Card>
           <CardHeader>
-            <CardTitle class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-              <LineChart class="w-5 h-5 text-red-500 dark:text-red-400" /> Expense Tracking
+            <CardTitle class="flex items-center gap-2">
+              <LineChart class="w-5 h-5 text-destructive" /> Expense Tracking
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Monthly Expenses Overview</p>
-            <div class="bg-gray-100 dark:bg-gray-800 rounded-lg h-40">
-              <Bar :data="barData" :options="barOptions" />
+            <p class="text-sm text-muted-foreground mb-2">Monthly Expenses Overview</p>
+            <div class="rounded-lg h-40 bg-muted flex items-center justify-center text-muted-foreground">
+              Bar Chart Placeholder
             </div>
           </CardContent>
         </Card>
 
         <!-- Budget Allocation -->
-        <Card class="rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition">
+        <Card>
           <CardHeader>
-            <CardTitle class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-              <PieChart class="w-5 h-5 text-blue-500 dark:text-blue-400" /> Budget Allocation
+            <CardTitle class="flex items-center gap-2">
+              <PieChart class="w-5 h-5 text-primary" /> Budget Allocation
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Budget Utilization</p>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
-              <div
-                class="bg-blue-600 dark:bg-blue-500 h-4 rounded-full shadow-sm transition-all"
-                :style="{ width: budgetProgress + '%' }"
-              ></div>
-            </div>
-            <p class="text-sm mt-2 font-medium text-gray-900 dark:text-gray-200">
+            <p class="text-sm text-muted-foreground mb-2">Budget Utilization</p>
+            <Progress :model-value="budgetProgress" class="h-4" />
+            <p class="text-sm mt-2 font-medium text-foreground">
               {{ budgetProgress }}% used
             </p>
           </CardContent>
@@ -170,43 +130,26 @@ const barOptions: ChartOptions<'bar'> = {
       </div>
 
       <!-- Date Range Selector -->
-      <Card class="rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+      <Card>
         <CardHeader>
-          <CardTitle class="text-gray-900 dark:text-gray-100">Custom Date Range</CardTitle>
+          <CardTitle>Custom Date Range</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="flex flex-wrap items-end gap-4">
             <!-- Start Date -->
-            <div class="flex flex-col">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Start Date</label>
-              <input
-                type="date"
-                v-model="dateRange.start"
-                class="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600
-                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                       focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+            <div class="flex flex-col space-y-1">
+              <Label for="start">Start Date</Label>
+              <Input id="start" type="date" v-model="dateRange.start" />
             </div>
 
             <!-- End Date -->
-            <div class="flex flex-col">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">End Date</label>
-              <input
-                type="date"
-                v-model="dateRange.end"
-                class="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600
-                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                       focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+            <div class="flex flex-col space-y-1">
+              <Label for="end">End Date</Label>
+              <Input id="end" type="date" v-model="dateRange.end" />
             </div>
 
             <!-- Apply Button -->
-            <button
-              class="bg-blue-600 text-white px-5 py-2 rounded-xl shadow-sm
-                     hover:bg-blue-700 dark:hover:bg-blue-500 transition focus:ring-2 focus:ring-blue-400"
-            >
-              Apply
-            </button>
+            <Button>Apply</Button>
           </div>
         </CardContent>
       </Card>
