@@ -232,6 +232,11 @@ const scrollToBottom = () => {
 const sendMessage = () => {
   if (!form.message.trim() || form.processing) return;
 
+  // 🔹 Reset textarea height immediately
+  if (messageInput.value) {
+    messageInput.value.style.height = 'auto';
+  }
+
   // Show typing indicator
   isTyping.value = true;
 
