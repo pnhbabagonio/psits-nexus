@@ -7,8 +7,8 @@
 
                 <!-- Export Buttons -->
                 <div class="flex space-x-2">
-                    <button class="rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Export CSV</button>
-                    <button class="rounded-xl bg-green-600 px-4 py-2 text-white hover:bg-green-700">Export PDF</button>
+                    <a href="/transactions/export/csv" class="rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Export CSV</a>
+                    <a href="/transactions/export/pdf" class="rounded-xl bg-green-600 px-4 py-2 text-white hover:bg-green-700">Export PDF</a>
                 </div>
             </div>
 
@@ -48,6 +48,7 @@
                             <th class="px-6 py-3">Description</th>
                             <th class="px-6 py-3">Amount</th>
                             <th class="px-6 py-3">Status</th>
+                            <th class="px-6 py-3">Receipt</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -67,17 +68,28 @@
                                         tx.status === 'Completed'
                                             ? 'bg-green-500 text-white'
                                             : tx.status === 'Pending'
-                                              ? 'bg-yellow-500 text-white'
-                                              : 'bg-red-500 text-white',
+                                            ? 'bg-yellow-500 text-white'
+                                            : 'bg-red-500 text-white',
                                     ]"
                                 >
                                     {{ tx.status }}
                                 </span>
                             </td>
+                            <td class="px-6 py-3">
+                            <a
+                                 v-if="tx.status === 'Completed'"
+                                   :href="`/transactions/${tx.id}/receipt`"
+                                   class="text-blue-600 hover:underline"
+                                   download
+                               >
+    Download Receipt
+</a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
             <!-- Pagination -->
             <div class="mt-6 flex items-center justify-between text-sm text-gray-600">
                 <p>Showing {{ filteredTransactions.length }} of {{ transactions.length }} transactions</p>
@@ -94,12 +106,9 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { computed, ref } from 'vue';
 
-// 👇 get transactions from Laravel
-const props = defineProps<{
-    transactions: Array<any>
-}>();
+const props = defineProps<{ transactions: Array<any> }>();
 
-const transactions = ref(props.transactions ?? []);
+const transactions = ref(props.transactions);
 
 const searchQuery = ref('');
 const filterType = ref('');
@@ -118,5 +127,3 @@ const filteredTransactions = computed(() => {
     });
 });
 </script>
-
-

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('description');
             $table->decimal('amount', 10, 2);
             $table->enum('status', ['Pending', 'Completed', 'Failed'])->default('Pending');
+            $table->string('receipt_path')->nullable();
             $table->timestamps();
         });
     }
