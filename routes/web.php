@@ -30,6 +30,10 @@ Route::get('expenses-tracking', function () {
     return Inertia::render('ExpenseTracking');
 })->middleware(['auth', 'verified'])->name('expenses-tracking');
 
+Route::get('/payments/qr-generator', function () {
+    return Inertia::render('Payments/QrGenerator');
+})->name('payments.qr-generator');
+
 // User management routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('user-management', [UserController::class, 'index'])->name('user-management');

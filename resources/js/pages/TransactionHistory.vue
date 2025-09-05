@@ -94,28 +94,29 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { computed, ref } from 'vue';
 
+// 👇 get transactions from Laravel
+const props = defineProps<{
+    transactions: Array<any>
+}>();
+
+const transactions = ref(props.transactions ?? []);
+
 const searchQuery = ref('');
 const filterType = ref('');
 const filterDate = ref('');
 
-// Sample Data
-const transactions = ref([
-    { date: '2025-08-01', type: 'payment', description: 'Membership Fee', amount: 500, status: 'Completed' },
-    { date: '2025-08-05', type: 'expense', description: 'Event Supplies', amount: 1200, status: 'Completed' },
-    { date: '2025-08-08', type: 'payment', description: 'Donation', amount: 800, status: 'Pending' },
-    { date: '2025-08-12', type: 'membership', description: 'New Member', amount: 450, status: 'Completed' },
-]);
-
-// Filtering Logic
 const filteredTransactions = computed(() => {
     return transactions.value.filter((tx) => {
         const matchesSearch =
-            tx.description.toLowerCase().includes(searchQuery.value.toLowerCase()) || tx.type.toLowerCase().includes(searchQuery.value.toLowerCase());
+            tx.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+            tx.type.toLowerCase().includes(searchQuery.value.toLowerCase());
 
         const matchesType = filterType.value ? tx.type === filterType.value : true;
-        const matchesDate = filterDate.value ? tx.date === filterDate.value : true;
+        const matchesDate = filterDate.value ? tx.date.startsWith(filterDate.value) : true;
 
         return matchesSearch && matchesType && matchesDate;
     });
 });
 </script>
+
+
