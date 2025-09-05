@@ -3,8 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\ChatController;
 use Inertia\Inertia;
-use App\Http\Controllers\HelpSupportController; // ← Add this import
+
 
 
 
@@ -45,12 +46,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('event-analysis', [EventController::class, 'analysis'])->name('events.analysis');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/help-support', [HelpSupportController::class, 'index'])
-        ->name('help-support.index');
 
-    Route::post('/help-support', [HelpSupportController::class, 'store'])
-        ->name('help-support.store');
+Route::middleware('auth')->group(function () {
+    Route::get('/help-support', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/help-support', [ChatController::class, 'store'])->name('chat.store');
+    Route::delete('/help-support/clear', [ChatController::class, 'clear'])->name('chat.clear');
 });
 
 
