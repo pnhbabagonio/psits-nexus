@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -14,7 +16,7 @@ class DashboardController extends Controller
         // Get real user/member data
         $totalMembers = User::count();
         $activeMembers = User::active()->count();
-        
+
         // Mock data for now - you can replace these with real models later
         $financialSummary = [
             'totalBalance' => 125750.5, // Replace with real financial data
@@ -72,6 +74,10 @@ class DashboardController extends Controller
             'announcements' => $announcements,
             'notificationCount' => 3, // Calculate real notifications
         ]);
+        $recentTransactions = Transaction::where('user_id', Auth::id())
+            ->latest()
+            ->take(5)
+            ->get();
     }
 
     /**
@@ -83,7 +89,7 @@ class DashboardController extends Controller
         if ($totalUsers === 0) return 0;
 
         $recentlyActiveUsers = User::where('last_login', '>=', Carbon::now()->subDays(30))->count();
-        
+
         return round(($recentlyActiveUsers / $totalUsers) * 100, 1);
     }
 

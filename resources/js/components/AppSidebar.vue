@@ -96,7 +96,7 @@ const footerNavItems: NavItem[] = [
     },
     {
         title: 'Platform Guide',
-        href: '/guide',
+        href: '/platform-guide',
         icon: BookOpen,
     },
 ];

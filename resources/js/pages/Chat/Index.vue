@@ -1,5 +1,5 @@
 <template>
-  <AppLayout>
+<AppLayout :breadcrumbs="breadcrumbs">
     <Head title="Chat Support" />
 
     <div class="h-screen flex flex-col p-4 sm:p-6">
@@ -170,18 +170,28 @@
   </AppLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import InputError from '@/components/InputError.vue';
 import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import type { BreadcrumbItem } from '@/types';
 
-const props = defineProps({
-  messages: {
-    type: Array,
-    default: () => [],
-  },
-});
+interface ChatMessage {
+  id: number | string;
+  sender: 'user' | 'bot';
+  message: string;
+  created_at: string;
+}
+
+const breadcrumbs: BreadcrumbItem[] = [
+  { title: 'Dashboard', href: '/dashboard' },
+  { title: 'Chat Support', href: '/chat' },
+];
+
+const props = defineProps<{
+  messages: ChatMessage[];
+}>();
 
 const form = useForm({
   message: '',
@@ -189,12 +199,12 @@ const form = useForm({
 
 const showStatus = ref(true);
 const isTyping = ref(false);
-const messagesContainer = ref(null);
-const messageInput = ref(null);
+const messagesContainer = ref<HTMLElement | null>(null);
+const messageInput = ref<HTMLTextAreaElement | null>(null);
 const shouldAutoScroll = ref(true);
 
 // Handle enter key in textarea
-const handleEnterKey = (event) => {
+const handleEnterKey = (event: KeyboardEvent) => {
   if (!event.shiftKey) {
     event.preventDefault();
     sendMessage();
@@ -210,7 +220,7 @@ const adjustTextareaHeight = () => {
   }
 };
 
-// Handle scroll to detect if user is at bottom
+// Scroll detection
 const handleScroll = () => {
   const container = messagesContainer.value;
   if (container) {
@@ -219,7 +229,7 @@ const handleScroll = () => {
   }
 };
 
-// Scroll to bottom of messages
+// Scroll to bottom
 const scrollToBottom = () => {
   nextTick(() => {
     if (messagesContainer.value && shouldAutoScroll.value) {
@@ -232,36 +242,31 @@ const scrollToBottom = () => {
 const sendMessage = () => {
   if (!form.message.trim() || form.processing) return;
 
-  // 🔹 Reset textarea height immediately
-  if (messageInput.value) {
-    messageInput.value.style.height = 'auto';
-  }
+  if (messageInput.value) messageInput.value.style.height = 'auto';
 
-  // Show typing indicator
   isTyping.value = true;
 
   form.post(route('chat.store'), {
     onFinish: () => {
       form.reset();
-      form.message = ''; // 🔥 force clear input
+      form.message = '';
       isTyping.value = false;
       scrollToBottom();
 
-      // Reset textarea height
       nextTick(() => {
         if (messageInput.value) {
           messageInput.value.style.height = 'auto';
-          messageInput.value.focus(); // 👈 keep focus here
+          messageInput.value.focus();
         }
       });
     },
     onError: () => {
       isTyping.value = false;
-    }
+    },
   });
 };
 
-// Clear chat history
+// Clear chat
 const clearChat = () => {
   if (props.messages.length === 0) return;
 
@@ -270,26 +275,23 @@ const clearChat = () => {
   }
 };
 
-// Format time for display
-const formatTime = (dateString) => {
+// Format time
+const formatTime = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   });
 };
 
-// Auto-scroll on mount and when messages change
+// On mount
 onMounted(() => {
   scrollToBottom();
-  if (messageInput.value) {
-    messageInput.value.focus();
-  }
+  if (messageInput.value) messageInput.value.focus();
 });
 
-// Hide status message after 5 seconds
-let statusTimeout = null;
+let statusTimeout: number | null = null;
 if (showStatus.value) {
   statusTimeout = setTimeout(() => {
     showStatus.value = false;
@@ -297,11 +299,10 @@ if (showStatus.value) {
 }
 
 onBeforeUnmount(() => {
-  if (statusTimeout) {
-    clearTimeout(statusTimeout);
-  }
+  if (statusTimeout) clearTimeout(statusTimeout);
 });
 </script>
+
 
 <style scoped>
 /* Custom scrollbar for messages */
