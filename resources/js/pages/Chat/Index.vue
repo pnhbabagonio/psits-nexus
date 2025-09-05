@@ -261,9 +261,7 @@ const clearChat = () => {
   if (props.messages.length === 0) return;
 
   if (confirm('Are you sure you want to clear your chat history? This action cannot be undone.')) {
-    form.post(route('chat.clear'), {
-      method: 'delete',
-    });
+    form.delete(route('chat.clear'));
   }
 };
 
