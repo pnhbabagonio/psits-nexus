@@ -96,7 +96,7 @@ const footerNavItems: NavItem[] = [
     },
     {
         title: 'Platform Guide',
-        href: '/guide',
+        href: route('platform-guide'), // ✅ gi-fix ni diri
         icon: BookOpen,
     },
 ];
