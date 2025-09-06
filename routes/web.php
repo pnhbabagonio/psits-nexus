@@ -62,6 +62,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
 });
 
+// Payment Management Page
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/payment', function () {
+        return Inertia::render('Payment'); // matches resources/js/Pages/Payment.vue
+    })->name('payment.index');
+
+    Route::get('/records', function () {
+        return Inertia::render('Records'); 
+    })->name('records.index');
+
+    Route::get('/profiles', function () {
+        return Inertia::render('Profiles'); 
+    })->name('profiles.index');
+});
+
+
 // Platform Guide page
 Route::get('platform-guide', function () {
     return Inertia::render('PlatformGuide'); 

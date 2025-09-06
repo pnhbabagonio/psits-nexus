@@ -30,6 +30,7 @@ import {
     PiggyBank,
     User,
     Users,
+    Banknote,
 } from 'lucide-vue-next';
 
 const mainNavItems: NavItem[] = [
@@ -37,6 +38,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Payment',
+        href: '/payment',
+        icon: Banknote,
     },
     {
         title: 'Reports',
