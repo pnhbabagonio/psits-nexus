@@ -26,6 +26,13 @@
           <option value="Penalties">Penalties</option>
         </select>
 
+        <!-- Admin-only filter by user -->
+        <select v-if="isAdmin" v-model="filterUser"
+          class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200">
+          <option value="">All Owners</option>
+          <option v-for="user in uniqueOwners" :key="user" :value="user">{{ user }}</option>
+        </select>
+
         <input type="date" v-model="filterDate"
           class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200" />
       </div>
@@ -40,11 +47,12 @@
               <th class="px-6 py-3">Description</th>
               <th class="px-6 py-3">Amount</th>
               <th class="px-6 py-3">Status</th>
+              <th v-if="isAdmin" class="px-6 py-3">Owner</th>
               <th class="px-6 py-3">Receipt</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(tx, index) in filteredTransactions" :key="tx.id"
+            <tr v-for="tx in filteredTransactions" :key="tx.id"
               class="border-b border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700">
               <td class="px-6 py-3 text-gray-700 dark:text-gray-200">{{ tx.date }}</td>
               <td class="px-6 py-3 text-gray-700 capitalize dark:text-gray-200">{{ tx.type }}</td>
@@ -57,27 +65,18 @@
                     ? 'bg-green-500 text-white'
                     : tx.status === 'Pending'
                       ? 'bg-yellow-500 text-white'
-                      : 'bg-red-500 text-white',
+                      : 'bg-red-500 text-white'
                 ]">
                   {{ tx.status }}
                 </span>
               </td>
+              <td v-if="isAdmin" class="px-6 py-3 text-gray-700 dark:text-gray-200">{{ tx.owner }}</td>
               <td class="px-6 py-3">
-                <div class="flex space-x-2">
-                  <!-- View button -->
-                  <button v-if="tx.status === 'Completed'" @click="viewReceipt(tx.id)"
-                    class="text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 text-sm">
-                    View
-                  </button>
-
-                  <!-- Download button -->
-                  <a v-if="tx.status === 'Completed'" :href="`/transactions/${tx.id}/receipt`"
-                    class="text-white bg-green-600 px-3 py-1 rounded hover:bg-green-700 text-sm" download>
-                    Download
-                  </a>
-                </div>
+                <button v-if="tx.status === 'Completed'" @click="viewReceipt(tx.id)"
+                  class="text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 text-sm">
+                  View / Download
+                </button>
               </td>
-
             </tr>
           </tbody>
         </table>
@@ -107,15 +106,20 @@ interface Transaction {
   description: string;
   amount: number;
   status: 'Completed' | 'Pending' | 'Failed';
-  receipt?: string;
+  owner?: string;
+  recorder?: string;
 }
 
-const props = defineProps<{ transactions: Transaction[] }>();
+const props = defineProps<{ transactions: Transaction[], is_admin: boolean }>();
 const transactions = ref<Transaction[]>(props.transactions);
 
 const searchQuery = ref('');
 const filterType = ref('');
 const filterDate = ref('');
+const filterUser = ref('');
+
+// Admin check
+const isAdmin = ref(props.is_admin);
 
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
@@ -128,14 +132,20 @@ const viewReceipt = (id: number | string) => {
   window.open(`/transactions/${id}/receipt`, '_blank');
 };
 
+// Unique owners for admin filter
+const uniqueOwners = computed(() => {
+  const owners = transactions.value.map(tx => tx.owner).filter(Boolean);
+  return [...new Set(owners)];
+});
 
-// Computed filtered transactions   
+// Computed filtered transactions
 const filteredTransactions = computed(() => {
-  return transactions.value.filter((tx) => {
+  return transactions.value.filter(tx => {
     const matchesSearch = tx.description.toLowerCase().includes(searchQuery.value.toLowerCase());
     const matchesType = filterType.value ? tx.type === filterType.value : true;
     const matchesDate = filterDate.value ? tx.date.startsWith(filterDate.value) : true;
-    return matchesSearch && matchesType && matchesDate;
+    const matchesUser = filterUser.value ? tx.owner === filterUser.value : true;
+    return matchesSearch && matchesType && matchesDate && matchesUser;
   });
 });
 </script>

@@ -65,6 +65,7 @@
             <p><strong>Category:</strong> {{ ucfirst($transaction->type) }}</p>
             <p><strong>Description:</strong> {{ $transaction->description }}</p>
             <p><strong>Status:</strong> {{ ucfirst($transaction->status) }}</p>
+            <p><strong>Owner:</strong> {{ $transaction->user->name ?? 'Unknown' }}</p>
         </div>
 
         <table>
