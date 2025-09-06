@@ -56,6 +56,7 @@ class TransactionController extends Controller
         return $pdf->download('transactions.pdf');
     }
 
+
     // ✅ Secure receipt download
     public function receipt($id)
     {
@@ -67,7 +68,7 @@ class TransactionController extends Controller
         }
 
         $pdf = Pdf::loadView('transactions.receipt', compact('transaction'));
-        // Fixed the filename: removed trailing dot, added .pdf extension
-        return $pdf->download("receipt-{$transaction->id}.pdf");
+        // Stream PDF to browser instead of forcing download
+        return $pdf->stream("receipt-{$transaction->id}.pdf");
     }
 }
