@@ -5,7 +5,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AttendeeController;
 use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\DashboardController; // Add this import
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HelpSupportController; 
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -60,6 +61,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
     Route::get('/analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
+});
+
+// Help & Support routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('help-support', [HelpSupportController::class, 'index'])->name('help-support');
+    Route::post('help-support', [HelpSupportController::class, 'store'])->name('help-support.store');
 });
 
 // Platform Guide page
