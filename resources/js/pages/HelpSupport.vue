@@ -7,25 +7,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import {
     Search,
-    Clock,
-    AlertCircle,
-    CheckCircle2,
-    XCircle,
     MessageSquare,
     Calendar,
-    Tag,
-    RefreshCw,
     Send,
     HelpCircle,
     Bug,
     CreditCard,
     Settings,
     Lightbulb,
-    FileText
+    FileText,
+    CheckCircle,
+    X
 } from 'lucide-vue-next';
 
 // Define types
@@ -41,48 +37,22 @@ interface SupportTicket {
 }
 
 interface Props {
-    userTickets: SupportTicket[];
+    userTickets?: SupportTicket[];
 }
 
-// Sample data for development
-const props = withDefaults(defineProps<Props>(), {
-    userTickets: () => [
-        {
-            id: 1,
-            subject: "QR Code Scanner Not Working",
-            message: "The QR code scanner is not functioning properly on mobile devices...",
-            category: "technical",
-            priority: "high",
-            status: "open",
-            created_at: "2024-01-15T10:30:00Z",
-            updated_at: "2024-01-15T10:30:00Z"
-        },
-        {
-            id: 2,
-            subject: "Billing Discrepancy",
-            message: "I noticed an incorrect charge on my membership fee...",
-            category: "billing",
-            priority: "medium",
-            status: "in_progress",
-            created_at: "2024-01-14T14:20:00Z",
-            updated_at: "2024-01-15T09:15:00Z"
-        },
-        {
-            id: 3,
-            subject: "Feature Request: Dark Mode",
-            message: "Would love to have a dark mode option for the dashboard...",
-            category: "feature_request",
-            priority: "low",
-            status: "resolved",
-            created_at: "2024-01-13T16:45:00Z",
-            updated_at: "2024-01-14T11:30:00Z"
-        }
-    ]
+// Get props from Laravel
+const props = defineProps<Props>();
+
+// Get flash messages - fix TypeScript error
+const page = usePage();
+const flashMessage = computed(() => {
+    const flash = page.props.flash as any;
+    return flash?.message;
 });
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Support', href: '/support' }
+    { title: 'Support', href: '/help-support' }
 ];
 
 // Form state
@@ -95,9 +65,11 @@ const form = useForm({
 
 // Reactive state
 const searchQuery = ref('');
+const showSuccessMessage = ref(false);
 
 // Computed properties
 const filteredTickets = computed(() => {
+    if (!props.userTickets) return [];
     if (!searchQuery.value) return props.userTickets;
     
     return props.userTickets.filter(ticket => 
@@ -165,16 +137,6 @@ const getCategoryInfo = (category: string) => {
     return categoryOptions.find(option => option.value === category) || categoryOptions[4];
 };
 
-const getStatusIcon = (status: string) => {
-    switch (status) {
-        case 'open': return AlertCircle;
-        case 'in_progress': return RefreshCw;
-        case 'resolved': return CheckCircle2;
-        case 'closed': return XCircle;
-        default: return Clock;
-    }
-};
-
 const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -186,11 +148,22 @@ const formatDate = (dateString: string) => {
 };
 
 const handleSubmit = () => {
-    form.post('/support/tickets', {
+    form.post('/help-support', {
         onSuccess: () => {
             form.reset();
+            showSuccessMessage.value = true;
+            setTimeout(() => {
+                showSuccessMessage.value = false;
+            }, 5000);
+        },
+        onError: () => {
+            // Errors are automatically handled by the form validation
         }
     });
+};
+
+const hideSuccessMessage = () => {
+    showSuccessMessage.value = false;
 };
 </script>
 
@@ -199,6 +172,28 @@ const handleSubmit = () => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
+            <!-- Success Message -->
+            <div 
+                v-if="showSuccessMessage || flashMessage" 
+                class="rounded-md bg-green-50 p-4 border border-green-200 relative"
+            >
+                <div class="flex items-start gap-3">
+                    <CheckCircle class="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div class="flex-1">
+                        <p class="text-sm text-green-700 font-medium">Success!</p>
+                        <p class="text-sm text-green-700 mt-1">
+                            {{ flashMessage || 'Your support ticket has been submitted successfully!' }}
+                        </p>
+                    </div>
+                    <button 
+                        @click="hideSuccessMessage"
+                        class="text-green-600 hover:text-green-800 p-1"
+                    >
+                        <X class="h-4 w-4" />
+                    </button>
+                </div>
+            </div>
+
             <!-- Header Section -->
             <div class="text-center">
                 <h1 class="text-3xl font-bold text-foreground">Need Help?</h1>
@@ -222,7 +217,7 @@ const handleSubmit = () => {
                                     v-model="form.subject" 
                                     placeholder="Brief description of your issue"
                                     required
-                                    :class="{ 'border-red-500': form.errors.subject }"
+                                    :class="{ 'border-red-500 focus:border-red-500': form.errors.subject }"
                                 />
                                 <p v-if="form.errors.subject" class="text-red-500 text-sm mt-1">
                                     {{ form.errors.subject }}
@@ -232,7 +227,7 @@ const handleSubmit = () => {
                             <div>
                                 <label class="text-sm font-medium mb-2 block">Category *</label>
                                 <Select v-model="form.category" required>
-                                    <SelectTrigger :class="{ 'border-red-500': form.errors.category }">
+                                    <SelectTrigger :class="{ 'border-red-500 focus:border-red-500': form.errors.category }">
                                         <SelectValue placeholder="Select category" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -299,7 +294,7 @@ const handleSubmit = () => {
                                     placeholder="Please describe your issue in detail. Include any error messages, steps to reproduce the problem, or screenshots if applicable."
                                     rows="6"
                                     required
-                                    :class="{ 'border-red-500': form.errors.message }"
+                                    :class="{ 'border-red-500 focus:border-red-500': form.errors.message }"
                                 />
                                 <p v-if="form.errors.message" class="text-red-500 text-sm mt-1">
                                     {{ form.errors.message }}
@@ -327,7 +322,7 @@ const handleSubmit = () => {
                     <CardHeader>
                         <CardTitle class="flex items-center gap-2">
                             <FileText class="h-5 w-5" />
-                            My Support Tickets
+                            My Support Tickets ({{ props.userTickets?.length || 0 }})
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -346,7 +341,7 @@ const handleSubmit = () => {
                             <div
                                 v-for="ticket in filteredTickets"
                                 :key="ticket.id"
-                                class="rounded-lg border border-border bg-muted/30 p-3 transition-all hover:bg-muted/50"
+                                class="rounded-lg border border-border bg-muted/30 p-3 transition-all hover:bg-muted/50 cursor-pointer"
                             >
                                 <div class="space-y-2">
                                     <!-- Header -->
@@ -386,7 +381,10 @@ const handleSubmit = () => {
                         <div v-if="filteredTickets.length === 0" class="py-8 text-center">
                             <MessageSquare class="mx-auto h-8 w-8 text-muted-foreground/50" />
                             <p class="mt-2 text-sm text-muted-foreground">
-                                {{ userTickets.length === 0 ? 'No support tickets yet' : 'No tickets match your search' }}
+                                {{ (!props.userTickets || props.userTickets.length === 0) ? 'No support tickets yet' : 'No tickets match your search' }}
+                            </p>
+                            <p v-if="!props.userTickets || props.userTickets.length === 0" class="text-xs text-muted-foreground mt-1">
+                                Submit your first ticket using the form on the left
                             </p>
                         </div>
                     </CardContent>

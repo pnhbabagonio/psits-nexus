@@ -11,7 +11,7 @@ class HelpSupportController extends Controller
 {
     public function index()
     {
-        $tickets = SupportTicket::where('user_id', Auth::id())
+        $userTickets = SupportTicket::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($ticket) {
@@ -28,7 +28,7 @@ class HelpSupportController extends Controller
             });
 
         return Inertia::render('HelpSupport', [
-            'tickets' => $tickets,
+            'userTickets' => $userTickets,
         ]);
     }
 
