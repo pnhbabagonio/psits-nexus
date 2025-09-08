@@ -51,11 +51,7 @@ defineProps<{
                 :href="route('home')"
                 class="group relative z-20 flex items-center text-xl font-semibold transition-all duration-300 hover:scale-105"
             >
-                <div
-                    class="mr-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 shadow-2xl shadow-blue-500/25 transition-all duration-300 group-hover:shadow-blue-500/40"
-                >
-                    <AppLogoIcon class="h-7 w-7 fill-current text-white" />
-                </div>
+                    <AppLogoIcon class="h-15 w-15 fill-current text-white" />
                 <span class="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                     {{ name }}
                 </span>
@@ -66,7 +62,7 @@ defineProps<{
                 <!-- Hero Section -->
                 <div class="mb-12 space-y-6">
                     <h2 class="text-4xl leading-tight font-bold tracking-tight">
-                        <span class="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent"> Welcome to PSITS Nexus </span>
+                        <span class="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent"> Welcome to Philippine Society of Information Technology  </span>
                     </h2>
                     <p class="text-lg leading-relaxed font-light text-blue-100/80">
                         Experience an easier way to access payment records, monitor finances, and stay up to date on society events and announcements.
