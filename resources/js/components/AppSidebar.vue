@@ -19,6 +19,8 @@ import { Link } from '@inertiajs/vue3';
 import {
     BarChart3,
     BookOpen,
+    Bot,
+    BotMessageSquare,
     Calendar,
     ChevronRight,
     Clipboard,
@@ -47,6 +49,11 @@ const mainNavItems: NavItem[] = [
         title: 'Help & Support',
         href: '/help-support',
         icon: HelpCircle,
+    },
+    {
+        title: 'ChatBot',
+        href: '/ChatBot',
+        icon: BotMessageSquare,
     },
 ];
 
@@ -109,7 +116,7 @@ const footerNavItems: NavItem[] = [
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
                         <Link :href="route('dashboard')">
-                            <AppLogo />
+                        <AppLogo />
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -121,8 +128,8 @@ const footerNavItems: NavItem[] = [
                 <SidebarMenuItem>
                     <SidebarMenuButton as-child>
                         <Link :href="mainNavItems[0].href">
-                            <component :is="mainNavItems[0].icon" />
-                            <span>{{ mainNavItems[0].title }}</span>
+                        <component :is="mainNavItems[0].icon" />
+                        <span>{{ mainNavItems[0].title }}</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -131,8 +138,8 @@ const footerNavItems: NavItem[] = [
                 <SidebarMenuItem>
                     <SidebarMenuButton as-child>
                         <Link :href="route('user-management')">
-                            <User />
-                            <span>User Management</span>
+                        <User />
+                        <span>User Management</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -144,7 +151,8 @@ const footerNavItems: NavItem[] = [
                             <SidebarMenuButton>
                                 <CreditCard />
                                 <span>Financial Management</span>
-                                <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                <ChevronRight
+                                    class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                             </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
@@ -152,8 +160,8 @@ const footerNavItems: NavItem[] = [
                                 <SidebarMenuSubItem v-for="subItem in financialManagementItems" :key="subItem.title">
                                     <SidebarMenuButton as-child size="sm">
                                         <Link :href="subItem.href">
-                                            <component :is="subItem.icon" />
-                                            <span>{{ subItem.title }}</span>
+                                        <component :is="subItem.icon" />
+                                        <span>{{ subItem.title }}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuSubItem>
@@ -169,7 +177,8 @@ const footerNavItems: NavItem[] = [
                             <SidebarMenuButton>
                                 <Calendar />
                                 <span>Event Management</span>
-                                <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                <ChevronRight
+                                    class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                             </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
@@ -177,8 +186,8 @@ const footerNavItems: NavItem[] = [
                                 <SidebarMenuSubItem v-for="subItem in eventManagementItems" :key="subItem.title">
                                     <SidebarMenuButton as-child size="sm">
                                         <Link :href="subItem.href">
-                                            <component :is="subItem.icon" />
-                                            <span>{{ subItem.title }}</span>
+                                        <component :is="subItem.icon" />
+                                        <span>{{ subItem.title }}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuSubItem>
@@ -191,8 +200,8 @@ const footerNavItems: NavItem[] = [
                 <SidebarMenuItem v-for="item in mainNavItems.slice(1)" :key="item.title">
                     <SidebarMenuButton as-child>
                         <Link :href="item.href">
-                            <component :is="item.icon" />
-                            <span>{{ item.title }}</span>
+                        <component :is="item.icon" />
+                        <span>{{ item.title }}</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
