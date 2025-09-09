@@ -20,13 +20,6 @@ const newMessage = ref('')
 const isTyping = ref(false)
 const messagesContainer = ref<InstanceType<typeof ScrollArea> | null>(null)
 
-/* -------------------- Categories -------------------- */
-const categories = [
-  { id: 1, label: 'Password Recovery' },
-  { id: 2, label: 'Signup Problem' },
-  { id: 3, label: 'Account Setup' },
-] as const
-
 /* -------------------- Helpers -------------------- */
 const formatTime = (date: Date) =>
   new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })

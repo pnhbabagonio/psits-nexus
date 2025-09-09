@@ -19,7 +19,6 @@ import { Link } from '@inertiajs/vue3';
 import {
     BarChart3,
     BookOpen,
-    Bot,
     BotMessageSquare,
     Calendar,
     ChevronRight,
