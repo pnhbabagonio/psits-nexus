@@ -224,77 +224,77 @@ watch([searchQuery, filters], () => {
 
     <!-- Search + Filter (Dropdown) -->
     <div class="flex items-center gap-4 mb-4">
-      <!-- Search Input -->
-      <div class="flex-1">
-        <input 
-          v-model="searchQuery"
-          type="text" 
-          placeholder="Search by name, student ID, or email..." 
-          class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2"
-        />
-      </div>
+        <!-- Search Input -->
+        <div class="flex-1">
+            <input 
+            v-model="searchQuery"
+            type="text" 
+            placeholder="Search by name, student ID, or email..." 
+            class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2"
+            />
+        </div>
 
-    <div class="relative" ref="filterDropdown">
-      <button 
-        @click="isFilterOpen = !isFilterOpen"
-        class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
-      >
-        <span>Filter</span>
-        <ChevronDown 
-          class="w-4 h-4 transition-transform" 
-          :class="{ 'rotate-180': isFilterOpen }" 
-        />
-      </button>
+        <div class="relative" ref="filterDropdown">
+        <button 
+            @click="isFilterOpen = !isFilterOpen"
+            class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+        >
+            <span>Filter</span>
+            <ChevronDown 
+            class="w-4 h-4 transition-transform" 
+            :class="{ 'rotate-180': isFilterOpen }" 
+            />
+        </button>
 
-    <!-- Dropdown content -->
-    <div 
-      v-if="isFilterOpen" 
-      class="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-4 z-[9999] space-y-3"
-    >
-      <select v-model="filters.program" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
-        <option value="">All Programs</option>
-        <option value="Library and Information Science">Library and Information Science</option>
-        <option value="Computer Science">Computer Science</option>
-        <option value="Information System">Information System</option>
-      </select>
+        <!-- Dropdown content -->
+        <div 
+        v-if="isFilterOpen" 
+        class="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-4 z-[9999] space-y-3"
+        >
+        <select v-model="filters.program" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
+            <option value="">All Programs</option>
+            <option value="Library and Information Science">Library and Information Science</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Information System">Information System</option>
+        </select>
 
-      <select v-model="filters.year" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
-        <option value="">All Years</option>
-        <option value="1st Year">1st Year</option>
-        <option value="2nd Year">2nd Year</option>
-        <option value="3rd Year">3rd Year</option>
-        <option value="4th Year">4th Year</option>
-        <option value="5th Year">5th Year</option>
-      </select>
+        <select v-model="filters.year" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
+            <option value="">All Years</option>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+            <option value="4th Year">4th Year</option>
+            <option value="5th Year">5th Year</option>
+        </select>
 
-      <select v-model="filters.role" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
-        <option value="">All Roles</option>
-        <option value="Member">Member</option>
-        <option value="Officer">Officer</option>
-      </select>
+        <select v-model="filters.role" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
+            <option value="">All Roles</option>
+            <option value="Member">Member</option>
+            <option value="Officer">Officer</option>
+        </select>
 
-      <select v-model="filters.status" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
-        <option value="">All Status</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
+        <select v-model="filters.status" class="w-full bg-gray-800 text-white border border-gray-700 rounded px-2 py-1 text-sm">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
 
-      <button 
-        @click="
-          filters.program = '';
-          filters.year = '';
-          filters.role = '';
-          filters.status = '';
-          searchQuery = '';
-        "
-        class="w-full px-3 py-1 bg-gray-700 text-sm text-white rounded hover:bg-gray-600 mt-2"
-      >
-        Clear Filters
-      </button>
+        <button 
+            @click="
+            filters.program = '';
+            filters.year = '';
+            filters.role = '';
+            filters.status = '';
+            searchQuery = '';
+            "
+            class="w-full px-3 py-1 bg-gray-700 text-sm text-white rounded hover:bg-gray-600 mt-2"
+        >
+            Clear Filters
+        </button>
+        </div>
     </div>
-  </div>
 
-</div>
+    </div>
 
 
 
