@@ -8,6 +8,8 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HelpSupportController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\TransactionController; // ✅ Added earlier
+use App\Http\Controllers\PaymentController;     // ✅ Add this for payments
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -23,11 +25,6 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 Route::get('dashboard/stats', [DashboardController::class, 'getStats'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard.stats');
-
-Route::get('transactions', function () {
-    return Inertia::render('TransactionHistory');
-    //this should match resources/js/Pages/TransactionHistory.vue
-})->middleware(['auth', 'verified'])->name('transactions');
 
 Route::get('financial-reports', function () {
     return Inertia::render('FinancialReports');
@@ -64,21 +61,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
 });
 
-// Payment Management Page
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/payment', function () {
-        return Inertia::render('Payment'); // matches resources/js/Pages/Payment.vue
-    })->name('payment.index');
+// --------------------
+// Payments Module
+// --------------------
+Route::middleware(['auth', 'verified'])->prefix('payments')->name('payments.')->group(function () {
+    Route::get('/qr-generator', function () {
+        return Inertia::render('QrGenerator');
+    })->name('qr-generator');
 
-    Route::get('/records', function () {
-        return Inertia::render('Records'); 
-    })->name('records.index');
+    Route::get('/record', function () {
+        return Inertia::render('RecordPayment');
+    })->name('record');
 
-    Route::get('/profiles', function () {
-        return Inertia::render('Profiles'); 
-    })->name('profiles.index');
+    Route::post('/record', [PaymentController::class, 'record'])->name('record.store');
 });
 
+// ✅ Transactions Module
+Route::middleware(['auth', 'verified'])->group(function () {
+    // FIXED: The controller now handles rendering the page AND the data logic.
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+
+    // Transaction Exports
+    Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv'])->name('transactions.export.csv');
+    Route::get('/transactions/export/pdf', [TransactionController::class, 'exportPdf'])->name('transactions.export.pdf');
+
+    // Receipt download
+    Route::get('/transactions/{id}/receipt', [TransactionController::class, 'receipt'])
+        ->name('transactions.receipt');
+});
 
 // Help & Support routes
 Route::middleware(['auth', 'verified'])->group(function () {

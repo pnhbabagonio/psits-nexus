@@ -140,14 +140,14 @@ const quickActions = [
         title: 'Generate QR Code',
         description: 'Create payment QR codes',
         icon: QrCode,
-        href: '/payments/qr-generator',
+        href: '/payments/qr-generator', // ✅ opens QrGenerator.vue
         color: 'bg-blue-500 hover:bg-blue-600',
     },
     {
         title: 'Record Payment',
         description: 'Manual payment entry',
         icon: CreditCard,
-        href: '/payments/record',
+        href: '/payments/record', // ✅ opens RecordPayment.vue
         color: 'bg-green-500 hover:bg-green-600',
     },
     {
@@ -168,6 +168,7 @@ const quickActions = [
 </script>
 
 <template>
+
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -184,10 +185,8 @@ const quickActions = [
                     <div class="relative">
                         <Button variant="outline" size="icon" class="relative">
                             <Bell class="h-4 w-4" />
-                            <Badge
-                                v-if="notificationCount > 0"
-                                class="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 p-0 text-xs hover:bg-red-600"
-                            >
+                            <Badge v-if="notificationCount > 0"
+                                class="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 p-0 text-xs hover:bg-red-600">
                                 {{ notificationCount }}
                             </Badge>
                         </Button>
@@ -202,12 +201,8 @@ const quickActions = [
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-56">
-                            <DropdownMenuItem
-                                v-for="action in quickActions"
-                                :key="action.title"
-                                class="cursor-pointer"
-                                @click="$inertia.visit(action.href)"
-                            >
+                            <DropdownMenuItem v-for="action in quickActions" :key="action.title" class="cursor-pointer"
+                                @click="$inertia.visit(action.href)">
                                 <component :is="action.icon" class="mr-2 h-4 w-4" />
                                 <div>
                                     <div class="font-medium">{{ action.title }}</div>
@@ -237,7 +232,8 @@ const quickActions = [
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-green-100">Membership Fees</p>
-                                <p class="text-2xl font-bold">₱{{ financialSummary.membershipFees.toLocaleString() }}</p>
+                                <p class="text-2xl font-bold">₱{{ financialSummary.membershipFees.toLocaleString() }}
+                                </p>
                             </div>
                             <UserCheck class="h-8 w-8 text-green-200" />
                         </div>
@@ -247,7 +243,8 @@ const quickActions = [
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-orange-100">Monthly Expenses</p>
-                                <p class="text-2xl font-bold">₱{{ financialSummary.monthlyExpenses.toLocaleString() }}</p>
+                                <p class="text-2xl font-bold">₱{{ financialSummary.monthlyExpenses.toLocaleString() }}
+                                </p>
                             </div>
                             <CreditCard class="h-8 w-8 text-orange-200" />
                         </div>
@@ -280,7 +277,8 @@ const quickActions = [
                                     </div>
                                     <span class="text-sm font-medium">Total Scans</span>
                                 </div>
-                                <p class="text-2xl font-bold text-blue-600">{{ qrAnalytics.totalScans.toLocaleString() }}</p>
+                                <p class="text-2xl font-bold text-blue-600">{{ qrAnalytics.totalScans.toLocaleString()
+                                    }}</p>
                             </div>
                             <div class="rounded-lg bg-muted/50 p-4">
                                 <div class="mb-2 flex items-center gap-2">
@@ -290,7 +288,8 @@ const quickActions = [
                                     <span class="text-sm font-medium">Success Rate</span>
                                 </div>
                                 <p class="text-2xl font-bold text-green-600">
-                                    {{ qrAnalytics.totalScans > 0 ? ((qrAnalytics.successfulPayments / qrAnalytics.totalScans) * 100).toFixed(1) : 0 }}%
+                                    {{ qrAnalytics.totalScans > 0 ? ((qrAnalytics.successfulPayments /
+                                        qrAnalytics.totalScans) * 100).toFixed(1) : 0 }}%
                                 </p>
                             </div>
                             <div class="rounded-lg bg-muted/50 p-4">
@@ -300,7 +299,8 @@ const quickActions = [
                                     </div>
                                     <span class="text-sm font-medium">Avg. Payment</span>
                                 </div>
-                                <p class="text-2xl font-bold text-yellow-600">₱{{ qrAnalytics.averagePaymentAmount.toFixed(2) }}</p>
+                                <p class="text-2xl font-bold text-yellow-600">₱{{
+                                    qrAnalytics.averagePaymentAmount.toFixed(2) }}</p>
                             </div>
                             <div class="rounded-lg bg-muted/50 p-4">
                                 <div class="mb-2 flex items-center gap-2">
@@ -324,13 +324,13 @@ const quickActions = [
                             <div class="space-y-2">
                                 <div class="flex justify-between text-sm">
                                     <span>Active Members</span>
-                                    <span class="font-medium">{{ engagementData.activeMembers }}/{{ financialSummary.totalMembers }}</span>
+                                    <span class="font-medium">{{ engagementData.activeMembers }}/{{
+                                        financialSummary.totalMembers }}</span>
                                 </div>
                                 <div class="h-2 w-full rounded-full bg-muted">
-                                    <div
-                                        class="h-2 rounded-full bg-blue-500"
-                                        :style="{ width: financialSummary.totalMembers > 0 ? (engagementData.activeMembers / financialSummary.totalMembers) * 100 + '%' : '0%' }"
-                                    ></div>
+                                    <div class="h-2 rounded-full bg-blue-500"
+                                        :style="{ width: financialSummary.totalMembers > 0 ? (engagementData.activeMembers / financialSummary.totalMembers) * 100 + '%' : '0%' }">
+                                    </div>
                                 </div>
                             </div>
 
@@ -340,7 +340,8 @@ const quickActions = [
                                     <span class="font-medium">{{ engagementData.eventAttendance }}%</span>
                                 </div>
                                 <div class="h-2 w-full rounded-full bg-muted">
-                                    <div class="h-2 rounded-full bg-green-500" :style="{ width: engagementData.eventAttendance + '%' }"></div>
+                                    <div class="h-2 rounded-full bg-green-500"
+                                        :style="{ width: engagementData.eventAttendance + '%' }"></div>
                                 </div>
                             </div>
 
@@ -350,7 +351,8 @@ const quickActions = [
                                     <span class="font-medium">{{ engagementData.paymentCompliance }}%</span>
                                 </div>
                                 <div class="h-2 w-full rounded-full bg-muted">
-                                    <div class="h-2 rounded-full bg-purple-500" :style="{ width: engagementData.paymentCompliance + '%' }"></div>
+                                    <div class="h-2 rounded-full bg-purple-500"
+                                        :style="{ width: engagementData.paymentCompliance + '%' }"></div>
                                 </div>
                             </div>
 
@@ -360,7 +362,8 @@ const quickActions = [
                                     <span class="font-medium">{{ engagementData.platformUsage }}%</span>
                                 </div>
                                 <div class="h-2 w-full rounded-full bg-muted">
-                                    <div class="h-2 rounded-full bg-orange-500" :style="{ width: engagementData.platformUsage + '%' }"></div>
+                                    <div class="h-2 rounded-full bg-orange-500"
+                                        :style="{ width: engagementData.platformUsage + '%' }"></div>
                                 </div>
                             </div>
                         </div>
@@ -379,11 +382,8 @@ const quickActions = [
                             </Button>
                         </div>
                         <div class="space-y-3">
-                            <div
-                                v-for="transaction in recentTransactions"
-                                :key="transaction.id"
-                                class="flex items-center justify-between rounded-lg bg-muted/50 p-3"
-                            >
+                            <div v-for="transaction in recentTransactions" :key="transaction.id"
+                                class="flex items-center justify-between rounded-lg bg-muted/50 p-3">
                                 <div class="flex items-center gap-3">
                                     <div class="rounded-full bg-green-100 p-2 text-green-600">
                                         <QrCode class="h-4 w-4" />
@@ -397,7 +397,8 @@ const quickActions = [
                                         </div>
                                     </div>
                                 </div>
-                                <div class="font-semibold text-green-600">+₱{{ transaction.amount.toLocaleString() }}</div>
+                                <div class="font-semibold text-green-600">+₱{{ transaction.amount.toLocaleString() }}
+                                </div>
                             </div>
                         </div>
                         <!-- Show message when no transactions -->
@@ -416,53 +417,45 @@ const quickActions = [
 
                         <!-- Calendar Header -->
                         <div class="mb-2 grid grid-cols-7 gap-1">
-                            <div
-                                v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
-                                :key="day"
-                                class="p-2 text-center text-xs font-medium text-muted-foreground"
-                            >
+                            <div v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day"
+                                class="p-2 text-center text-xs font-medium text-muted-foreground">
                                 {{ day }}
                             </div>
                         </div>
 
                         <!-- Calendar Grid -->
                         <div class="grid grid-cols-7 gap-1">
-                            <div
-                                v-for="(dayData, index) in calendarDays"
-                                :key="index"
-                                :class="[
-                                    'relative cursor-pointer rounded p-2 text-center text-sm transition-colors',
-                                    dayData.day ? 'hover:bg-muted' : '',
-                                    dayData.isToday ? 'bg-primary font-bold text-primary-foreground' : '',
-                                    dayData.hasEvent ? 'border border-blue-200 bg-blue-50' : '',
-                                ]"
-                            >
+                            <div v-for="(dayData, index) in calendarDays" :key="index" :class="[
+                                'relative cursor-pointer rounded p-2 text-center text-sm transition-colors',
+                                dayData.day ? 'hover:bg-muted' : '',
+                                dayData.isToday ? 'bg-primary font-bold text-primary-foreground' : '',
+                                dayData.hasEvent ? 'border border-blue-200 bg-blue-50' : '',
+                            ]">
                                 <span v-if="dayData.day">{{ dayData.day }}</span>
-                                <div
-                                    v-if="dayData.hasEvent"
-                                    class="absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 transform rounded-full bg-blue-500"
-                                ></div>
+                                <div v-if="dayData.hasEvent"
+                                    class="absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 transform rounded-full bg-blue-500">
+                                </div>
                             </div>
                         </div>
 
                         <!-- Event List -->
                         <div class="mt-4 space-y-2">
                             <h4 class="mb-2 text-sm font-medium">Upcoming Events</h4>
-                            <div v-for="event in calendarEvents" :key="event.date" class="flex items-center gap-2 rounded bg-muted/50 p-2 text-xs">
-                                <div
-                                    :class="[
-                                        'h-2 w-2 rounded-full',
-                                        event.type === 'workshop' ? 'bg-blue-500' : '',
-                                        event.type === 'meeting' ? 'bg-green-500' : '',
-                                        event.type === 'deadline' ? 'bg-red-500' : '',
-                                        event.type === 'event' ? 'bg-purple-500' : '',
-                                    ]"
-                                ></div>
+                            <div v-for="event in calendarEvents" :key="event.date"
+                                class="flex items-center gap-2 rounded bg-muted/50 p-2 text-xs">
+                                <div :class="[
+                                    'h-2 w-2 rounded-full',
+                                    event.type === 'workshop' ? 'bg-blue-500' : '',
+                                    event.type === 'meeting' ? 'bg-green-500' : '',
+                                    event.type === 'deadline' ? 'bg-red-500' : '',
+                                    event.type === 'event' ? 'bg-purple-500' : '',
+                                ]"></div>
                                 <span class="font-medium">{{ event.date }}</span>
                                 <span>{{ event.title }}</span>
                             </div>
                             <!-- Show message when no events -->
-                            <div v-if="calendarEvents.length === 0" class="text-center py-4 text-muted-foreground text-xs">
+                            <div v-if="calendarEvents.length === 0"
+                                class="text-center py-4 text-muted-foreground text-xs">
                                 <Calendar class="h-8 w-8 mx-auto mb-2 opacity-50" />
                                 <p>No upcoming events</p>
                             </div>
@@ -477,20 +470,15 @@ const quickActions = [
                         <Megaphone class="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div class="grid gap-4 md:grid-cols-3">
-                        <div
-                            v-for="announcement in announcements"
-                            :key="announcement.id"
-                            class="cursor-pointer rounded-lg bg-muted/50 p-4 transition-colors hover:bg-muted/70"
-                        >
+                        <div v-for="announcement in announcements" :key="announcement.id"
+                            class="cursor-pointer rounded-lg bg-muted/50 p-4 transition-colors hover:bg-muted/70">
                             <div class="mb-2 flex items-start justify-between">
                                 <h4 class="text-sm font-medium">{{ announcement.title }}</h4>
-                                <Badge
-                                    :class="{
-                                        'bg-red-100 text-red-700': announcement.priority === 'high',
-                                        'bg-yellow-100 text-yellow-700': announcement.priority === 'medium',
-                                        'bg-gray-100 text-gray-700': announcement.priority === 'low',
-                                    }"
-                                >
+                                <Badge :class="{
+                                    'bg-red-100 text-red-700': announcement.priority === 'high',
+                                    'bg-yellow-100 text-yellow-700': announcement.priority === 'medium',
+                                    'bg-gray-100 text-gray-700': announcement.priority === 'low',
+                                }">
                                     {{ announcement.priority }}
                                 </Badge>
                             </div>
