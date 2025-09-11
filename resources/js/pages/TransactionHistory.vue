@@ -1,5 +1,5 @@
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-6">
             <!-- Header -->
             <div class="mb-6 flex items-center justify-between">
@@ -91,6 +91,12 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { computed, ref } from 'vue';
+import { type BreadcrumbItem } from '@/types';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Transaction History', href: '/transactions' }
+];
 
 const props = defineProps<{
     transactions: Array<any>,
