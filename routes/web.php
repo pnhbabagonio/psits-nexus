@@ -67,9 +67,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Payment'); // matches resources/js/Pages/Payment.vue
     })->name('payment.index');
 
-    Route::get('/records', function () {
-        return Inertia::render('Records');
-    })->name('records.index');
+    // Route::get('/records', function () {
+    //     return Inertia::render('Records');
+    // })->name('records.index');
 
     Route::get('/profiles', function () {
         return Inertia::render('Profiles');
@@ -103,6 +103,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Receipt download
     Route::get('/transactions/{id}/receipt', [TransactionController::class, 'receipt'])
         ->name('transactions.receipt');
+});
+
+
+// Reports Page
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/reports', function () {
+        return Inertia::render('Reports'); // matches resources/js/Pages/Reports.vue
+    })->name('reports');
+
+    // API endpoint for reports data
+    Route::get('/reports/stats', [\App\Http\Controllers\ReportController::class, 'index'])
+        ->name('reports.stats');
 });
 
 // Help & Support routes
