@@ -9,7 +9,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB; // ✅ For querying roles
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,15 +20,13 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('auth/Register', [
-            'roles' => DB::table('roles')
-                ->where('role_name', '!=', 'Admin')
-                ->get(['role_id', 'role_name']),
-        ]);
+        return Inertia::render('auth/Register');
     }
 
     /**
      * Handle an incoming registration request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
@@ -38,27 +35,30 @@ class RegisteredUserController extends Controller
             'last_name' => 'required|string|max:100',
             'email' => 'required|string|lowercase|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role_id' => 'required|exists:roles,role_id',
             'student_id' => 'nullable|string|max:50|unique:users,student_id',
             'department' => 'nullable|string|max:100',
             'year_level' => 'nullable|string|max:50',
+            'contact_number' => 'nullable|string|max:20',
         ]);
 
+        // Create the user with all required fields from your database schema
         $user = User::create([
-            'first_name'    => $request->first_name,
-            'last_name'     => $request->last_name,
-            'email'         => $request->email,
-            'student_id'    => $request->student_id,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
             'password_hash' => Hash::make($request->password),
-            'role_id'       => $request->role_id,
-            'department'    => $request->department,
-            'year_level'    => $request->year_level,
+            'student_id' => $request->student_id,
+            'role_id' => 3, // Student role based on your default data
+            'department' => $request->department,
+            'year_level' => $request->year_level,
+            'contact_number' => $request->contact_number,
+            'account_status' => 'pending', // Default status from your schema
+            'date_registered' => now(),
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return to_route('dashboard');
+        // Don't login automatically - redirect to pending approval page
+        return redirect()->route('pending-approval', ['email' => $user->email]);
     }
 }

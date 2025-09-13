@@ -16,7 +16,7 @@ class UserController extends Controller
     // Authentication Methods
     public function showLoginForm()
     {
-        return Inertia::render('Auth/Login', [
+        return Inertia::render('auth/Login', [
             'canResetPassword' => true,
             'status' => session('status'),
         ]);
@@ -24,7 +24,7 @@ class UserController extends Controller
 
     public function showRegisterForm()
     {
-        return Inertia::render('Auth/Register', [
+        return Inertia::render('auth/Register', [
             'roles' => Role::where('role_name', '!=', 'super_admin')
                           ->orderBy('role_name')
                           ->get(['role_id', 'role_name']),
@@ -336,4 +336,6 @@ class UserController extends Controller
 
         return back()->with('success', 'Password updated successfully.');
     }
+
+    
 }

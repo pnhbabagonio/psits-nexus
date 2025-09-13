@@ -11,6 +11,7 @@ use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\TransactionController; // ✅ Added earlier
 use App\Http\Controllers\PaymentController;     // ✅ Add this for payments
 use Inertia\Inertia;
+use Illuminate\Http\Request; // ← Added for Request in closure
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -20,6 +21,13 @@ Route::get('/', function () {
 Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+// Pending approval page after registration
+Route::get('/pending-approval', function (Request $request) {
+    return Inertia::render('auth/PendingApproval', [
+        'email' => $request->query('email')
+    ]);
+})->name('pending-approval');
 
 // Add API route for dashboard stats
 Route::get('dashboard/stats', [DashboardController::class, 'getStats'])

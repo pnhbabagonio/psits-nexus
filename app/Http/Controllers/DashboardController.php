@@ -13,7 +13,7 @@ class DashboardController extends Controller
     {
         // Get real user/member data
         $totalMembers = User::count();
-        $activeMembers = User::active()->count();
+        $activeMembers = User::where('account_status', 'active')->count();
         
         // Mock data for now - you can replace these with real models later
         $financialSummary = [
@@ -94,10 +94,10 @@ class DashboardController extends Controller
     {
         return response()->json([
             'total_members' => User::count(),
-            'active_members' => User::active()->count(),
-            'student_members' => User::role('student')->count(),
-            'admin_members' => User::role('admin')->count(),
-            'recent_registrations' => User::where('created_at', '>=', Carbon::now()->subDays(7))->count(),
+            'active_members' => User::where('account_status', 'active')->count(),
+            'student_members' => User::where('role_id', 3)->count(), // Assuming role_id 3 is student
+            'admin_members' => User::where('role_id', 1)->count(), // Assuming role_id 1 is admin
+            'recent_registrations' => User::where('date_registered', '>=', Carbon::now()->subDays(7))->count(),
         ]);
     }
 }

@@ -4,73 +4,88 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $primaryKey = 'user_id';
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'first_name',
         'last_name',
         'email',
+        'password_hash', // Make sure this is included
         'student_id',
-        'password_hash',
         'role_id',
         'department',
         'year_level',
-        'profile_image',
         'contact_number',
-        'account_status'
+        'account_status',
+        'date_registered'
     ];
 
     protected $hidden = [
-        'password_hash'
+        'password_hash',
+        'remember_token',
     ];
 
     protected $casts = [
         'date_registered' => 'datetime',
         'last_login' => 'datetime',
-        'account_status' => 'string'
     ];
 
+    /**
+     * Get the password for the user.
+     * Overriding default password field name
+     */
+    public function getAuthPassword()
+    {
+        return $this->password_hash;
+    }
+
+    /**
+     * Relationship to Role
+     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
 
-    public function organizedEvents(): HasMany
+    /**
+     * REMOVE OR COMMENT OUT THIS MUTATOR - passwords are already hashed
+     * Set the password hash attribute
+     */
+    // public function setPasswordHashAttribute($value)
+    // {
+    //     $this->attributes['password_hash'] = bcrypt($value);
+    // }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
     {
-        return $this->hasMany(Event::class, 'organizer_id');
+        return $this->role && $this->role->role_name === 'admin';
     }
 
-    public function payments(): HasMany
+    /**
+     * Check if user account is active
+     */
+    public function isActive(): bool
     {
-        return $this->hasMany(Payment::class, 'user_id');
+        return $this->account_status === 'active';
     }
 
-    public function eventRegistrations(): HasMany
+    /**
+     * Get full name attribute
+     */
+    public function getFullNameAttribute(): string
     {
-        return $this->hasMany(EventRegistration::class, 'user_id');
-    }
-
-    public function financialTransactions(): HasMany
-    {
-        return $this->hasMany(FinancialTransaction::class, 'recorded_by');
-    }
-
-    public function qrCodes(): HasMany
-    {
-        return $this->hasMany(QrCode::class, 'created_by');
-    }
-
-    public function chatbotSessions(): HasMany
-    {
-        return $this->hasMany(ChatbotSession::class, 'user_id');
+        return $this->first_name . ' ' . $this->last_name;
     }
 }

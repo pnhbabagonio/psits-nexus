@@ -4,28 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Role extends Model
 {
     use HasFactory;
 
     protected $primaryKey = 'role_id';
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'role_name',
         'description',
-        'permissions'
+        'permissions',
     ];
 
     protected $casts = [
         'permissions' => 'array',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
-    public function users(): HasMany
+    /**
+     * Relationship to Users
+     */
+    public function users()
     {
         return $this->hasMany(User::class, 'role_id');
     }
