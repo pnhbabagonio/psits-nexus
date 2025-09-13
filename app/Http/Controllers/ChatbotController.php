@@ -2,64 +2,100 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ChatBot;
+use App\Models\ChatbotSession;
+use App\Models\ChatbotMessage;
+use App\Models\ChatbotIntent;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class ChatbotController extends Controller
 {
-    /**
-     * Show the chat interface with messages.
-     */
-    public function index()
-    {
-        $messages = ChatBot::where('user_id', Auth::id())
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        return Inertia::render('ChatBot', [
-            'messages' => $messages,
-        ]);
-    }
-
-    /**
-     * Store a new chat message and generate a bot reply.
-     */
-    public function store(Request $request)
+    public function processMessage(Request $request)
     {
         $validated = $request->validate([
             'message' => 'required|string',
+            'session_id' => 'nullable|string',
+            'user_id' => 'nullable|exists:users,user_id'
         ]);
 
-        // Save user's message
-        $userMessage = ChatBot::create([
-            'user_id' => Auth::id(),
-            'message' => $validated['message'],
-            'is_bot' => false,
+        // Get or create session
+        $session = $this->getOrCreateSession($validated['session_id'], $validated['user_id'] ?? null);
+        
+        // Process message and get intent
+        $intent = $this->detectIntent($validated['message']);
+        
+        // Store user message
+        $userMessage = ChatbotMessage::create([
+            'conversation_id' => $session->conversations()->latest()->first()?->conversation_id,
+            'session_id' => $session->session_id,
+            'message_type' => 'text',
+            'message_content' => $validated['message'],
+            'intent_id' => $intent->intent_id,
+            'is_user_message' => true
         ]);
 
-        // Very simple bot logic (replace with AI later)
-        $botReply = ChatBot::create([
-            'user_id' => Auth::id(),
-            'message' => "You said: {$validated['message']} 🤖",
-            'is_bot' => true,
+        // Generate response
+        $response = $this->generateResponse($intent, $validated['message']);
+        
+        // Store bot response
+        $botMessage = ChatbotMessage::create([
+            'conversation_id' => $session->conversations()->latest()->first()?->conversation_id,
+            'session_id' => $session->session_id,
+            'message_type' => 'text',
+            'message_content' => $response,
+            'intent_id' => $intent->intent_id,
+            'is_user_message' => false
         ]);
 
-        // Return JSON for Inertia to update without full page reload
         return response()->json([
-            'userMessage' => $userMessage,
-            'botReply' => $botReply,
+            'session_id' => $session->session_id,
+            'response' => $response,
+            'intent' => $intent->intent_name
         ]);
     }
 
-    /**
-     * Clear the chat history.
-     */
-    public function clear()
+    private function getOrCreateSession($sessionId = null, $userId = null)
     {
-        ChatBot::where('user_id', Auth::id())->delete();
+        if ($sessionId) {
+            $session = ChatbotSession::find($sessionId);
+            if ($session) {
+                $session->update(['last_activity' => now()]);
+                return $session;
+            }
+        }
 
-        return response()->json(['status' => 'cleared']);
+        return ChatbotSession::create([
+            'session_id' => Str::uuid(),
+            'user_id' => $userId,
+            'user_platform' => request()->header('User-Agent'),
+            'ip_address' => request()->ip()
+        ]);
+    }
+
+    private function detectIntent($message)
+    {
+        $message = strtolower(trim($message));
+        
+        // Simple intent detection - you might want to use NLP here
+        $intents = ChatbotIntent::where('is_active', true)
+            ->orderBy('priority', 'desc')
+            ->get();
+
+        foreach ($intents as $intent) {
+            foreach ($intent->training_phrases as $phrase) {
+                if (str_contains($message, strtolower($phrase))) {
+                    return $intent;
+                }
+            }
+        }
+
+        // Fallback to default intent
+        return ChatbotIntent::where('intent_name', 'greeting')->first();
+    }
+
+    private function generateResponse($intent, $userMessage)
+    {
+        $responses = $intent->responses;
+        return $responses[array_rand($responses)] ?? 'I apologize, but I don\'t have a response for that.';
     }
 }

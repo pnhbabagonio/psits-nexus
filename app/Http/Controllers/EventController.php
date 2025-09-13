@@ -2,85 +2,114 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('Event', [
-            'stats' => [
-                'totalEvents' => 24,
-                'activeRegistrations' => 187,
-                'upcomingEvents' => 8,
-                'averageAttendance' => 94.2,
-            ],
-            'recentEvents' => [
-                [
-                    'title' => 'PSITS Tech Summit 2025',
-                    'date' => 'September 15, 2025',
-                    'time' => '09:00 AM',
-                    'location' => 'PSITS Auditorium',
-                    'status' => 'Upcoming',
-                    'registered' => '87/150'
-                ],
-                [
-                    'title' => 'Coding Bootcamp',
-                    'date' => 'September 20, 2025',
-                    'time' => '10:00 AM',
-                    'location' => 'Computer Lab 1',
-                    'status' => 'Ongoing',
-                    'registered' => '28/30'
-                ],
-            ],
-            'recentActivity' => [
-                ['message' => 'New registration from Maria Santos', 'time' => '3 hours ago'],
-                ['message' => 'Event details updated', 'time' => '1 day ago'],
-                ['message' => 'Reminder sent to 87 attendees', 'time' => '2 days ago'],
-            ],
-        ]);
+        $query = Event::with('organizer');
+        
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('type')) {
+            $query->where('event_type', $request->type);
+        }
+
+        if ($request->has('organizer')) {
+            $query->where('organizer_id', $request->organizer);
+        }
+
+        if ($request->has('upcoming') && $request->upcoming) {
+            $query->where('start_datetime', '>', now());
+        }
+
+        $events = $query->orderBy('start_datetime')->paginate(15);
+
+        return response()->json($events);
     }
 
-    public function create()
+    public function show($id)
     {
-        return Inertia::render('Components/EventForm'); 
+        $event = Event::with(['organizer', 'registrations.user'])->findOrFail($id);
+        return response()->json($event);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'time' => 'required',
-            'venue' => 'required|string|max:255',
-            'address' => 'required|string',
-            'max_capacity' => 'nullable|integer|min:1',
-            'registration_fee' => 'nullable|numeric|min:0',
-            'requires_approval' => 'boolean',
+            'title' => 'required|string|max:200',
+            'description' => 'required|string',
+            'start_datetime' => 'required|date|after:now',
+            'end_datetime' => 'required|date|after:start_datetime',
+            'location' => 'required|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
+            'registration_deadline' => 'required|date|before:start_datetime',
+            'event_type' => 'required|string|max:100',
+            'is_paid' => 'required|boolean',
+            'fee_amount' => 'required_if:is_paid,true|numeric|min:0',
+            'organizer_id' => 'required|exists:users,user_id',
+            'banner_image' => 'nullable|url'
         ]);
 
-        return redirect()->route('events.index')->with('success', 'Event created successfully!');
+        $event = Event::create([
+            ...$validated,
+            'status' => 'draft'
+        ]);
+
+        return response()->json($event, 201);
     }
 
     public function update(Request $request, $id)
     {
-        // validate for now
+        $event = Event::findOrFail($id);
+
         $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
-            'date'  => 'nullable|date',
-            'time'  => 'nullable',
-            'venue' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
+            'title' => 'sometimes|string|max:200',
+            'description' => 'sometimes|string',
+            'start_datetime' => 'sometimes|date',
+            'end_datetime' => 'sometimes|date|after:start_datetime',
+            'location' => 'sometimes|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
+            'registration_deadline' => 'sometimes|date|before:start_datetime',
+            'event_type' => 'sometimes|string|max:100',
+            'is_paid' => 'sometimes|boolean',
+            'fee_amount' => 'required_if:is_paid,true|numeric|min:0',
+            'status' => 'sometimes|in:draft,published,cancelled,completed',
+            'banner_image' => 'nullable|url'
         ]);
 
-        return redirect()->back()->with('success', "Event #{$id} updated successfully (mock).");
+        $event->update($validated);
+
+        return response()->json($event);
     }
+
     public function destroy($id)
     {
-        // pretend the event was deleted
-        return redirect()->route('events.index')
-            ->with('success', "Event #{$id} deleted successfully (mock).");
+        $event = Event::findOrFail($id);
+        $event->delete();
+
+        return response()->json(['message' => 'Event deleted successfully']);
+    }
+
+    public function publish($id)
+    {
+        $event = Event::findOrFail($id);
+        $event->update(['status' => 'published']);
+
+        return response()->json(['message' => 'Event published successfully']);
+    }
+
+    public function cancel($id)
+    {
+        $event = Event::findOrFail($id);
+        $event->update(['status' => 'cancelled']);
+
+        return response()->json(['message' => 'Event cancelled successfully']);
     }
 }
