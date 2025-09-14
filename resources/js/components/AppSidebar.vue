@@ -142,7 +142,7 @@ const footerNavItems: NavItem[] = [
                 <!-- User Management -->
                 <SidebarMenuItem>
                     <SidebarMenuButton as-child>
-                        <Link :href="route('user-management')">
+                        <Link :href="route('users.index')">
                         <User />
                         <span>User Management</span>
                         </Link>

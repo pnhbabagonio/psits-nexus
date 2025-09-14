@@ -19,14 +19,15 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'email',
-        'password_hash', // Make sure this is included
+        'password_hash',
         'student_id',
         'role_id',
         'department',
         'year_level',
         'contact_number',
         'account_status',
-        'date_registered'
+        'date_registered',
+        'last_login'
     ];
 
     protected $hidden = [
@@ -39,9 +40,56 @@ class User extends Authenticatable
         'last_login' => 'datetime',
     ];
 
+    // 👇 Keep only non-conflicting computed attributes
+    protected $appends = [
+        'name',
+        'program',
+        'year',
+        'role_name', // renamed from 'role'
+        'status',
+        'last_login_formatted'
+    ];
+
+    public function getNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    public function getProgramAttribute()
+    {
+        return $this->department;
+    }
+
+    public function getYearAttribute()
+    {
+        return $this->year_level;
+    }
+
+    // 👇 Fix: renamed to role_name
+    public function getRoleNameAttribute()
+    {
+        return $this->role?->role_name ?? 'Member';
+    }
+
+    public function getStatusAttribute()
+    {
+        $statusMap = [
+            'active' => 'active',
+            'inactive' => 'inactive',
+            'suspended' => 'inactive',
+            'pending' => 'inactive'
+        ];
+
+        return $statusMap[$this->account_status] ?? 'inactive';
+    }
+
+    public function getLastLoginFormattedAttribute()
+    {
+        return $this->last_login ? $this->last_login->format('Y-m-d H:i:s') : null;
+    }
+
     /**
      * Get the password for the user.
-     * Overriding default password field name
      */
     public function getAuthPassword()
     {
@@ -55,15 +103,6 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
-
-    /**
-     * REMOVE OR COMMENT OUT THIS MUTATOR - passwords are already hashed
-     * Set the password hash attribute
-     */
-    // public function setPasswordHashAttribute($value)
-    // {
-    //     $this->attributes['password_hash'] = bcrypt($value);
-    // }
 
     /**
      * Check if user is admin

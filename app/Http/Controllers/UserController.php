@@ -195,6 +195,9 @@ class UserController extends Controller
             'account_status' => 'sometimes|in:active,inactive,suspended,pending'
         ]);
 
+        // Remove password_confirmation from validated data
+        unset($validated['password_confirmation']);
+
         $user = User::create([
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
@@ -206,7 +209,7 @@ class UserController extends Controller
             'year_level' => $validated['year_level'] ?? null,
             'contact_number' => $validated['contact_number'] ?? null,
             'account_status' => $validated['account_status'] ?? 'pending',
-            'email_verified_at' => now(), // Auto-verify for admin created users
+            'email_verified_at' => now(),
         ]);
 
         if ($request->expectsJson()) {
@@ -242,6 +245,9 @@ class UserController extends Controller
             'contact_number' => 'nullable|string|max:20',
             'account_status' => 'sometimes|in:active,inactive,suspended,pending'
         ]);
+
+        // Remove password_confirmation from validated data before processing
+        unset($validated['password_confirmation']);
 
         // Only update password if provided
         if (!empty($validated['password'])) {

@@ -44,7 +44,7 @@ Route::get('expenses-tracking', function () {
 
 // User management routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('user-management', [UserController::class, 'index'])->name('user-management');
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::post('users', [UserController::class, 'store'])->name('users.store');
     Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
