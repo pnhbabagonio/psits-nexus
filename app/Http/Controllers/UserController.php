@@ -189,16 +189,8 @@ class UserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        // Return JSON response for modal operations
-        if ($request->header('X-Inertia') || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'User created successfully.',
-                'user' => $user->load('role')
-            ]);
-        }
 
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        return redirect()->back()->with('success', 'User created successfully.');
     }
 
 
@@ -231,16 +223,8 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        // Return JSON response for modal operations
-        if ($request->header('X-Inertia') || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'User updated successfully.',
-                'user' => $user->load('role')
-            ]);
-        }
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+        return redirect()->back()->with('success', 'User updated successfully.');
     }
 
     public function destroy($id)
@@ -249,19 +233,12 @@ class UserController extends Controller
         
         // Prevent deleting own account
         if ($user->user_id === Auth::id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You cannot delete your own account.'
-            ], 422);
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
         }
 
         $user->delete();
-
-        // Return JSON response for modal operations
-        return response()->json([
-            'success' => true,
-            'message' => 'User deleted successfully.'
-        ]);
+        
+        return redirect()->back()->with('success', 'User deleted successfully.');
     }
 
     public function updateStatus(Request $request, $id)

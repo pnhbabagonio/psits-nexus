@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { router, useForm, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { type BreadcrumbItem } from '@/types'
+import { PageProps as InertiaPageProps } from '@inertiajs/core'
 
 // Define types
 interface Role {
@@ -48,13 +49,42 @@ const props = defineProps<{
         role?: string
         status?: string
     }
+    flash?: {
+        success?: string
+        error?: string
+    }
+    success?: string
+    error?: string
 }>()
+
+// Extend Inertia's PageProps instead of creating a new interface
+interface PageProps extends InertiaPageProps {
+    flash?: {
+        success?: string
+        error?: string
+    }
+    success?: string
+    error?: string
+    users?: PaginatedUsers
+    roles?: Role[]
+    filters?: {
+        search?: string
+        role?: string
+        status?: string
+    }
+}
+
 
 // Reactive data
 const activeTab = ref('list')
 const loading = ref(false)
 const users = ref<PaginatedUsers | null>(props.users || null)
 const roles = ref<Role[]>(props.roles || [])
+
+const page = usePage<PageProps>()
+// Add this computed property to access flash messages
+const flashMessage = computed(() => page.props.flash?.success || page.props.success)
+const errorMessage = computed(() => page.props.flash?.error || page.props.error)
 
 // Use Inertia form for user operations
 const userForm = useForm({
@@ -219,9 +249,9 @@ const saveUser = () => {
                 showEditModal.value = false
                 showCreateModal.value = false
                 resetForm()
-                fetchUsers() // Refresh the list
                 loading.value = false
-                console.log('User updated successfully')
+                //fetchUsers() // Refresh the list
+                //console.log('User updated successfully')
             },
             onError: (errors) => {
                 console.error('Error updating user:', errors)
@@ -235,9 +265,9 @@ const saveUser = () => {
             onSuccess: () => {
                 showCreateModal.value = false
                 resetForm()
-                fetchUsers() // Refresh the list
+                //fetchUsers() // Refresh the list
                 loading.value = false
-                console.log('User created successfully')
+                //console.log('User created successfully')
             },
             onError: (errors) => {
                 console.error('Error creating user:', errors)
