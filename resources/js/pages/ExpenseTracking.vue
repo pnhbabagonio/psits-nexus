@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue'
-import { Head } from '@inertiajs/vue3'
-import { type BreadcrumbItem } from '@/types';
-import { ref } from 'vue'
+import AppLayout from '@/layouts/AppLayout.vue';
+import { ref } from 'vue';
+import { type BreadcrumbItem } from '@/types'
+
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Financial Management', href: '/financial-management' },
+  { title: 'Expense Tracking', href: '/expenses-tracking' },
 ]
 
 const expenses = ref([
@@ -41,7 +41,7 @@ const categories = ['Travel', 'Meals', 'Office Supplies', 'Utilities', 'Other']
 
 <template>
   <AppLayout :breadcrumbs="breadcrumbs">
-    <Head title="Expense Tracking" />
+    <Head :breadcrumbs="breadcrumbs" />
 
     <div class="p-6 space-y-8">
       <!-- Page Title -->

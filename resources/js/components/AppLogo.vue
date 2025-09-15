@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import AppLogoIcon from './AppLogoIcon.vue';
 </script>
 
 <template>
-    <div class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-        <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
+  <div class="flex items-center">
+    <!-- Make the logo bigger (e.g. size-10 instead of size-5) -->
+    <AppLogoIcon class="size-10" />
+
+    <div class="ml-2 grid flex-1 text-left text-base">
+      <span class="truncate leading-tight font-semibold">
+        PSITS Nexus
+      </span>
     </div>
-    <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate leading-tight font-semibold">PSITS Nexus</span>
-    </div>
+  </div>
 </template>

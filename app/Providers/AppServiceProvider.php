@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Auth\Events\Login;
+use App\Listeners\UpdateLastLogin;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -17,6 +18,20 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
+    public function boot(): void
+    {
+        //
+    }
+}
+
+class EventServiceProvider extends ServiceProvider
+{
+    protected $listen = [
+        Login::class => [
+            UpdateLastLogin::class,
+        ],
+    ];
+
     public function boot(): void
     {
         //

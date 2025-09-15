@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -11,7 +12,11 @@ test('login screen can be rendered', function () {
 });
 
 test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'email' => 'admin@example.com',
+        'password' => Hash::make('password'),
+        'role' => 'Admin', // Add this line - make user an admin
+    ]);
 
     $response = $this->post('/login', [
         'email' => $user->email,

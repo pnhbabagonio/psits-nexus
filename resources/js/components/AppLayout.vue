@@ -1,12 +1,12 @@
 <!-- SIDEBAR AND NAV-->
 
 <script setup lang="ts">
-import AppSidebar from '@/Components/AppSidebar.vue';
-import AppSidebarHeader from '@/Components/AppSidebarHeader.vue';
+import AppSidebar from '@/components/AppSidebar.vue';
+import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
 
 defineProps<{
-    breadcrumbs?: Array<{ label: string; href: string }>;
-}>();
+  breadcrumbs?: Array<{ title: string; href: string }>
+}>()
 </script>
 
 <template>

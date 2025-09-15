@@ -31,21 +31,34 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'student_id' => 'nullable|string|max:50|unique:users,student_id',
+            'department' => 'nullable|string|max:100',
+            'year_level' => 'nullable|string|max:50',
+            'contact_number' => 'nullable|string|max:20',
         ]);
 
+        // Create the user with all required fields from your database schema
         $user = User::create([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password_hash' => Hash::make($request->password),
+            'student_id' => $request->student_id,
+            'role_id' => 3, // Student role based on your default data
+            'department' => $request->department,
+            'year_level' => $request->year_level,
+            'contact_number' => $request->contact_number,
+            'account_status' => 'pending', // Default status from your schema
+            'date_registered' => now(),
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return to_route('dashboard');
+        // Don't login automatically - redirect to pending approval page
+        return redirect()->route('pending-approval', ['email' => $user->email]);
     }
 }
