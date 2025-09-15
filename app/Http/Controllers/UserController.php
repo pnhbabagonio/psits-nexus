@@ -149,10 +149,6 @@ class UserController extends Controller
 
         $users = $query->orderBy('created_at', 'desc')->paginate(20);
 
-        if ($request->expectsJson()) {
-            return response()->json($users);
-        }
-
         return Inertia::render('Users/Index', [
             'users' => $users,
             'filters' => $request->only(['search', 'role', 'status']),
@@ -160,25 +156,6 @@ class UserController extends Controller
         ]);
     }
 
-    public function show($id)
-    {
-        $user = User::with(['role', 'organizedEvents', 'payments'])->findOrFail($id);
-        
-        if (request()->expectsJson()) {
-            return response()->json($user);
-        }
-
-        return Inertia::render('Users/Show', [
-            'user' => $user,
-        ]);
-    }
-
-    public function create()
-    {
-        return Inertia::render('Users/Create', [
-            'roles' => Role::all(['role_id', 'role_name']),
-        ]);
-    }
 
     public function store(Request $request)
     {
@@ -212,22 +189,19 @@ class UserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        if ($request->expectsJson()) {
-            return response()->json($user->load('role'), 201);
+        // Return JSON response for modal operations
+        if ($request->header('X-Inertia') || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'User created successfully.',
+                'user' => $user->load('role')
+            ]);
         }
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
 
-    public function edit($id)
-    {
-        $user = User::with('role')->findOrFail($id);
-        
-        return Inertia::render('Users/Edit', [
-            'user' => $user,
-            'roles' => Role::all(['role_id', 'role_name']),
-        ]);
-    }
+
 
     public function update(Request $request, $id)
     {
@@ -257,8 +231,13 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        if ($request->expectsJson()) {
-            return response()->json($user->load('role'));
+        // Return JSON response for modal operations
+        if ($request->header('X-Inertia') || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully.',
+                'user' => $user->load('role')
+            ]);
         }
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
@@ -270,19 +249,19 @@ class UserController extends Controller
         
         // Prevent deleting own account
         if ($user->user_id === Auth::id()) {
-            if (request()->expectsJson()) {
-                return response()->json(['message' => 'You cannot delete your own account.'], 422);
-            }
-            return redirect()->back()->withErrors(['error' => 'You cannot delete your own account.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot delete your own account.'
+            ], 422);
         }
 
         $user->delete();
 
-        if (request()->expectsJson()) {
-            return response()->json(['message' => 'User deleted successfully']);
-        }
-
-        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+        // Return JSON response for modal operations
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully.'
+        ]);
     }
 
     public function updateStatus(Request $request, $id)
@@ -295,20 +274,13 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        if ($request->expectsJson()) {
-            return response()->json($user->load('role'));
-        }
-
-        return redirect()->back()->with('success', 'User status updated successfully.');
-    }
-
-    // Profile Methods
-    public function profile()
-    {
-        return Inertia::render('Profile/Show', [
-            'user' => Auth::user()->load('role'),
+        return response()->json([
+            'success' => true,
+            'message' => 'User status updated successfully.',
+            'user' => $user->load('role')
         ]);
     }
+
 
     public function updateProfile(Request $request)
     {

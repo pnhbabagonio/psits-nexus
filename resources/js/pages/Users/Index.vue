@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, useForm, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { type BreadcrumbItem } from '@/types'
 
@@ -56,8 +56,8 @@ const loading = ref(false)
 const users = ref<PaginatedUsers | null>(props.users || null)
 const roles = ref<Role[]>(props.roles || [])
 
-// Form data
-const userForm = ref({
+// Use Inertia form for user operations
+const userForm = useForm({
     user_id: null as number | null,
     first_name: '',
     last_name: '',
@@ -86,8 +86,8 @@ const showDeleteModal = ref(false)
 const showViewModal = ref(false)
 const selectedUser = ref<User | null>(null)
 
-// Form errors
-const errors = ref<Record<string, string>>({})
+// Form errors - now handled by Inertia form
+const errors = computed(() => userForm.errors)
 
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
@@ -121,69 +121,49 @@ const filteredUsers = computed(() => {
     return users.value.data
 })
 
-const isEditing = computed(() => userForm.value.user_id !== null)
+const isEditing = computed(() => userForm.user_id !== null)
 
 // Methods
-const fetchUsers = async () => {
+const fetchUsers = () => {
     loading.value = true
-    try {
-        const params = new URLSearchParams()
-        if (filters.value.search) params.append('search', filters.value.search)
-        if (filters.value.role) params.append('role', filters.value.role)
-        if (filters.value.status) params.append('status', filters.value.status)
-        
-        const response = await fetch(`/users?${params.toString()}`, {
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        
-        if (response.ok) {
-            users.value = await response.json()
+    
+    router.get('/users', {
+        search: filters.value.search,
+        role: filters.value.role,
+        status: filters.value.status
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            // Users data will be updated via props
+            loading.value = false
+        },
+        onError: (errors) => {
+            console.error('Error fetching users:', errors)
+            loading.value = false
         }
-    } catch (error) {
-        console.error('Error fetching users:', error)
-    } finally {
-        loading.value = false
-    }
+    })
 }
 
-const fetchRoles = async () => {
+const fetchRoles = () => {
     if (roles.value.length === 0) {
-        try {
-            // This would need to be added to your routes if not already available
-            const response = await fetch('/api/roles', {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            if (response.ok) {
-                roles.value = await response.json()
+        router.get('/api/roles', {}, {
+            preserveState: true,
+            onSuccess: (page) => {
+                // Fix: Properly handle the response type
+                const pageProps = page.props as any
+                roles.value = pageProps.roles || []
+            },
+            onError: (errors) => {
+                console.error('Error fetching roles:', errors)
             }
-        } catch (error) {
-            console.error('Error fetching roles:', error)
-        }
+        })
     }
 }
 
 const resetForm = () => {
-    userForm.value = {
-        user_id: null,
-        first_name: '',
-        last_name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-        role_id: null,
-        student_id: '',
-        department: '',
-        year_level: '',
-        contact_number: '',
-        account_status: 'pending'
-    }
-    errors.value = {}
+    userForm.reset()
+    userForm.clearErrors()
 }
 
 const openCreateModal = () => {
@@ -192,22 +172,28 @@ const openCreateModal = () => {
     activeTab.value = 'list'
 }
 
+// FIXED: Properly populate form data for editing
 const openEditModal = (user: User) => {
     selectedUser.value = user
-    userForm.value = {
-        user_id: user.user_id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        password: '',
-        password_confirmation: '',
-        role_id: user.role_id,
-        student_id: user.student_id || '',
-        department: user.department || '',
-        year_level: user.year_level || '',
-        contact_number: user.contact_number || '',
-        account_status: user.account_status
-    }
+    
+    // Reset form first
+    userForm.reset()
+    userForm.clearErrors()
+    
+    // Properly populate form data using direct assignment
+    userForm.user_id = user.user_id
+    userForm.first_name = user.first_name
+    userForm.last_name = user.last_name
+    userForm.email = user.email
+    userForm.password = '' // Always empty for security
+    userForm.password_confirmation = ''
+    userForm.role_id = user.role_id
+    userForm.student_id = user.student_id || ''
+    userForm.department = user.department || ''
+    userForm.year_level = user.year_level || ''
+    userForm.contact_number = user.contact_number || ''
+    userForm.account_status = user.account_status
+    
     showEditModal.value = true
 }
 
@@ -221,99 +207,81 @@ const openDeleteModal = (user: User) => {
     showDeleteModal.value = true
 }
 
-const saveUser = async () => {
+// FIXED: Better saveUser method
+const saveUser = () => {
     loading.value = true
-    errors.value = {}
     
-    try {
-        const url = isEditing.value ? `/users/${userForm.value.user_id}` : '/users'
-        const method = isEditing.value ? 'PUT' : 'POST'
-        
-        // Create a copy of the form data
-        const formData: Record<string, any> = { ...userForm.value }
-        
-        // Remove password fields if editing and password is empty
-        if (isEditing.value && !formData.password) {
-            delete formData.password
-            delete formData.password_confirmation
-        }
-        
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+    if (isEditing.value) {
+        // Update user - use PUT request
+        userForm.put(`/users/${userForm.user_id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                showEditModal.value = false
+                showCreateModal.value = false
+                resetForm()
+                fetchUsers() // Refresh the list
+                loading.value = false
+                console.log('User updated successfully')
             },
-            body: JSON.stringify(formData)
-        })
-        
-        if (response.ok) {
-            showCreateModal.value = false
-            showEditModal.value = false
-            await fetchUsers()
-            resetForm()
-        } else {
-            const errorData = await response.json()
-            if (errorData.errors) {
-                errors.value = errorData.errors
+            onError: (errors) => {
+                console.error('Error updating user:', errors)
+                loading.value = false
             }
-        }
-    } catch (error) {
-        console.error('Error saving user:', error)
-    } finally {
-        loading.value = false
+        })
+    } else {
+        // Create user - use POST request
+        userForm.post('/users', {
+            preserveScroll: true,
+            onSuccess: () => {
+                showCreateModal.value = false
+                resetForm()
+                fetchUsers() // Refresh the list
+                loading.value = false
+                console.log('User created successfully')
+            },
+            onError: (errors) => {
+                console.error('Error creating user:', errors)
+                loading.value = false
+            }
+        })
     }
 }
 
-const deleteUser = async () => {
+const deleteUser = () => {
     if (!selectedUser.value) return
     
     loading.value = true
-    try {
-        const response = await fetch(`/users/${selectedUser.value.user_id}`, {
-            method: 'DELETE',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-            }
-        })
-        
-        if (response.ok) {
+    
+    router.delete(`/users/${selectedUser.value.user_id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
             showDeleteModal.value = false
-            await fetchUsers()
+            fetchUsers() // Refresh the list
+            loading.value = false
+        },
+        onError: (errors) => {
+            console.error('Error deleting user:', errors)
+            loading.value = false
         }
-    } catch (error) {
-        console.error('Error deleting user:', error)
-    } finally {
-        loading.value = false
-    }
+    })
 }
 
 const updateUserStatus = async (user: User, newStatus: string) => {
     loading.value = true
-    try {
-        const response = await fetch(`/users/${user.user_id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-            },
-            body: JSON.stringify({ account_status: newStatus })
-        })
-        
-        if (response.ok) {
-            await fetchUsers()
+    
+    router.put(`/users/${user.user_id}`, {
+        account_status: newStatus
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            fetchUsers() // Refresh the list
+            loading.value = false
+        },
+        onError: (errors) => {
+            console.error('Error updating user status:', errors)
+            loading.value = false
         }
-    } catch (error) {
-        console.error('Error updating user status:', error)
-    } finally {
-        loading.value = false
-    }
+    })
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -736,6 +704,11 @@ onMounted(() => {
                         </button>
                     </div>
 
+                    <!-- Debug info (remove in production) -->
+                    <div class="text-xs text-gray-400 mb-2">
+                        Debug: isEditing = {{ isEditing }}, user_id = {{ userForm.user_id }}
+                    </div>
+
                     <form @submit.prevent="saveUser" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -790,6 +763,7 @@ onMounted(() => {
                                 <p v-if="errors.role_id" class="text-red-400 text-sm mt-1">{{ errors.role_id[0] }}</p>
                             </div>
 
+                            <!-- Password fields for create mode -->
                             <div v-if="!isEditing">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Password *</label>
                                 <input
@@ -812,6 +786,7 @@ onMounted(() => {
                                 >
                             </div>
 
+                            <!-- Password fields for edit mode -->
                             <div v-if="isEditing">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
                                 <input
@@ -1070,4 +1045,5 @@ onMounted(() => {
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
     background: #9CA3AF;
 }
+
 </style>

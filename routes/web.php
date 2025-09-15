@@ -49,7 +49,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-});
+    Route::get('/api/roles', function () {
+        return response()->json(\App\Models\Role::all());
+    })->name('api.roles');
+}); 
 
 // Event Management Routes
 Route::middleware(['auth', 'verified'])->group(function () {
