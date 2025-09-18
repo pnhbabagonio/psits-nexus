@@ -8,7 +8,10 @@ import {
     X,
     Pencil,
     Trash2,
+    QrCode,
 } from "lucide-vue-next"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 // --- Types ---
 interface PaymentRecord {
@@ -167,23 +170,27 @@ function scanQR() {
 </script>
 
 <template>
-    <div class="p-6 text-gray-200">
+    <div class="p-6 text-foreground">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold">Payment Records</h2>
+            <div>
+                <h2 class="text-2xl font-bold">Payment Records</h2>
+                <p class="text-muted-foreground">Manage and track all payment transactions</p>
+            </div>
             <div class="flex gap-2">
-                <button
+                <Button
                     @click="scanQR"
-                    class="px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium"
+                    variant="outline"
+                    class="gap-2"
                 >
-                    Scan QR
-                </button>
-                <button
+                    <QrCode class="w-4 h-4" /> Scan QR
+                </Button>
+                <Button
                     @click="openAddModal"
-                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium"
+                    class="gap-2"
                 >
                     <Plus class="w-4 h-4" /> Add Record
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -192,35 +199,36 @@ function scanQR() {
         
             <!-- Search -->
             <div
-                class="flex items-center flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2"
+                class="flex items-center flex-1 bg-muted border border-border rounded-lg px-3 py-2"
             >
-                <Search class="w-4 h-4 text-gray-400" />
+                <Search class="w-4 h-4 text-muted-foreground" />
                 <input
                     v-model="search"
                     type="text"
                     placeholder="Search name..."
-                    class="ml-2 flex-1 bg-transparent text-sm focus:outline-none"
+                    class="ml-2 flex-1 bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground"
                 />
             </div>
 
             <!-- Filter -->
             <div class="relative">
-                <button
+                <Button
                     @click="isFilterOpen = !isFilterOpen"
-                    class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                    variant="outline"
+                    class="gap-2"
                 >
                     <Filter class="w-4 h-4" />
-                    <span class="text-sm">{{ paymentFilter }}</span>
+                    <span>{{ paymentFilter }}</span>
                     <ChevronDown
                         class="w-4 h-4 transition-transform"
                         :class="{ 'rotate-180': isFilterOpen }"
                     />
-                </button>
+                </Button>
 
                 <!-- Dropdown -->
                 <div
                 v-if="isFilterOpen"
-                class="absolute right-0 mt-2 w-32 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10"
+                class="absolute right-0 mt-2 w-32 bg-card border border-border rounded-lg shadow-lg z-10 overflow-hidden"
                 >
                     <button
                         v-for="option in filterOptions"
@@ -229,8 +237,8 @@ function scanQR() {
                         paymentFilter = option;
                         isFilterOpen = false
                         "
-                        class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                        :class="{ 'bg-gray-700 text-white': paymentFilter === option }"
+                        class="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                        :class="{ 'bg-muted': paymentFilter === option }"
                     >
                         {{ option }}
                     </button>
@@ -238,34 +246,34 @@ function scanQR() {
             </div>
 
             <!-- Clear Filter -->
-            <button
+            <Button
                 v-if="paymentFilter !== 'All' || search"
                 @click="paymentFilter = 'All'; search = ''"
-                class="px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm"
+                variant="outline"
             >
                 Clear Filters
-            </button>
+            </Button>
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto rounded-lg border border-gray-800">
-            <table class="w-full text-sm text-left text-gray-300">
-                <thead class="bg-gray-800 text-gray-400 uppercase text-xs">
+        <div class="overflow-x-auto rounded-xl border border-border bg-card">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-muted uppercase text-xs">
                     <tr>
-                        <th class="px-4 py-3">Student</th>
-                        <th class="px-4 py-3">Requirement</th>
-                        <th class="px-4 py-3">Amount</th>
-                        <th class="px-4 py-3">Date</th>
-                        <th class="px-4 py-3">Method</th>
-                        <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3">Actions</th>
+                        <th class="px-4 py-3 text-muted-foreground">Student</th>
+                        <th class="px-4 py-3 text-muted-foreground">Requirement</th>
+                        <th class="px-4 py-3 text-muted-foreground">Amount</th>
+                        <th class="px-4 py-3 text-muted-foreground">Date</th>
+                        <th class="px-4 py-3 text-muted-foreground">Method</th>
+                        <th class="px-4 py-3 text-muted-foreground">Status</th>
+                        <th class="px-4 py-3 text-muted-foreground">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr
                         v-for="record in filteredRecords"
                         :key="record.id"
-                        class="border-t border-gray-700 hover:bg-gray-800"
+                        class="border-t border-border hover:bg-muted/50 transition-colors"
                     >
                         <td class="px-4 py-3 font-medium">
                         {{ record.firstName }} {{ record.middleName }} {{ record.lastName }}
@@ -275,83 +283,90 @@ function scanQR() {
                         <td class="px-4 py-3">{{ record.date || "—" }}</td>
                         <td class="px-4 py-3">{{ record.status === "Paid" ? record.method : "—" }}</td>
                         <td class="px-4 py-3">
-                            <span
-                                class="px-2 py-1 text-xs rounded-full"
+                            <Badge
                                 :class="{
-                                'bg-green-900 text-green-300': record.status === 'Paid',
-                                'bg-red-900 text-red-300': record.status === 'Unpaid',
+                                'bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-300': record.status === 'Paid',
+                                'bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900 dark:text-red-300': record.status === 'Unpaid',
                                 }"
                             >
                                 {{ record.status }}
-                            </span>
+                            </Badge>
                         </td>
                         <td class="px-4 py-3 flex gap-2">
-                            <button
+                            <Button
                                 @click="openEditModal(record)"
-                                class="p-2 rounded-lg hover:bg-yellow-600/20 transition"
+                                variant="ghost"
+                                size="icon"
                             >
-                                <Pencil class="w-4 h-4 text-yellow-500" />
-                            </button>
-                        <button
-                            @click="deleteRecord(record.id)"
-                            class="p-2 rounded-lg hover:bg-red-600/20 transition"
-                        >
-                            <Trash2 class="w-4 h-4 text-red-500" />
-                        </button>
+                                <Pencil class="w-4 h-4" />
+                            </Button>
+                            <Button
+                                @click="deleteRecord(record.id)"
+                                variant="ghost"
+                                size="icon"
+                            >
+                                <Trash2 class="w-4 h-4" />
+                            </Button>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            
+            <!-- Empty state -->
+            <div v-if="filteredRecords.length === 0" class="text-center py-8 text-muted-foreground">
+                <Search class="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No payment records found</p>
+            </div>
         </div>
 
         <!-- Add/Edit Record Modal -->
         <div
             v-if="showModal"
-            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50"
+            class="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50"
         >
-            <div class="bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-lg">
+            <div class="bg-card border border-border rounded-xl p-6 w-full max-w-md shadow-lg">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">
                         {{ editingRecord ? "Edit Payment Record" : "Add Payment Record" }}
                     </h3>
-                    <button @click="showModal = false" class="text-gray-400 hover:text-white">
+                    <Button @click="showModal = false" variant="ghost" size="icon">
                         <X class="w-5 h-5" />
-                    </button>
+                    </Button>
                 </div>
                 <form @submit.prevent="saveRecord" class="space-y-4">
                     <div>
-                        <label class="block text-sm text-gray-400">First Name</label>
+                        <label class="block text-sm text-muted-foreground mb-1">First Name</label>
                         <input
                             v-model="newRecord.firstName"
                             type="text"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Middle Name</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Middle Name</label>
                         <input
                             v-model="newRecord.middleName"
                             type="text"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Last Name</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Last Name</label>
                         <input
                             v-model="newRecord.lastName"
                             type="text"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Requirement</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Requirement</label>
                         <select
                             v-model="newRecord.requirement"
                             @change="
                                 newRecord.amount =
                                 requirementOptions.find((r) => r.title === newRecord.requirement)?.amount || 0
                             "
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         >
                             <option disabled value="">Select requirement</option>
                             <option v-for="req in requirementOptions" :key="req.title" :value="req.title">
@@ -360,29 +375,29 @@ function scanQR() {
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Amount</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Amount</label>
                         <input
                             v-model.number="newRecord.amount"
                             type="number"
                             disabled
-                            class="w-full px-3 py-2 mt-1 bg-gray-700 border border-gray-600 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Status</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Status</label>
                         <select
                             v-model="newRecord.status"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         >
                             <option value="Paid">Paid</option>
                             <option value="Unpaid">Unpaid</option>
                         </select>
                     </div>
                     <div v-if="newRecord.status === 'Paid'">
-                        <label class="block text-sm text-gray-400">Payment Method</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Payment Method</label>
                         <select
                             v-model="newRecord.method"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         >
                             <option value="Cash">Cash</option>
                             <option value="GCash">GCash</option>
@@ -390,35 +405,34 @@ function scanQR() {
                         </select>
                     </div>
                     <div v-if="newRecord.status === 'Paid'">
-                        <label class="block text-sm text-gray-400">Date Paid</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Date Paid</label>
                         <input
                             v-model="newRecord.date"
                             type="date"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         />
                     </div>
 
-                    <div class="flex justify-end gap-2 mt-4">
-                        <button
+                    <div class="flex justify-end gap-2 mt-6">
+                        <Button
                             type="button"
                             @click="showModal = false"
-                            class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm"
+                            variant="outline"
                         >
                         Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm"
                         >
                             {{ editingRecord ? "Save Changes" : "Add" }}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>
         </div>
 
         <!-- Pagination Footer -->
-        <div class="flex items-center justify-between p-4 text-sm text-gray-400 mt-4">
+        <div class="flex items-center justify-between p-4 text-sm text-muted-foreground mt-4">
             <span>
                 Showing {{ filteredRecords.length ? 1 : 0 }}–
                 {{ filteredRecords.length }} of {{ filteredRecords.length }} records (page 1 of 1)
@@ -427,25 +441,27 @@ function scanQR() {
             <div class="flex items-center gap-2">
                 <span>Rows per page:</span>
                 <select
-                class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-gray-300"
+                class="bg-background border border-border rounded px-2 py-1"
                 >
                     <option>10</option>
                     <option>25</option>
                     <option>50</option>
                 </select>
-                <button
-                    class="px-2 py-1 rounded bg-gray-700 text-gray-400 cursor-not-allowed"
+                <Button
+                    variant="outline"
+                    size="sm"
                     disabled
                 >
                 Previous
-                </button>
-                <button class="px-2 py-1 rounded bg-blue-600 text-white">1</button>
-                <button
-                    class="px-2 py-1 rounded bg-gray-700 text-gray-400 cursor-not-allowed"
+                </Button>
+                <Button size="sm">1</Button>
+                <Button
+                    variant="outline"
+                    size="sm"
                     disabled
                 >
                 Next
-                </button>
+                </Button>
             </div>
         </div>
     </div>
