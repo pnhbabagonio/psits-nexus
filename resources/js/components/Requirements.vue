@@ -16,7 +16,6 @@ import {
     LayoutGrid,
     List,
     ChevronDown,
-    X,
     Pencil,
     Trash2,
     Calendar,

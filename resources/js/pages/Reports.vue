@@ -21,7 +21,6 @@ import {
   Download,
   Settings,
   Clock,
-  Filter,
   Eye,
   FileText,
   Mail,

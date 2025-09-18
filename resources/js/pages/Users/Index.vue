@@ -207,11 +207,6 @@ const resetForm = () => {
     userForm.clearErrors()
 }
 
-const openCreateModal = () => {
-    resetForm()
-    showCreateModal.value = true
-    activeTab.value = 'list'
-}
 
 const openEditModal = (user: User) => {
     selectedUser.value = user
@@ -389,15 +384,6 @@ onMounted(() => {
             <!-- Header -->
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold text-foreground">User Management</h1>
-                <!-- <button
-                    @click="openCreateModal"
-                    class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    <span>Add Usesr</span>
-                </button> -->
             </div>
 
             <!-- Tabs Navigation -->

@@ -5,7 +5,8 @@ import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { Clock, ArrowLeft, Mail, Shield } from 'lucide-vue-next';
 
-const props = defineProps<{
+// Remove the unused props variable assignment
+defineProps<{
     email?: string;
 }>();
 
