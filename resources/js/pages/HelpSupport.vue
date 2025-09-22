@@ -1,415 +1,367 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { Head } from '@inertiajs/vue3';
 import {
-    Search,
-    MessageSquare,
-    Calendar,
-    Send,
-    HelpCircle,
-    Bug,
-    CreditCard,
-    Settings,
-    Lightbulb,
+    BookOpen,
+    ChevronDown,
+    ChevronUp,
+    Download,
+    ExternalLink,
     FileText,
-    CheckCircle,
-    X
+    HelpCircle,
+    MessageCircle,
+    MessageSquare,
+    Phone,
+    Search,
+    Upload,
+    Video,
 } from 'lucide-vue-next';
-
-// Define types
-interface SupportTicket {
-    id: number;
-    subject: string;
-    message: string;
-    category: 'technical' | 'billing' | 'account' | 'feature_request' | 'other';
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    status: 'open' | 'in_progress' | 'resolved' | 'closed';
-    created_at: string;
-    updated_at: string;
-}
-
-interface Props {
-    userTickets?: SupportTicket[];
-}
-
-// Get props from Laravel
-const props = defineProps<Props>();
-
-// Get flash messages - fix TypeScript error
-const page = usePage();
-const flashMessage = computed(() => {
-    const flash = page.props.flash as any;
-    return flash?.message;
-});
+import { ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Support', href: '/help-support' }
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+    },
+    {
+        title: 'Help & Support',
+        href: '/help-support',
+    },
 ];
 
-// Form state
-const form = useForm({
+// FAQ data
+const faqs = ref([
+    {
+        question: 'How do I generate a QR code for payment collection?',
+        answer: 'To generate a QR code: Navigate to the QR Generator page from the Quick Actions menu, enter the payment amount and description, click "Generate QR Code", then download or share the generated QR code.',
+        open: false
+    },
+    {
+        question: 'How can I manually record a payment?',
+        answer: 'To manually record a payment: Go to the Record Payment page from Quick Actions, select the member, enter the payment details (amount, date, payment method), add any notes or references, then click "Record Payment" to save.',
+        open: false
+    },
+    {
+        question: 'Why is my QR code not scanning properly?',
+        answer: 'Common reasons for scanning issues: The QR code is too small or pixelated when printed, poor lighting conditions when scanning, the camera lens is dirty or damaged, outdated scanning app or system software. Try generating a new QR code with higher resolution settings.',
+        open: false
+    },
+    {
+        question: 'How do I add a new member to the system?',
+        answer: 'To add a new member: Click "Add Member" from the Quick Actions menu, fill in the required information (name, contact details, etc.), set the member\'s status and permissions, upload a profile photo if available, then click "Save" to add the member to the database.',
+        open: false
+    },
+    {
+        question: 'How can I view transaction history for a member?',
+        answer: 'To view transaction history: Go to the Members section from the main navigation, search for the specific member, click on the member\'s name to view their profile, navigate to the "Transactions" tab, then you can filter transactions by date range or type.',
+        open: false
+    }
+]);
+
+// Toggle FAQ item
+const toggleFaq = (index: number) => {
+    faqs.value[index].open = !faqs.value[index].open;
+};
+
+// Support form data
+const formData = ref({
+    name: '',
+    email: '',
     subject: '',
-    message: '',
-    category: '',
-    priority: 'medium'
+    description: '',
+    attachments: [] as File[]
 });
 
-// Reactive state
-const searchQuery = ref('');
-const showSuccessMessage = ref(false);
+// Handle file upload
+const handleFileUpload = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files) {
+        formData.value.attachments = Array.from(target.files);
+    }
+};
 
-// Computed properties
-const filteredTickets = computed(() => {
-    if (!props.userTickets) return [];
-    if (!searchQuery.value) return props.userTickets;
+// Submit support request
+const submitSupportRequest = () => {
+    // In a real application, this would send the data to your backend
+    console.log('Submitting support request:', formData.value);
+    alert('Support request submitted successfully!');
     
-    return props.userTickets.filter(ticket => 
-        ticket.subject.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        ticket.message.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-});
-
-// Category options with icons and descriptions
-const categoryOptions = [
-    {
-        value: 'technical',
-        label: 'Technical Issue',
-        icon: Bug,
-        description: 'Problems with features, bugs, or system errors'
-    },
-    {
-        value: 'billing',
-        label: 'Billing',
-        icon: CreditCard,
-        description: 'Payment issues, charges, or membership fees'
-    },
-    {
-        value: 'account',
-        label: 'Account',
-        icon: Settings,
-        description: 'Profile, login, or account settings issues'
-    },
-    {
-        value: 'feature_request',
-        label: 'Feature Request',
-        icon: Lightbulb,
-        description: 'Suggestions for new features or improvements'
-    },
-    {
-        value: 'other',
-        label: 'Other',
-        icon: HelpCircle,
-        description: 'General questions or other concerns'
-    }
-];
-
-// Utility functions
-const getPriorityColor = (priority: string) => {
-    switch (priority) {
-        case 'urgent': return 'bg-red-100 text-red-700 border-red-200';
-        case 'high': return 'bg-orange-100 text-orange-700 border-orange-200';
-        case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-        case 'low': return 'bg-gray-100 text-gray-700 border-gray-200';
-        default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-};
-
-const getStatusColor = (status: string) => {
-    switch (status) {
-        case 'open': return 'bg-blue-100 text-blue-700 border-blue-200';
-        case 'in_progress': return 'bg-purple-100 text-purple-700 border-purple-200';
-        case 'resolved': return 'bg-green-100 text-green-700 border-green-200';
-        case 'closed': return 'bg-gray-100 text-gray-700 border-gray-200';
-        default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-};
-
-const getCategoryInfo = (category: string) => {
-    return categoryOptions.find(option => option.value === category) || categoryOptions[4];
-};
-
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
-
-const handleSubmit = () => {
-    form.post('/help-support', {
-        onSuccess: () => {
-            form.reset();
-            showSuccessMessage.value = true;
-            setTimeout(() => {
-                showSuccessMessage.value = false;
-            }, 5000);
-        },
-        onError: () => {
-            // Errors are automatically handled by the form validation
-        }
-    });
-};
-
-const hideSuccessMessage = () => {
-    showSuccessMessage.value = false;
+    // Reset form
+    formData.value = {
+        name: '',
+        email: '',
+        subject: '',
+        description: '',
+        attachments: []
+    };
 };
 </script>
 
 <template>
-    <Head title="Submit Support Ticket" />
+    <Head title="Help & Support" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
-            <!-- Success Message -->
-            <div 
-                v-if="showSuccessMessage || flashMessage" 
-                class="rounded-md bg-green-50 p-4 border border-green-200 relative"
-            >
-                <div class="flex items-start gap-3">
-                    <CheckCircle class="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div class="flex-1">
-                        <p class="text-sm text-green-700 font-medium">Success!</p>
-                        <p class="text-sm text-green-700 mt-1">
-                            {{ flashMessage || 'Your support ticket has been submitted successfully!' }}
-                        </p>
+        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <!-- Header -->
+            <div class="mb-4 flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-foreground">PSITS Nexus Help & Support</h1>
+                    <p class="text-muted-foreground">Find answers to common questions and get assistance</p>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input type="text" placeholder="Search help articles..." class="pl-10 pr-4 py-2 border border-border rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-card">
+                        <Search class="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     </div>
-                    <button 
-                        @click="hideSuccessMessage"
-                        class="text-green-600 hover:text-green-800 p-1"
-                    >
-                        <X class="h-4 w-4" />
-                    </button>
                 </div>
             </div>
 
-            <!-- Header Section -->
-            <div class="text-center">
-                <h1 class="text-3xl font-bold text-foreground">Need Help?</h1>
-                <p class="mt-2 text-muted-foreground">Submit a support ticket and our team will assist you promptly</p>
-            </div>
-
-            <div class="grid gap-6 lg:grid-cols-2">
-                <!-- Submit New Ticket -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle class="flex items-center gap-2">
-                            <MessageSquare class="h-5 w-5" />
-                            Submit New Ticket
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form @submit.prevent="handleSubmit" class="space-y-4">
-                            <div>
-                                <label class="text-sm font-medium mb-2 block">Subject *</label>
-                                <Input 
-                                    v-model="form.subject" 
-                                    placeholder="Brief description of your issue"
-                                    required
-                                    :class="{ 'border-red-500 focus:border-red-500': form.errors.subject }"
-                                />
-                                <p v-if="form.errors.subject" class="text-red-500 text-sm mt-1">
-                                    {{ form.errors.subject }}
-                                </p>
+            <!-- Main Content -->
+            <div class="grid gap-6">
+                <!-- Quick Help Cards -->
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <div class="rounded-xl border border-border bg-card p-6 cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="rounded-full bg-blue-100 p-3 text-blue-600">
+                                <QrCode class="h-6 w-6" />
                             </div>
-                            
-                            <div>
-                                <label class="text-sm font-medium mb-2 block">Category *</label>
-                                <Select v-model="form.category" required>
-                                    <SelectTrigger :class="{ 'border-red-500 focus:border-red-500': form.errors.category }">
-                                        <SelectValue placeholder="Select category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem 
-                                            v-for="option in categoryOptions" 
-                                            :key="option.value" 
-                                            :value="option.value"
-                                            class="cursor-pointer"
-                                        >
-                                            <div class="flex items-center gap-3">
-                                                <component :is="option.icon" class="h-4 w-4" />
-                                                <div>
-                                                    <div class="font-medium">{{ option.label }}</div>
-                                                    <div class="text-xs text-muted-foreground">{{ option.description }}</div>
-                                                </div>
-                                            </div>
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <p v-if="form.errors.category" class="text-red-500 text-sm mt-1">
-                                    {{ form.errors.category }}
-                                </p>
-                            </div>
-                            
-                            <div>
-                                <label class="text-sm font-medium mb-2 block">Priority</label>
-                                <Select v-model="form.priority">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select priority" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="low">
-                                            <div class="flex items-center gap-2">
-                                                <div class="h-2 w-2 rounded-full bg-gray-400"></div>
-                                                Low - General questions or minor issues
-                                            </div>
-                                        </SelectItem>
-                                        <SelectItem value="medium">
-                                            <div class="flex items-center gap-2">
-                                                <div class="h-2 w-2 rounded-full bg-yellow-400"></div>
-                                                Medium - Standard issues affecting usage
-                                            </div>
-                                        </SelectItem>
-                                        <SelectItem value="high">
-                                            <div class="flex items-center gap-2">
-                                                <div class="h-2 w-2 rounded-full bg-orange-400"></div>
-                                                High - Significant problems
-                                            </div>
-                                        </SelectItem>
-                                        <SelectItem value="urgent">
-                                            <div class="flex items-center gap-2">
-                                                <div class="h-2 w-2 rounded-full bg-red-400"></div>
-                                                Urgent - Critical issues blocking work
-                                            </div>
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            
-                            <div>
-                                <label class="text-sm font-medium mb-2 block">Message *</label>
-                                <Textarea 
-                                    v-model="form.message" 
-                                    placeholder="Please describe your issue in detail. Include any error messages, steps to reproduce the problem, or screenshots if applicable."
-                                    rows="6"
-                                    required
-                                    :class="{ 'border-red-500 focus:border-red-500': form.errors.message }"
-                                />
-                                <p v-if="form.errors.message" class="text-red-500 text-sm mt-1">
-                                    {{ form.errors.message }}
-                                </p>
-                                <p class="text-xs text-muted-foreground mt-1">
-                                    The more details you provide, the faster we can help resolve your issue.
-                                </p>
-                            </div>
-                            
-                            <Button 
-                                type="submit" 
-                                class="w-full gap-2" 
-                                :disabled="form.processing"
-                                :class="form.processing ? 'opacity-50 cursor-not-allowed' : ''"
-                            >
-                                <Send class="h-4 w-4" />
-                                {{ form.processing ? 'Submitting...' : 'Submit Ticket' }}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
-
-                <!-- My Tickets -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle class="flex items-center gap-2">
-                            <FileText class="h-5 w-5" />
-                            My Support Tickets ({{ props.userTickets?.length || 0 }})
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <!-- Search -->
-                        <div class="relative mb-4">
-                            <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                                v-model="searchQuery"
-                                placeholder="Search your tickets..." 
-                                class="pl-10"
-                            />
+                            <h3 class="font-semibold">QR Payments</h3>
                         </div>
+                        <p class="text-sm text-muted-foreground">Learn how to generate and scan QR codes for payments</p>
+                    </div>
 
-                        <!-- Tickets List -->
-                        <div class="space-y-3 max-h-96 overflow-y-auto">
-                            <div
-                                v-for="ticket in filteredTickets"
-                                :key="ticket.id"
-                                class="rounded-lg border border-border bg-muted/30 p-3 transition-all hover:bg-muted/50 cursor-pointer"
-                            >
-                                <div class="space-y-2">
-                                    <!-- Header -->
-                                    <div class="flex items-start justify-between gap-2">
-                                        <h4 class="font-medium text-sm leading-tight">{{ ticket.subject }}</h4>
-                                        <div class="flex items-center gap-1 flex-shrink-0">
-                                            <Badge :class="getPriorityColor(ticket.priority)" class="text-xs">
-                                                {{ ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) }}
-                                            </Badge>
-                                            <Badge :class="getStatusColor(ticket.status)" class="text-xs">
-                                                {{ ticket.status.replace('_', ' ').charAt(0).toUpperCase() + ticket.status.replace('_', ' ').slice(1) }}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Message Preview -->
-                                    <p class="text-xs text-muted-foreground line-clamp-2">
-                                        {{ ticket.message }}
-                                    </p>
-                                    
-                                    <!-- Meta Information -->
-                                    <div class="flex items-center justify-between text-xs text-muted-foreground">
-                                        <div class="flex items-center gap-1">
-                                            <component :is="getCategoryInfo(ticket.category).icon" class="h-3 w-3" />
-                                            <span>{{ getCategoryInfo(ticket.category).label }}</span>
-                                        </div>
-                                        <div class="flex items-center gap-1">
-                                            <Calendar class="h-3 w-3" />
-                                            <span>{{ formatDate(ticket.created_at) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="rounded-xl border border-border bg-card p-6 cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="rounded-full bg-green-100 p-3 text-green-600">
+                                <CreditCard class="h-6 w-6" />
                             </div>
+                            <h3 class="font-semibold">Payment Issues</h3>
                         </div>
-                        
-                        <!-- Empty State -->
-                        <div v-if="filteredTickets.length === 0" class="py-8 text-center">
-                            <MessageSquare class="mx-auto h-8 w-8 text-muted-foreground/50" />
-                            <p class="mt-2 text-sm text-muted-foreground">
-                                {{ (!props.userTickets || props.userTickets.length === 0) ? 'No support tickets yet' : 'No tickets match your search' }}
-                            </p>
-                            <p v-if="!props.userTickets || props.userTickets.length === 0" class="text-xs text-muted-foreground mt-1">
-                                Submit your first ticket using the form on the left
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+                        <p class="text-sm text-muted-foreground">Troubleshoot payment recording and processing problems</p>
+                    </div>
 
-            <!-- Help Section -->
-            <Card class="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-                <CardContent class="p-6">
-                    <div class="flex items-start gap-4">
-                        <div class="rounded-full bg-blue-100 p-3">
-                            <HelpCircle class="h-6 w-6 text-blue-600" />
+                    <div class="rounded-xl border border-border bg-card p-6 cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="rounded-full bg-purple-100 p-3 text-purple-600">
+                                <Users class="h-6 w-6" />
+                            </div>
+                            <h3 class="font-semibold">Member Management</h3>
                         </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-blue-900 mb-2">Need Immediate Help?</h3>
-                            <div class="grid gap-2 text-sm text-blue-800">
-                                <p>• For urgent technical issues, please select "Urgent" priority</p>
-                                <p>• Include screenshots, error messages, and steps to reproduce the problem</p>
-                                <p>• Our support team typically responds within 24 hours for standard issues</p>
-                                <p>• Check our FAQ section for common solutions before submitting</p>
+                        <p class="text-sm text-muted-foreground">Add, edit, and manage member information</p>
+                    </div>
+
+                    <div class="rounded-xl border border-border bg-card p-6 cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="rounded-full bg-orange-100 p-3 text-orange-600">
+                                <Calendar class="h-6 w-6" />
+                            </div>
+                            <h3 class="font-semibold">Events & Calendar</h3>
+                        </div>
+                        <p class="text-sm text-muted-foreground">Create events and manage the organization calendar</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="rounded-xl border border-border bg-card p-6">
+                    <div class="mb-6 flex items-center justify-between">
+                        <h2 class="text-xl font-semibold">Frequently Asked Questions</h2>
+                        <HelpCircle class="h-5 w-5 text-muted-foreground" />
+                    </div>
+
+                    <div class="space-y-4">
+                        <div v-for="(faq, index) in faqs" :key="index" class="border-b border-border pb-4">
+                            <button class="flex w-full items-center justify-between text-left font-medium" @click="toggleFaq(index)">
+                                <span>{{ faq.question }}</span>
+                                <ChevronDown v-if="!faq.open" class="h-5 w-5 text-muted-foreground" />
+                                <ChevronUp v-else class="h-5 w-5 text-muted-foreground" />
+                            </button>
+                            <div v-if="faq.open" class="mt-2 text-muted-foreground">
+                                <p>{{ faq.answer }}</p>
                             </div>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+
+                <!-- Contact Support Section -->
+                <div class="grid gap-6 lg:grid-cols-2">
+                    <!-- Contact Form -->
+                    <div class="rounded-xl border border-border bg-card p-6">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h2 class="text-xl font-semibold">Contact Support</h2>
+                            <MessageCircle class="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        
+                        <form class="space-y-4" @submit.prevent="submitSupportRequest">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Name</label>
+                                <input 
+                                    type="text" 
+                                    v-model="formData.name"
+                                    class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-card"
+                                    required
+                                >
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Email</label>
+                                <input 
+                                    type="email" 
+                                    v-model="formData.email"
+                                    class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-card"
+                                    required
+                                >
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Subject</label>
+                                <select 
+                                    v-model="formData.subject"
+                                    class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-card"
+                                    required
+                                >
+                                    <option value="">Select a subject</option>
+                                    <option>Payment Issues</option>
+                                    <option>QR Code Problems</option>
+                                    <option>Member Management</option>
+                                    <option>Event Management</option>
+                                    <option>Technical Support</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Description</label>
+                                <textarea 
+                                    rows="4" 
+                                    v-model="formData.description"
+                                    class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-card"
+                                    required
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Attachments (optional)</label>
+                                <div class="flex items-center justify-center w-full">
+                                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer border-border bg-muted/50 hover:bg-muted/70 transition-colors">
+                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <Upload class="w-8 h-8 mb-3 text-muted-foreground" />
+                                            <p class="mb-2 text-sm text-muted-foreground">Click to upload or drag and drop</p>
+                                            <p class="text-xs text-muted-foreground" v-if="formData.attachments.length > 0">
+                                                {{ formData.attachments.length }} file(s) selected
+                                            </p>
+                                        </div>
+                                        <input type="file" class="hidden" @change="handleFileUpload" multiple />
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <Button type="submit" class="w-full">
+                                Submit Request
+                            </Button>
+                        </form>
+                    </div>
+
+                    <!-- Support Resources -->
+                    <div class="rounded-xl border border-border bg-card p-6">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h2 class="text-xl font-semibold">Support Resources</h2>
+                            <BookOpen class="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 border border-border rounded-lg">
+                                <h3 class="font-medium flex items-center gap-2 mb-2">
+                                    <FileText class="h-4 w-4 text-blue-600" />
+                                    User Guide & Documentation
+                                </h3>
+                                <p class="text-sm text-muted-foreground mb-3">Comprehensive guide to all PSITS Nexus features</p>
+                                <button class="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                                    Download PDF <Download class="h-4 w-4" />
+                                </button>
+                            </div>
+                            
+                            <div class="p-4 border border-border rounded-lg">
+                                <h3 class="font-medium flex items-center gap-2 mb-2">
+                                    <Video class="h-4 w-4 text-purple-600" />
+                                    Video Tutorials
+                                </h3>
+                                <p class="text-sm text-muted-foreground mb-3">Watch step-by-step tutorials on YouTube</p>
+                                <button class="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                                    Visit Channel <ExternalLink class="h-4 w-4" />
+                                </button>
+                            </div>
+                            
+                            <div class="p-4 border border-border rounded-lg">
+                                <h3 class="font-medium flex items-center gap-2 mb-2">
+                                    <MessageSquare class="h-4 w-4 text-green-600" />
+                                    Community Forum
+                                </h3>
+                                <p class="text-sm text-muted-foreground mb-3">Connect with other PSITS Nexus users</p>
+                                <button class="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                                    Join Discussion <ExternalLink class="h-4 w-4" />
+                                </button>
+                            </div>
+                            
+                            <div class="p-4 border border-border rounded-lg">
+                                <h3 class="font-medium flex items-center gap-2 mb-2">
+                                    <Phone class="h-4 w-4 text-orange-600" />
+                                    Direct Support
+                                </h3>
+                                <p class="text-sm text-muted-foreground mb-1">Email: support@psitsnexus.ph</p>
+                                <p class="text-sm text-muted-foreground mb-3">Phone: +63 (02) 1234-5678</p>
+                                <p class="text-xs text-muted-foreground">Available Monday-Friday, 8:00 AM - 5:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="rounded-xl border border-border bg-card p-6">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="text-xl font-semibold">System Status</h2>
+                        <div class="flex items-center gap-2">
+                            <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                            <span class="text-sm text-green-600">All Systems Operational</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div class="p-4 border border-border rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-medium">Payment Processing</h3>
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                            </div>
+                            <p class="text-sm text-muted-foreground">No issues detected</p>
+                        </div>
+                        
+                        <div class="p-4 border border-border rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-medium">QR Code Generation</h3>
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                            </div>
+                            <p class="text-sm text-muted-foreground">No issues detected</p>
+                        </div>
+                        
+                        <div class="p-4 border border-border rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-medium">Database Services</h3>
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                            </div>
+                            <p class="text-sm text-muted-foreground">No issues detected</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 text-sm text-muted-foreground">
+                        <p>Last updated: September 21, 2023 at 10:30 AM</p>
+                        <a href="#" class="text-blue-600 hover:underline">View incident history</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </AppLayout>
 </template>
