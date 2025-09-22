@@ -22,7 +22,7 @@ class UserController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'student_id' => $user->student_id ?? '',
-                    'program' => $user->program ?? '',
+                    'program' => $user->program ?? '', 
                     'year' => $user->year ?? '',
                     'role' => $user->role,
                     'status' => $user->status,
