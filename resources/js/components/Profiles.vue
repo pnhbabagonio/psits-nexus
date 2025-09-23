@@ -10,7 +10,10 @@ import {
     Trash2,
     Eye,
     Download,
+    QrCode,
 } from "lucide-vue-next"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 // --- Types ---
 interface UserProfile {
@@ -266,24 +269,28 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
 </script>
 
 <template>
-    <div class="p-6 text-gray-200">
+    <div class="p-6 text-foreground">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold">User Payment Profiles</h2>
+            <div>
+                <h2 class="text-2xl font-bold">User Payment Profiles</h2>
+                <p class="text-muted-foreground">Manage student payment records and requirements</p>
+            </div>
             <div class="flex items-center gap-3">
-                <button
+                <Button
                     @click="scanQR"
-                    class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium"
+                    variant="outline"
+                    class="gap-2"
                 >
-                Scan QR
-                </button>
+                    <QrCode class="w-4 h-4" /> Scan QR
+                </Button>
 
-                <button
+                <Button
                     @click="openAddModal"
-                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                    class="gap-2"
                 >
                     <Plus class="w-4 h-4" /> Add User
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -292,42 +299,43 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
         
             <!-- Search -->
             <div
-                class="flex items-center flex-1 bg-[#1E293B] border border-gray-700 rounded-lg px-3 py-2"
+                class="flex items-center flex-1 bg-muted border border-border rounded-lg px-3 py-2"
             >
-                <Search class="w-4 h-4 text-gray-400" />
+                <Search class="w-4 h-4 text-muted-foreground" />
                 <input
                     v-model="search"
                     type="text"
                     placeholder="Search users..."
-                    class="ml-2 flex-1 bg-transparent text-sm focus:outline-none text-gray-200"
+                    class="ml-2 flex-1 bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground"
                 />
             </div>
 
             <!-- Filter (course) -->
             <div class="relative">
-                <button
+                <Button
                     @click="isFilterOpen = !isFilterOpen"
-                    class="flex items-center gap-2 px-3 py-2 bg-[#1E293B] hover:bg-gray-700 rounded text-sm"
+                    variant="outline"
+                    class="gap-2"
                 >
-                <Filter class="w-4 h-4 text-gray-400" />
-                <span>{{ courseFilter }}</span>
-                <ChevronDown
-                    class="w-4 h-4 transition-transform"
-                    :class="{ 'rotate-180': isFilterOpen }"
-                />
-                </button>
+                    <Filter class="w-4 h-4" />
+                    <span>{{ courseFilter }}</span>
+                    <ChevronDown
+                        class="w-4 h-4 transition-transform"
+                        :class="{ 'rotate-180': isFilterOpen }"
+                    />
+                </Button>
 
                 <!-- Dropdown -->
                 <div
                     v-if="isFilterOpen"
-                    class="absolute right-0 mt-2 w-40 bg-[#1E293B] border border-gray-700 rounded-lg shadow-lg z-10"
+                    class="absolute right-0 mt-2 w-40 bg-card border border-border rounded-lg shadow-lg z-10 overflow-hidden"
                 >
                     <button
                         v-for="option in filterOptions"
                         :key="option"
                         @click="courseFilter = option; isFilterOpen = false"
-                        class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700"
-                        :class="{ 'bg-gray-700 text-white': courseFilter === option }"
+                        class="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                        :class="{ 'bg-muted': courseFilter === option }"
                     >
                         {{ option }}
                     </button>
@@ -335,13 +343,13 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
             </div>
 
             <!-- Clear Filter -->
-            <button
+            <Button
                 v-if="courseFilter !== 'All' || search"
                 @click="courseFilter = 'All'; search = ''"
-                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
+                variant="outline"
             >
                 Clear
-            </button>
+            </Button>
         </div>
 
         <!-- User Cards -->
@@ -349,37 +357,37 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
             <div
                 v-for="user in filteredUsers"
                 :key="user.id"
-                class="bg-[#0F172A] rounded-xl border border-gray-700 shadow p-5"
+                class="bg-card rounded-xl border border-border p-5"
             >
 
                 <!-- Profile Info -->
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center">
-                        <span class="text-blue-300 font-bold text-sm">
+                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span class="text-primary font-bold text-sm">
                         {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
                         </span>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-100">
+                        <h3 class="font-semibold">
                         {{ user.firstName }} {{ user.lastName }}
                         </h3>
-                        <p class="text-sm text-gray-400">{{ user.course }}</p>
+                        <p class="text-sm text-muted-foreground">{{ user.course }}</p>
                     </div>
                 </div>
 
                 <!-- Payment Stats -->
                 <div class="text-sm space-y-1 mb-4">
                     <p>
-                        <span class="font-medium text-gray-300">Balance:</span>
-                        <span class="ml-2 font-semibold text-gray-100">₱{{ user.totalBalance }}</span>
+                        <span class="font-medium text-muted-foreground">Balance:</span>
+                        <span class="ml-2 font-semibold">₱{{ user.totalBalance }}</span>
                     </p>
                     <p>
-                        <span class="font-medium text-gray-300">Paid:</span>
-                        <span class="ml-2 text-green-400 font-semibold">₱{{ user.totalPaid }}</span>
+                        <span class="font-medium text-muted-foreground">Paid:</span>
+                        <span class="ml-2 text-green-600 font-semibold">₱{{ user.totalPaid }}</span>
                     </p>
                     <p>
-                        <span class="font-medium text-gray-300">Unpaid:</span>
-                        <span class="ml-2 text-red-400 font-semibold">₱{{ user.totalUnpaid }}</span>
+                        <span class="font-medium text-muted-foreground">Unpaid:</span>
+                        <span class="ml-2 text-red-600 font-semibold">₱{{ user.totalUnpaid }}</span>
                     </p>
                 </div>
 
@@ -388,7 +396,7 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
                 
                     <!-- Paid -->
                     <div
-                        class="bg-green-900/30 text-green-400 rounded-lg flex flex-col items-center justify-center py-3"
+                        class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded-lg flex flex-col items-center justify-center py-3"
                     >
                         <span class="text-lg font-bold">✔ {{ user.paidRequirements.length }}</span>
                         <span class="text-xs">Paid Requirements</span>
@@ -396,7 +404,7 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
 
                     <!-- Unpaid -->
                     <div
-                        class="bg-red-900/30 text-red-400 rounded-lg flex flex-col items-center justify-center py-3"
+                        class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded-lg flex flex-col items-center justify-center py-3"
                     >
                         <span class="text-lg font-bold">✘ {{ user.unpaidRequirements.length }}</span>
                         <span class="text-xs">Unpaid Requirements</span>
@@ -405,64 +413,72 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2">
-                    <button
+                    <Button
                         @click="openDetails(user)"
-                        class="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm"
+                        class="flex-1 gap-2"
                     >
                         <Eye class="w-4 h-4" /> View Details
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="openEditModal(user)"
-                        class="p-2 rounded-lg hover:bg-yellow-600/20 transition"
+                        variant="ghost"
+                        size="icon"
                     >
-                        <Pencil class="w-4 h-4 text-yellow-500" />
-                    </button>
-                    <button
+                        <Pencil class="w-4 h-4" />
+                    </Button>
+                    <Button
                         @click="deleteUser(user.id)"
-                        class="p-2 rounded-lg hover:bg-red-600/20 transition"
+                        variant="ghost"
+                        size="icon"
                     >
-                        <Trash2 class="w-4 h-4 text-red-500" />
-                    </button>
+                        <Trash2 class="w-4 h-4" />
+                    </Button>
                 </div>
             </div>
+        </div>
+
+        <!-- Empty state -->
+        <div v-if="filteredUsers.length === 0" class="text-center py-12 text-muted-foreground">
+            <Search class="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No users found</p>
         </div>
 
         <!-- Add/Edit User Modal -->
         <div
             v-if="showModal"
-            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50"
+            class="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50"
         >
-            <div class="bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-lg">
+            <div class="bg-card border border-border rounded-xl p-6 w-full max-w-md shadow-lg">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">
                         {{ editingUser ? "Edit User" : "Add User" }}
                     </h3>
-                    <button @click="showModal = false" class="text-gray-400 hover:text-white">
+                    <Button @click="showModal = false" variant="ghost" size="icon">
                         <X class="w-5 h-5" />
-                    </button>
+                    </Button>
                 </div>
                 <form @submit.prevent="saveUser" class="space-y-4">
                     <div>
-                        <label class="block text-sm text-gray-400">First Name</label>
+                        <label class="block text-sm text-muted-foreground mb-1">First Name</label>
                         <input
                             v-model="newUser.firstName"
                             type="text"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Last Name</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Last Name</label>
                         <input
                             v-model="newUser.lastName"
                             type="text"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Course</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Course</label>
                         <select
                             v-model="newUser.course"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         >
                             <option disabled value="">Select course</option>
                             <option v-for="option in filterOptions.slice(1)" :key="option" :value="option">
@@ -471,38 +487,37 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Year</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Year</label>
                         <input
                             v-model="newUser.year"
                             type="text"
                             placeholder="e.g. 2nd Year"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400">Section</label>
+                        <label class="block text-sm text-muted-foreground mb-1">Section</label>
                         <input
                             v-model="newUser.section"
                             type="text"
                             placeholder="e.g. A"
-                            class="w-full px-3 py-2 mt-1 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
                         />
                     </div>
 
-                    <div class="flex justify-end gap-2 mt-4">
-                        <button
+                    <div class="flex justify-end gap-2 mt-6">
+                        <Button
                             type="button"
                             @click="showModal = false"
-                            class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm"
-                            >
-                            Cancel
-                            </button>
-                            <button
-                            type="submit"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm"
+                            variant="outline"
                         >
-                        {{ editingUser ? "Save Changes" : "Add" }}
-                        </button>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                        >
+                            {{ editingUser ? "Save Changes" : "Add" }}
+                        </Button>
                     </div>
                 </form>
             </div>
@@ -511,57 +526,58 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
         <!-- View Details Modal -->
         <div
             v-if="showDetailsModal && selectedUser"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            class="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         >
             <div
-                class="bg-gray-900 p-8 rounded-2xl shadow-2xl w-[950px] max-h-[95vh] overflow-y-auto flex flex-col"
+                class="bg-card border border-border p-8 rounded-xl shadow-lg w-[950px] max-h-[95vh] overflow-y-auto flex flex-col"
             >
                 
                 <!-- Header -->
-                <div class="flex justify-between items-center border-b border-gray-700 pb-4 mb-6">
-                    <h2 class="text-2xl font-bold text-white">
+                <div class="flex justify-between items-center border-b border-border pb-4 mb-6">
+                    <h2 class="text-2xl font-bold">
                         {{ selectedUser.firstName }} {{ selectedUser.lastName }}
                     </h2>
-                    <button
+                    <Button
                         @click="showDetailsModal = false"
-                        class="text-gray-400 hover:text-gray-200"
+                        variant="ghost"
+                        size="icon"
                     >
                         <X class="w-6 h-6" />
-                    </button>
+                    </Button>
                 </div>
 
                 <!-- Two Column Layout -->
                 <div class="grid grid-cols-2 gap-6">
                 
                     <!-- Left Column: Student Info -->
-                    <div class="space-y-3 bg-gray-800 p-5 rounded-lg border border-gray-700">
+                    <div class="space-y-3 bg-muted p-5 rounded-lg border border-border">
                         <p class="text-lg">
-                            <span class="font-semibold text-gray-400">Course:</span>
-                            <span class="ml-2 font-bold text-white">{{ selectedUser.course }}</span>
+                            <span class="font-semibold text-muted-foreground">Course:</span>
+                            <span class="ml-2 font-bold">{{ selectedUser.course }}</span>
                         </p>
                         <p class="text-lg">
-                            <span class="font-semibold text-gray-400">Year & Section:</span>
-                            <span class="ml-2 font-bold text-white">{{ selectedUser.year }} - {{ selectedUser.section }}</span>
+                            <span class="font-semibold text-muted-foreground">Year & Section:</span>
+                            <span class="ml-2 font-bold">{{ selectedUser.year }} - {{ selectedUser.section }}</span>
                         </p>
                         <p class="text-lg">
-                            <span class="font-semibold text-gray-400">Total Balance:</span>
-                            <span class="ml-2 font-bold text-blue-400">₱{{ selectedUser.totalBalance }}</span>
+                            <span class="font-semibold text-muted-foreground">Total Balance:</span>
+                            <span class="ml-2 font-bold text-blue-600">₱{{ selectedUser.totalBalance }}</span>
                         </p>
                         <p class="text-lg">
-                            <span class="font-semibold text-gray-400">Total Paid:</span>
-                            <span class="ml-2 font-bold text-green-400">₱{{ selectedUser.totalPaid }}</span>
+                            <span class="font-semibold text-muted-foreground">Total Paid:</span>
+                            <span class="ml-2 font-bold text-green-600">₱{{ selectedUser.totalPaid }}</span>
                         </p>
                         <p class="text-lg">
-                            <span class="font-semibold text-gray-400">Total Unpaid:</span>
-                            <span class="ml-2 font-bold text-red-400">₱{{ selectedUser.totalUnpaid }}</span>
+                            <span class="font-semibold text-muted-foreground">Total Unpaid:</span>
+                            <span class="ml-2 font-bold text-red-600">₱{{ selectedUser.totalUnpaid }}</span>
                         </p>
                         <p class="text-lg">
-                            <span class="font-semibold text-gray-400">Paid Requirements:</span>
-                            <span class="ml-2 font-bold text-green-400">{{ selectedUser.paidRequirements.length }}</span>
+                            <span class="font-semibold text-muted-foreground">Paid Requirements:</span>
+                            <span class="ml-2 font-bold text-green-600">{{ selectedUser.paidRequirements.length }}</span>
                         </p>
                         <p class="text-lg">
-                            <span class="font-semibold text-gray-400">Unpaid Requirements:</span>
-                            <span class="ml-2 font-bold text-red-400">{{ selectedUser.unpaidRequirements.length }}</span>
+                            <span class="font-semibold text-muted-foreground">Unpaid Requirements:</span>
+                            <span class="ml-2 font-bold text-red-600">{{ selectedUser.unpaidRequirements.length }}</span>
                         </p>
                     </div>
 
@@ -569,29 +585,33 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
                     <div class="space-y-4">
                         <!-- Search + Filter -->
                         <div class="flex items-center justify-between mb-2">
-                            <input
-                                v-model="requirementSearch"
-                                type="text"
-                                placeholder="Search requirements..."
-                                class="bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 text-sm w-2/3"
-                            />
+                            <div class="flex items-center flex-1 bg-muted border border-border rounded-lg px-3 py-2 mr-2">
+                                <Search class="w-4 h-4 text-muted-foreground" />
+                                <input
+                                    v-model="requirementSearch"
+                                    type="text"
+                                    placeholder="Search requirements..."
+                                    class="ml-2 flex-1 bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground"
+                                />
+                            </div>
                             <div class="relative">
-                                <button
+                                <Button
                                     @click="isRequirementFilterOpen = !isRequirementFilterOpen"
-                                    class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-lg text-sm"
+                                    variant="outline"
+                                    class="gap-2"
                                 >
                                     <Filter class="w-4 h-4" /> {{ requirementFilter }}
                                     <ChevronDown class="w-4 h-4" />
-                                </button>
+                                </Button>
                                 <div
                                     v-if="isRequirementFilterOpen"
-                                    class="absolute right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg w-40 z-10"
+                                    class="absolute right-0 mt-2 bg-card border border-border rounded-lg shadow-lg w-40 z-10 overflow-hidden"
                                 >
                                     <button
                                         v-for="opt in ['All','Recent','Old','Paid','Unpaid']"
                                         :key="opt"
                                         @click="requirementFilter = opt; isRequirementFilterOpen = false"
-                                        class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                        class="block w-full text-left px-4 py-2 text-sm hover:bg-muted"
                                     >
                                         {{ opt }}
                                     </button>
@@ -604,39 +624,47 @@ const filteredRequirements = computed<CombinedReq[]>(() => {
                             <div
                                 v-for="(req, i) in filteredRequirements"
                                 :key="i"
-                                class="p-4 rounded-lg border border-gray-700 bg-gray-800 flex justify-between items-center"
+                                class="p-4 rounded-lg border border-border bg-muted flex justify-between items-center"
                             >
                                 <div>
                                     <p class="font-medium">
-                                        <span v-if="req.status === 'paid'" class="text-green-400">✔</span>
-                                        <span v-else class="text-red-400">✘</span>
+                                        <span v-if="req.status === 'paid'" class="text-green-600">✔</span>
+                                        <span v-else class="text-red-600">✘</span>
                                         {{ req.name }}
                                     </p>
-                                    <p class="text-sm text-gray-400">
+                                    <p class="text-sm text-muted-foreground">
                                         Date: {{ new Date(req.date).toLocaleDateString() }}
                                     </p>
-                                    <p v-if="req.overdue" class="text-sm text-red-400">(Overdue)</p>
+                                    <Badge v-if="req.overdue" variant="destructive" class="mt-1 text-xs">
+                                        Overdue
+                                    </Badge>
                                 </div>
                                 <p class="font-semibold">₱{{ req.amount }}</p>
                             </div>
+                        </div>
+
+                        <!-- Empty state for requirements -->
+                        <div v-if="filteredRequirements.length === 0" class="text-center py-8 text-muted-foreground">
+                            <Search class="h-8 w-8 mx-auto mb-2 opacity-50" />
+                            <p>No requirements found</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Footer -->
-                <div class="flex justify-end gap-2 mt-6 border-t border-gray-700 pt-4">
-                    <button
+                <div class="flex justify-end gap-2 mt-6 border-t border-border pt-4">
+                    <Button
                         @click="exportReceipt(selectedUser)"
-                        class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm"
+                        class="gap-2"
                     >
                         <Download class="w-4 h-4" /> Export
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="showDetailsModal = false"
-                        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm"
+                        variant="outline"
                     >
                         Close
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
