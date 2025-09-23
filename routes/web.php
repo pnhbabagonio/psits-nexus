@@ -135,5 +135,10 @@ Route::get('platform-guide', function () {
     // This should match resources/js/Pages/PlatformGuide.vue
 })->middleware(['auth', 'verified'])->name('platform-guide');
 
+// ✅ Registration Pending Page (Added)
+Route::get('/registration-pending', function () {
+    return Inertia::render('auth/RegistrationPending');
+})->name('registration.pending');
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
