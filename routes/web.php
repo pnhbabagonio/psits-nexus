@@ -10,11 +10,31 @@ use App\Http\Controllers\HelpSupportController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\TransactionController; // ✅ Added earlier
 use App\Http\Controllers\PaymentController;     // ✅ Add this for payments
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
+
+// Forgot password (request reset link)
+Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.request');
+
+Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.email');
+
+// Reset password (form + store new password)
+Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.reset');
+
+Route::post('reset-password', [NewPasswordController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.store');
 
 // Replace the dashboard closure with controller
 Route::get('dashboard', [DashboardController::class, 'index'])
