@@ -33,6 +33,38 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    // Add the new fields for user management
+    student_id?: string;
+    program?: string;
+    year?: string;
+    role: 'Member' | 'Officer' | 'Admin';
+    status: 'active' | 'inactive';
+    last_login: string;
+    // Optional fields that might be useful
+    first_name?: string;
+    middle_name?: string;
+    last_name?: string;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
+
+// Add additional interfaces for user management
+export interface UserStats {
+    total: number;
+    active: number;
+    inactive: number;
+    admins: number;
+    officers: number;
+    members: number;
+}
+
+export interface UserFormData {
+    name: string;
+    email: string;
+    studentId: string;
+    program: string;
+    year: string;
+    role: 'Member' | 'Officer' | 'Admin';
+    status: 'active' | 'inactive';
+    lastLogin: string;
+}

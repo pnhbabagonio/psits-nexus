@@ -17,7 +17,10 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'name',       // still used by Laravel auth
         'email',
         'password',
         'student_id', 
@@ -39,7 +42,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -53,20 +56,15 @@ class User extends Authenticatable
     }
 
     /**
-     * Send the password reset notification.
-     * This overrides the default method and queues the notification.
-     *
-     * @param  string  $token
-     * @return void
+     * Send the password reset notification (queued).
      */
     public function sendPasswordResetNotification($token)
     {
-        // This will queue the notification instead of sending it immediately
         $this->notify(new QueuedResetPasswordNotification($token));
     }
 
     /**
-     * Accessor for formatted last login date
+     * Accessor for formatted last login date.
      */
     public function getFormattedLastLoginAttribute()
     {
@@ -74,7 +72,16 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope for active users
+     * Accessor for full name.
+     */
+    public function getFullNameAttribute(): string
+    {
+        $parts = array_filter([$this->first_name, $this->middle_name, $this->last_name]);
+        return implode(' ', $parts) ?: $this->name; // fallback to old "name" field
+    }
+
+    /**
+     * Scope for active users.
      */
     public function scopeActive($query)
     {
@@ -82,7 +89,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope for specific role
+     * Scope for specific role.
      */
     public function scopeRole($query, $role)
     {
