@@ -38,7 +38,7 @@ export interface User {
     program?: string;
     year?: string;
     role: 'Member' | 'Officer' | 'Admin';
-    status: 'active' | 'inactive';
+    status: 'active' | 'inactive' | 'pending';
     last_login: string;
     // Optional fields that might be useful
     first_name?: string;

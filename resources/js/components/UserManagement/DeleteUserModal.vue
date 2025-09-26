@@ -1,6 +1,6 @@
 <!-- /resources/components/UserManagement/DeleteUserModal.vue -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 
 interface User {
@@ -18,9 +18,15 @@ const emit = defineEmits<{
 }>()
 
 const isDeleting = ref(false)
+const confirmName = ref('')
 const errors = ref<Record<string, string>>({})
 
+// Only allow delete when input matches user's name
+const isConfirmValid = computed(() => confirmName.value.trim() === props.user.name)
+
 const deleteUser = () => {
+    if (!isConfirmValid.value) return
+    
     isDeleting.value = true
     
     router.delete(`/users/${props.user.id}`, {
@@ -64,7 +70,7 @@ document.addEventListener('keydown', handleEscape)
             </div>
 
             <!-- Modal Body -->
-            <div class="p-6">
+            <div class="p-6 space-y-4">
                 <div class="flex items-start gap-4">
                     <svg class="w-8 h-8 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -75,12 +81,28 @@ document.addEventListener('keydown', handleEscape)
                     </svg>
                     <div>
                         <p class="text-gray-300">
-                            Are you sure you want to delete <span class="font-semibold text-white">{{ user.name }}</span>?
+                            Are you sure you want to <span class="text-red-400 font-semibold">permanently delete</span> 
+                            the user <span class="font-semibold text-white">{{ user.name }}</span>?
                         </p>
-                        <p class="text-sm text-gray-400 mt-1">This action cannot be undone.</p>
+                        <p class="text-sm text-gray-400 mt-1">This action <span class="text-red-400 font-medium">cannot</span> be undone.</p>
                     </div>
                 </div>
-                <p v-if="errors.general" class="mt-4 text-sm text-red-400">{{ errors.general }}</p>
+
+                <!-- Confirmation Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        Please type <span class="text-white font-semibold">{{ user.name }}</span> to confirm:
+                    </label>
+                    <input
+                        v-model="confirmName"
+                        type="text"
+                        class="w-full bg-gray-700 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors"
+                        :class="isConfirmValid ? 'border-gray-600 focus:ring-green-500' : 'border-red-500 focus:ring-red-500'"
+                        placeholder="Enter user name"
+                    />
+                </div>
+
+                <p v-if="errors.general" class="text-sm text-red-400">{{ errors.general }}</p>
             </div>
 
             <!-- Modal Footer -->
@@ -96,7 +118,7 @@ document.addEventListener('keydown', handleEscape)
                 <button
                     @click="deleteUser"
                     class="bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                    :disabled="isDeleting"
+                    :disabled="isDeleting || !isConfirmValid"
                 >
                     <svg v-if="isDeleting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

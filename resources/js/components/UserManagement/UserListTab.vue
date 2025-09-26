@@ -1,7 +1,22 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EditUserModal from './EditUserModal.vue'
 import DeleteUserModal from './DeleteUserModal.vue'
+import {
+  Search,
+  ChevronDown,
+  Pencil,
+  Trash2,
+  User,
+  Calendar,
+  Filter,
+  ArrowUpDown
+} from "lucide-vue-next"
 
 interface User {
     id: number
@@ -11,7 +26,7 @@ interface User {
     program: string
     year: string
     role: 'Member' | 'Officer' | 'Admin'
-    status: 'active' | 'inactive'
+    status: 'active' | 'inactive' | 'pending'  // CHANGED: Added pending status
     last_login: string
 }
 
@@ -25,9 +40,10 @@ const showDeleteModal = ref(false)
 const selectedUser = ref<User | null>(null)
 const searchQuery = ref("")
 const roleFilter = ref("all")
-const statusFilter = ref("all")
+const statusFilter = ref("all")  // CHANGED: Now includes 'pending'
 const sortField = ref("id")
 const sortDirection = ref("desc")
+const isFilterOpen = ref(false)  // CHANGED: Added for dropdown state
 
 // Computed
 const filteredAndSortedUsers = computed(() => {
@@ -55,6 +71,34 @@ const filteredAndSortedUsers = computed(() => {
         }
     })
 })
+
+// CHANGED: Updated to use shadcn/ui Badge variants
+const getRoleVariant = (role: string) => {
+    switch (role) {
+        case 'Admin': return 'destructive'
+        case 'Officer': return 'default'
+        case 'Member': return 'secondary'
+        default: return 'outline'
+    }
+}
+
+// CHANGED: Updated to use shadcn/ui Badge variants and added pending status
+const getStatusVariant = (status: string) => {
+    switch (status) {
+        case 'active': return 'default'
+        case 'inactive': return 'destructive'
+        case 'pending': return 'outline'
+        default: return 'secondary'
+    }
+}
+
+// CHANGED: Updated sort icon function to use Lucide icons
+const getSortIcon = (field: string) => {
+    if (sortField.value !== field) {
+        return ArrowUpDown
+    }
+    return sortDirection.value === 'asc' ? ChevronDown : ChevronDown
+}
 
 // Methods
 const openEditModal = (user: User) => {
@@ -86,240 +130,306 @@ const sortBy = (field: string) => {
     }
 }
 
-const getRoleColor = (role: string) => {
-    switch (role) {
-        case 'Admin': return 'bg-red-900/50 text-red-200 border-red-700'
-        case 'Officer': return 'bg-blue-900/50 text-blue-200 border-blue-700'
-        case 'Member': return 'bg-green-900/50 text-green-200 border-green-700'
-        default: return 'bg-gray-900/50 text-gray-200 border-gray-700'
-    }
-}
-
-const getStatusColor = (status: string) => {
-    return status === 'active' 
-        ? 'bg-green-900/50 text-green-200 border-green-700'
-        : 'bg-red-900/50 text-red-200 border-red-700'
-}
-
-const getSortIcon = (field: string) => {
-    if (sortField.value !== field) {
-        return '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>'
-    }
-    
-    return sortDirection.value === 'asc' 
-        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>'
-        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path>'
+// CHANGED: Added function to clear all filters
+const clearFilters = () => {
+    searchQuery.value = ""
+    roleFilter.value = "all"
+    statusFilter.value = "all"
 }
 </script>
 
 <template>
-    <div class="space-y-6">
-        <!-- Header with filters -->
-        <div class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+    <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-xl font-semibold text-white">All Users</h2>
-                <p class="text-gray-400">{{ filteredAndSortedUsers.length }} users found</p>
-            </div>
-            
-            <!-- Search and Filters -->
-            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                <div class="relative">
-                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    <input
-                        v-model="searchQuery"
-                        type="text"
-                        placeholder="Search users..."
-                        class="pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 w-full sm:w-64"
-                    />
-                </div>
-                
-                <select
-                    v-model="roleFilter"
-                    class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                >
-                    <option value="all">All Roles</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Officer">Officer</option>
-                    <option value="Member">Member</option>
-                </select>
-                
-                <select
-                    v-model="statusFilter"
-                    class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                >
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
+                <h1 class="text-2xl font-bold text-foreground">User Management</h1>
+                <p class="text-muted-foreground">Manage and track all system users</p>
             </div>
         </div>
 
-        <!-- Users Table -->
-        <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-900">
-                        <tr>
-                            <th class="text-left px-6 py-3">
-                                <button 
-                                    @click="sortBy('name')"
-                                    class="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                                >
-                                    Name
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <g v-html="getSortIcon('name')"></g>
-                                    </svg>
-                                </button>
-                            </th>
-                            <th class="text-left px-6 py-3">
-                                <button 
-                                    @click="sortBy('email')"
-                                    class="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                                >
-                                    Email
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <g v-html="getSortIcon('email')"></g>
-                                    </svg>
-                                </button>
-                            </th>
-                            <th class="text-left px-6 py-3 text-sm font-medium text-gray-300">Student ID</th>
-                            <th class="text-left px-6 py-3">
-                                <button 
-                                    @click="sortBy('program')"
-                                    class="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                                >
-                                    Program
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <g v-html="getSortIcon('program')"></g>
-                                    </svg>
-                                </button>
-                            </th>
-                            <th class="text-left px-6 py-3">
-                                <button 
-                                    @click="sortBy('year')"
-                                    class="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                                >
-                                    Year
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <g v-html="getSortIcon('year')"></g>
-                                    </svg>
-                                </button>
-                            </th>
-                            <th class="text-left px-6 py-3">
-                                <button 
-                                    @click="sortBy('role')"
-                                    class="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                                >
-                                    Role
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <g v-html="getSortIcon('role')"></g>
-                                    </svg>
-                                </button>
-                            </th>
-                            <th class="text-left px-6 py-3">
-                                <button 
-                                    @click="sortBy('status')"
-                                    class="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                                >
-                                    Status
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <g v-html="getSortIcon('status')"></g>
-                                    </svg>
-                                </button>
-                            </th>
-                            <th class="text-left px-6 py-3">
-                                <button 
-                                    @click="sortBy('last_login')"
-                                    class="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                                >
-                                    Last Login
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <g v-html="getSortIcon('last_login')"></g>
-                                    </svg>
-                                </button>
-                            </th>
-                            <th class="text-left px-6 py-3 text-sm font-medium text-gray-300">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        <tr v-for="user in filteredAndSortedUsers" :key="user.id" class="hover:bg-gray-750 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-8 w-8 bg-blue-900/50 rounded-full flex items-center justify-center">
-                                        <span class="text-sm font-medium text-blue-200">{{ user.name.charAt(0).toUpperCase() }}</span>
-                                    </div>
-                                    <div class="ml-3">
-                                        <div class="text-sm font-medium text-white">{{ user.name }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-300">{{ user.email }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-300">{{ user.student_id || '-' }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-300">{{ user.program || '-' }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-300">{{ user.year || '-' }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="getRoleColor(user.role)">
-                                    {{ user.role }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="getStatusColor(user.status)">
-                                    {{ user.status }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-300">{{ user.last_login }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center gap-2">
-                                    <button 
-                                        @click="openEditModal(user)"
-                                        class="text-blue-400 hover:text-blue-300 p-1 rounded transition-colors"
-                                        title="Edit User"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
-                                    <button 
-                                        @click="openDeleteModal(user)"
-                                        class="text-red-400 hover:text-red-300 p-1 rounded transition-colors"
-                                        title="Delete User"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        
-                        <!-- Empty State -->
-                        <tr v-if="filteredAndSortedUsers.length === 0">
-                            <td colspan="9" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center">
-                                    <svg class="w-12 h-12 text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                    </svg>
-                                    <h3 class="text-lg font-medium text-gray-400 mb-1">No users found</h3>
-                                    <p class="text-gray-500">Try adjusting your search or filter criteria</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Search + Filter -->
+        <div class="flex flex-wrap items-center gap-3">
+            <!-- Search -->
+            <div class="relative flex-1 min-w-[300px]">
+                <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    v-model="searchQuery"
+                    placeholder="Search users..."
+                    class="pl-9"
+                />
             </div>
+
+            <!-- Role Filter Dropdown -->
+            <DropdownMenu v-model:open="isFilterOpen">
+                <DropdownMenuTrigger as-child>
+                    <Button variant="outline" class="gap-2">
+                        <Filter class="h-4 w-4" />
+                        {{ roleFilter === 'all' ? 'All Roles' : roleFilter }}
+                        <ChevronDown 
+                            class="h-4 w-4 transition-transform"
+                            :class="{ 'rotate-180': isFilterOpen }"
+                        />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                        @click="roleFilter = 'all'"
+                        :class="{ 'bg-accent': roleFilter === 'all' }"
+                    >
+                        All Roles
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                        @click="roleFilter = 'Admin'"
+                        :class="{ 'bg-accent': roleFilter === 'Admin' }"
+                    >
+                        Admin
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                        @click="roleFilter = 'Officer'"
+                        :class="{ 'bg-accent': roleFilter === 'Officer' }"
+                    >
+                        Officer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                        @click="roleFilter = 'Member'"
+                        :class="{ 'bg-accent': roleFilter === 'Member' }"
+                    >
+                        Member
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <!-- Status Filter Dropdown -->
+            <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                    <Button variant="outline" class="gap-2">
+                        <Filter class="h-4 w-4" />
+                        {{ statusFilter === 'all' ? 'All Status' : statusFilter }}
+                        <ChevronDown class="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                        @click="statusFilter = 'all'"
+                        :class="{ 'bg-accent': statusFilter === 'all' }"
+                    >
+                        All Status
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                        @click="statusFilter = 'active'"
+                        :class="{ 'bg-accent': statusFilter === 'active' }"
+                    >
+                        Active
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                        @click="statusFilter = 'inactive'"
+                        :class="{ 'bg-accent': statusFilter === 'inactive' }"
+                    >
+                        Inactive
+                    </DropdownMenuItem>
+                    <!-- CHANGED: Added pending filter option -->
+                    <DropdownMenuItem 
+                        @click="statusFilter = 'pending'"
+                        :class="{ 'bg-accent': statusFilter === 'pending' }"
+                    >
+                        Pending
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <!-- Clear Filters -->
+            <Button
+                v-if="roleFilter !== 'all' || statusFilter !== 'all' || searchQuery"
+                @click="clearFilters"
+                variant="destructive"
+                size="sm"
+            >
+                Clear Filters
+            </Button>
         </div>
+
+        <!-- Users Table Card -->
+        <Card>
+            <CardHeader>
+                <CardTitle>All Users</CardTitle>
+                <CardDescription>
+                    {{ filteredAndSortedUsers.length }} users found
+                </CardDescription>
+            </CardHeader>
+            <CardContent class="p-0">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="border-b">
+                            <tr>
+                                <th class="text-left px-6 py-3">
+                                    <Button 
+                                        @click="sortBy('name')"
+                                        variant="ghost"
+                                        class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground p-0 h-auto"
+                                    >
+                                        Name
+                                        <component :is="getSortIcon('name')" class="h-4 w-4" />
+                                    </Button>
+                                </th>
+                                <th class="text-left px-6 py-3">
+                                    <Button 
+                                        @click="sortBy('email')"
+                                        variant="ghost"
+                                        class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground p-0 h-auto"
+                                    >
+                                        Email
+                                        <component :is="getSortIcon('email')" class="h-4 w-4" />
+                                    </Button>
+                                </th>
+                                <th class="text-left px-6 py-3 text-sm font-medium text-muted-foreground">Student ID</th>
+                                <th class="text-left px-6 py-3">
+                                    <Button 
+                                        @click="sortBy('program')"
+                                        variant="ghost"
+                                        class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground p-0 h-auto"
+                                    >
+                                        Program
+                                        <component :is="getSortIcon('program')" class="h-4 w-4" />
+                                    </Button>
+                                </th>
+                                <th class="text-left px-6 py-3">
+                                    <Button 
+                                        @click="sortBy('year')"
+                                        variant="ghost"
+                                        class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground p-0 h-auto"
+                                    >
+                                        Year
+                                        <component :is="getSortIcon('year')" class="h-4 w-4" />
+                                    </Button>
+                                </th>
+                                <th class="text-left px-6 py-3">
+                                    <Button 
+                                        @click="sortBy('role')"
+                                        variant="ghost"
+                                        class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground p-0 h-auto"
+                                    >
+                                        Role
+                                        <component :is="getSortIcon('role')" class="h-4 w-4" />
+                                    </Button>
+                                </th>
+                                <th class="text-left px-6 py-3">
+                                    <Button 
+                                        @click="sortBy('status')"
+                                        variant="ghost"
+                                        class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground p-0 h-auto"
+                                    >
+                                        Status
+                                        <component :is="getSortIcon('status')" class="h-4 w-4" />
+                                    </Button>
+                                </th>
+                                <th class="text-left px-6 py-3">
+                                    <Button 
+                                        @click="sortBy('last_login')"
+                                        variant="ghost"
+                                        class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground p-0 h-auto"
+                                    >
+                                        Last Login
+                                        <component :is="getSortIcon('last_login')" class="h-4 w-4" />
+                                    </Button>
+                                </th>
+                                <th class="text-left px-6 py-3 text-sm font-medium text-muted-foreground">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr 
+                                v-for="user in filteredAndSortedUsers" 
+                                :key="user.id" 
+                                class="hover:bg-muted/50 transition-colors"
+                            >
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                                            <User class="h-4 w-4 text-primary" />
+                                        </div>
+                                        <div class="font-medium text-foreground">{{ user.name }}</div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-muted-foreground">
+                                    {{ user.email }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-muted-foreground">
+                                    {{ user.student_id || '-' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-muted-foreground">
+                                    {{ user.program || '-' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-muted-foreground">
+                                    {{ user.year || '-' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <Badge :variant="getRoleVariant(user.role)">
+                                        {{ user.role }}
+                                    </Badge>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <Badge :variant="getStatusVariant(user.status)">
+                                        {{ user.status }}
+                                    </Badge>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-2 text-muted-foreground">
+                                        <Calendar class="h-3 w-3" />
+                                        {{ user.last_login }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <Button 
+                                            @click="openEditModal(user)"
+                                            variant="ghost"
+                                            size="icon"
+                                            class="h-8 w-8"
+                                        >
+                                            <Pencil class="h-4 w-4" />
+                                        </Button>
+                                        <Button 
+                                            @click="openDeleteModal(user)"
+                                            variant="ghost"
+                                            size="icon"
+                                            class="h-8 w-8 text-red-500 hover:text-red-600"
+                                        >
+                                            <Trash2 class="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Empty State -->
+                            <tr v-if="filteredAndSortedUsers.length === 0">
+                                <td colspan="9" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <div class="mx-auto mb-4 h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                                            <User class="h-6 w-6 text-muted-foreground" />
+                                        </div>
+                                        <h3 class="text-lg font-medium mb-2">No users found</h3>
+                                        <p class="text-muted-foreground mb-4">
+                                            {{ searchQuery || roleFilter !== 'all' || statusFilter !== 'all'
+                                                ? 'Try adjusting your filters or search terms.' 
+                                                : 'No users available in the system.'
+                                            }}
+                                        </p>
+                                        <Button 
+                                            v-if="!searchQuery && roleFilter === 'all' && statusFilter === 'all'"
+                                            variant="outline"
+                                            class="gap-2"
+                                        >
+                                            <User class="h-4 w-4" />
+                                            Add First User
+                                        </Button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </CardContent>
+        </Card>
     </div>
 
     <!-- Modals -->

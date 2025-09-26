@@ -9,8 +9,8 @@ interface User {
     student_id: string
     program: string
     year: string
-    role: 'Member' | 'Officer' | 'Admin'
-    status: 'active' | 'inactive'
+    role: 'Member' | 'Officer' | 'Admin' 
+    status: 'active' | 'inactive' | 'pending'
     last_login: string
 }
 
@@ -30,7 +30,7 @@ const form = reactive({
     program: '',
     year: '',
     role: 'Member' as 'Member' | 'Officer' | 'Admin',
-    status: 'active' as 'active' | 'inactive',
+    status: 'active' as 'active' | 'inactive' | 'pending', 
     lastLogin: ''
 })
 
@@ -107,15 +107,8 @@ onMounted(() => {
 // Programs list (same as AddUserTab)
 const programs = [
     'Computer Science',
-    'Information Technology',
-    'Software Engineering',
-    'Data Science',
-    'Cybersecurity',
-    'Business Administration',
-    'Accounting',
-    'Marketing',
-    'Engineering',
-    'Other'
+    'Information System',
+    'Library Information System'
 ]
 
 // Year levels
@@ -125,8 +118,6 @@ const years = [
     '3rd Year',
     '4th Year',
     '5th Year',
-    'Graduate',
-    'Alumni'
 ]
 </script>
 

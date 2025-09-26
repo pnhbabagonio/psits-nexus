@@ -84,15 +84,8 @@ const resetForm = () => {
 // Programs list (you can customize this based on your needs)
 const programs = [
     'Computer Science',
-    'Information Technology',
-    'Software Engineering',
-    'Data Science',
-    'Cybersecurity',
-    'Business Administration',
-    'Accounting',
-    'Marketing',
-    'Engineering',
-    'Other'
+    'Information System',
+    'Library Information System'
 ]
 
 // Year levels
@@ -101,9 +94,7 @@ const years = [
     '2nd Year', 
     '3rd Year',
     '4th Year',
-    '5th Year',
-    'Graduate',
-    'Alumni'
+    '5th Year'
 ]
 </script>
 
