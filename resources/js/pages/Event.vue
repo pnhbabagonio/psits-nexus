@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, router } from '@inertiajs/vue3'
+import { Head, router, usePage } from '@inertiajs/vue3'
 import { type BreadcrumbItem } from '@/types'
 import { CalendarDays, Users2, CalendarCheck2, Award, Plus, Filter, ChevronDown } from 'lucide-vue-next'
 import EventForm from '@/components/EventForm.vue'
@@ -24,10 +24,10 @@ const stats = ref({
     average_attendance: 0
 })
 
-const recentEvents = ref<Event[]>([])
+const recentEvents = ref<AppEvent[]>([])
 const recentActivity = ref<Activity[]>([])
 
-interface Event {
+interface AppEvent {
     id: number
     title: string
     description: string
@@ -119,7 +119,7 @@ function openCreateForm() {
 
 // Form and modal state
 const showForm = ref(false)
-const selectedEvent = ref<Event | null>(null)
+const selectedEvent = ref<AppEvent | null>(null)
 const showEventDetail = ref(false)
 
 // Event Filter
@@ -142,7 +142,7 @@ const filteredRecentEvents = computed(() => {
 })
 
 // Function to open event detail
-function openEventDetail(event: Event) {
+function openEventDetail(event: AppEvent) {
     selectedEvent.value = event
     showEventDetail.value = true
 }
@@ -153,12 +153,29 @@ function closeEventDetail() {
     showEventDetail.value = false
 }
 
-// Function to handle new event creation
-async function handleEventCreated(newEvent: Event) {
+// Function to handle new event creation with optimistic update
+async function handleEventCreated(newEvent: AppEvent) {
+    console.log('🎯 handleEventCreated called with:', newEvent)
     showForm.value = false
-    await loadEvents(eventFilter.value)
 
-    // Add to recent activity
+    // Check if it's a temporary event (negative ID)
+    const isTemporaryEvent = newEvent.id < 0
+
+    // Store current state for rollback
+    const previousEvents = [...recentEvents.value]
+    const previousStats = { ...stats.value }
+
+    // Optimistically add the event to UI (at the top)
+    recentEvents.value = [newEvent, ...recentEvents.value]
+
+    // Optimistically update stats
+    stats.value = {
+        ...stats.value,
+        total_events: stats.value.total_events + 1,
+        upcoming_events: newEvent.status === 'Upcoming' ? stats.value.upcoming_events + 1 : stats.value.upcoming_events
+    }
+
+    // Add to recent activity optimistically
     recentActivity.value.unshift({
         text: `New event created: ${newEvent.title}`,
         time: 'Just now',
@@ -169,10 +186,33 @@ async function handleEventCreated(newEvent: Event) {
     if (recentActivity.value.length > 3) {
         recentActivity.value = recentActivity.value.slice(0, 3)
     }
+
+    console.log('⚡ UI updated optimistically')
+
+    // Only sync with server if it's a temporary event
+    if (isTemporaryEvent) {
+        try {
+            await loadEvents(eventFilter.value)
+            console.log('✅ Server sync completed - temporary event replaced with real one')
+        } catch (error) {
+            console.error('❌ Server sync failed, rolling back:', error)
+
+            // Rollback on error
+            recentEvents.value = previousEvents
+            stats.value = previousStats
+
+            // Remove the recent activity we added
+            recentActivity.value = recentActivity.value.filter(activity =>
+                !activity.text.includes(`New event created: ${newEvent.title}`)
+            )
+
+            alert('Failed to sync event with server. Please refresh the page.')
+        }
+    }
 }
 
 // Open EventForm for editing
-function handleEditEvent(event: Event) {
+function handleEditEvent(event: AppEvent) {
     selectedEvent.value = event
     isEditing.value = true
     showForm.value = true
@@ -180,38 +220,59 @@ function handleEditEvent(event: Event) {
 }
 
 // When form is saved, update existing event
-async function handleEventUpdated(updatedEvent: Event) {
+async function handleEventUpdated(updatedEvent: AppEvent) {
+    console.log('🔄 handleEventUpdated called with:', updatedEvent)
     showForm.value = false
     isEditing.value = false
     selectedEvent.value = null
+
     await loadEvents(eventFilter.value)
+    console.log('✅ Events reloaded after update')
 }
 
-// Delete event
-async function handleEventDeleted(eventId: number) {
-    if (confirm('Are you sure you want to delete this event?')) {
-        try {
-            const response = await fetch(`/events/${eventId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
-                    'Content-Type': 'application/json',
-                }
-            })
 
-            if (!response.ok) {
-                throw new Error('Failed to delete event')
-            }
+// Delete event using Inertia with optimistic update
+function handleEventDeleted(eventId: number) {
+    console.log('🗑️ Deleting event:', eventId)
 
-            await loadEvents(eventFilter.value)
-            showEventDetail.value = false
-        } catch (error) {
-            console.error('Failed to delete event:', error)
-            alert('Failed to delete event. Please try again.')
+    // Store current state for rollback
+    const previousEvents = [...recentEvents.value]
+    const previousStats = { ...stats.value }
+
+    // Optimistically remove the event from UI
+    recentEvents.value = recentEvents.value.filter(event => event.id !== eventId)
+
+    // Optimistically update stats
+    const deletedEvent = previousEvents.find(e => e.id === eventId)
+    if (deletedEvent) {
+        stats.value = {
+            ...stats.value,
+            total_events: stats.value.total_events - 1,
+            active_registrations: stats.value.active_registrations - (parseInt(deletedEvent.registered) || 0),
+            upcoming_events: deletedEvent.status === 'Upcoming' ? stats.value.upcoming_events - 1 : stats.value.upcoming_events
         }
     }
-}
 
+    // Close detail modal immediately
+    showEventDetail.value = false
+
+    // Then make the actual delete request
+    router.delete(`/events/${eventId}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            console.log('✅ Delete successful via Inertia')
+            // Optional: Reload to ensure sync, but UI is already updated
+            loadEvents(eventFilter.value)
+        },
+        onError: (errors) => {
+            console.error('❌ Delete failed:', errors)
+            // Rollback on error
+            recentEvents.value = previousEvents
+            stats.value = previousStats
+            alert('Failed to delete event. Please try again.')
+        }
+    })
+}
 // Watch for filter changes
 watch(eventFilter, (newFilter) => {
     loadEvents(newFilter)

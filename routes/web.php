@@ -66,7 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Event routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events', [EventController::class, 'index'])->name('events');
-    Route::get('/events/data', [EventController::class, 'getEvents'])->name('events.data');
+    Route::get('/events/data', [EventController::class, 'data'])->name('events.data');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');

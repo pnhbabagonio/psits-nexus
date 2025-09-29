@@ -25,8 +25,28 @@ class EventController extends Controller
             });
 
         return Inertia::render('Event', [
-            'events' => $events,
+            'events' => $events, // Make sure this is passed correctly
             'filters' => $request->only(['status']),
+            'stats' => $this->getStats(),
+        ]);
+    }
+
+    public function data(Request $request)
+    {
+        $status = $request->get('status', 'All');
+
+        $events = Event::with('user')
+            ->when($status !== 'All', function ($query) use ($status) {
+                return $query->where('status', $status);
+            })
+            ->latest()
+            ->get()
+            ->map(function ($event) {
+                return $this->formatEvent($event);
+            });
+
+        return response()->json([
+            'events' => $events,
             'stats' => $this->getStats(),
         ]);
     }
@@ -45,13 +65,17 @@ class EventController extends Controller
             'organizer' => 'required|string|max:255',
         ]);
 
-        Event::create([
+        $event = Event::create([
             ...$validated,
             'user_id' => $request->user()->id,
             'registered' => 0,
         ]);
 
-        return redirect()->back()->with('success', 'Event created successfully');
+        // Return the created event in the response
+        return redirect()->route('events')->with([
+            'success' => 'Event created successfully',
+            'created_event' => $this->formatEvent($event) // Return the formatted event
+        ]);
     }
 
     public function update(Request $request, Event $event)

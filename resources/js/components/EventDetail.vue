@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { router } from "@inertiajs/vue3"
 import { Calendar, MapPin, Clock, Users, FileText, Edit, Trash2 } from "lucide-vue-next"
 
 // shadcn-vue components
@@ -10,7 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-interface Event {
+// Use AppEvent to avoid conflict with global Event type
+interface AppEvent {
     id: number
     title: string
     time: string
@@ -22,16 +22,18 @@ interface Event {
     max_capacity: number
     status: "Upcoming" | "Ongoing" | "Completed"
     organizer: string
+    created_at: string  // Add this
+    updated_at: string  // Add this
 }
 
 const props = defineProps<{
-    event: Event
+    event: AppEvent
     isOpen: boolean
 }>()
 
 const emit = defineEmits<{
     close: []
-    edit: [event: Event]
+    edit: [event: AppEvent]
     delete: [eventId: number]
 }>()
 

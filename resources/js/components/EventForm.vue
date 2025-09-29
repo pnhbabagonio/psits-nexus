@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, usePage } from '@inertiajs/vue3'
 import { MapPin, Calendar, Clock, Users, DollarSign, Shield } from 'lucide-vue-next'
 
 // shadcn-vue components
@@ -25,6 +25,7 @@ const emit = defineEmits<{
     updated: [event: any]
 }>()
 
+const page = usePage()
 const form = useForm({
     title: '',
     description: '',
@@ -68,7 +69,13 @@ function submit() {
         form.put(`/events/${props.event.id}`, {
             preserveScroll: true,
             onSuccess: () => {
-                emit('updated', form.data())
+                // For edit, we can use the form data since we know the ID
+                const updatedEvent = {
+                    ...props.event!,
+                    ...form.data(),
+                    max_capacity: parseInt(form.max_capacity) || props.event!.max_capacity
+                }
+                emit('updated', updatedEvent)
                 emit('close')
                 form.reset()
             },
@@ -77,7 +84,23 @@ function submit() {
         form.post('/events', {
             preserveScroll: true,
             onSuccess: () => {
-                emit('created', form.data())
+                // For create, create a temporary event with form data
+                const tempEvent = {
+                    id: -Date.now(), // Temporary ID
+                    title: form.title,
+                    description: form.description,
+                    date: form.date,
+                    time: form.time,
+                    venue: form.venue,
+                    address: form.address,
+                    max_capacity: parseInt(form.max_capacity) || 0,
+                    organizer: form.organizer,
+                    status: form.status,
+                    registered: '0',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                }
+                emit('created', tempEvent)
                 emit('close')
                 form.reset()
             },
@@ -203,6 +226,7 @@ function cancel() {
                 </Card>
 
                 <!-- Status Card -->
+                <!-- Status Card - Fixed with Radio Buttons -->
                 <Card>
                     <CardContent class="pt-6">
                         <div class="space-y-2">
@@ -212,18 +236,18 @@ function cancel() {
                             </Label>
                             <div class="flex gap-4">
                                 <div class="flex items-center space-x-2">
-                                    <Checkbox id="status-upcoming" :checked="form.status === 'Upcoming'"
-                                        @update:checked="form.status = 'Upcoming'" />
+                                    <input type="radio" id="status-upcoming" v-model="form.status" value="Upcoming"
+                                        class="rounded-full" />
                                     <Label for="status-upcoming" class="text-sm font-normal">Upcoming</Label>
                                 </div>
                                 <div class="flex items-center space-x-2">
-                                    <Checkbox id="status-ongoing" :checked="form.status === 'Ongoing'"
-                                        @update:checked="form.status = 'Ongoing'" />
+                                    <input type="radio" id="status-ongoing" v-model="form.status" value="Ongoing"
+                                        class="rounded-full" />
                                     <Label for="status-ongoing" class="text-sm font-normal">Ongoing</Label>
                                 </div>
                                 <div class="flex items-center space-x-2">
-                                    <Checkbox id="status-completed" :checked="form.status === 'Completed'"
-                                        @update:checked="form.status = 'Completed'" />
+                                    <input type="radio" id="status-completed" v-model="form.status" value="Completed"
+                                        class="rounded-full" />
                                     <Label for="status-completed" class="text-sm font-normal">Completed</Label>
                                 </div>
                             </div>
