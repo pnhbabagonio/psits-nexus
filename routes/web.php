@@ -8,8 +8,8 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HelpSupportController;
 use App\Http\Controllers\ChatbotController;
-use App\Http\Controllers\TransactionController; // ✅ Added earlier
-use App\Http\Controllers\PaymentController;     // ✅ Add this for payments
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use Inertia\Inertia;
@@ -63,9 +63,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
-// Event Management Routes
+// Event routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('events', EventController::class);
+    Route::get('/events', [EventController::class, 'index'])->name('events');
+    Route::get('/events/data', [EventController::class, 'getEvents'])->name('events.data');
+    Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
+    Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
 });
 
 // Attendee Management Routes

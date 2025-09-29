@@ -1,9 +1,18 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import { MapPin } from 'lucide-vue-next'
-import { watch } from 'vue'
+import { MapPin, Calendar, Clock, Users, DollarSign, Shield } from 'lucide-vue-next'
 
-// Props to control modal visibility
+// shadcn-vue components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+
 const props = defineProps<{
     isOpen: boolean
     isEditing?: boolean
@@ -16,14 +25,6 @@ const emit = defineEmits<{
     updated: [event: any]
 }>()
 
-// Initialize form with event if editing
-watch(() => props.event, (event) => {
-    if (event) {
-        form.defaults(event) // prefill form with existing event data
-        form.reset(event)
-    }
-})
-
 const form = useForm({
     title: '',
     description: '',
@@ -32,24 +33,45 @@ const form = useForm({
     venue: '',
     address: '',
     max_capacity: '',
-    registration_fee: '',
-    requires_approval: false,
+    organizer: '',
+    status: 'Upcoming',
+})
+
+// Reset form when dialog opens/closes or when event changes
+watch(() => props.isOpen, (isOpen) => {
+    if (!isOpen) {
+        form.reset()
+    }
 })
 
 watch(() => props.event, (event) => {
     if (event) {
-        form.reset(event)
+        form.defaults({
+            title: event.title || '',
+            description: event.description || '',
+            date: event.date || '',
+            time: event.time || '',
+            venue: event.venue || '',
+            address: event.address || '',
+            max_capacity: event.max_capacity || '',
+            organizer: event.organizer || '',
+            status: event.status || 'Upcoming',
+        })
+        form.reset()
+    } else {
+        form.reset()
     }
 })
 
 function submit() {
     if (props.isEditing && props.event) {
         form.put(`/events/${props.event.id}`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            emit('updated', form.data()) // just send back form data
-            emit('close')
-        },
+            preserveScroll: true,
+            onSuccess: () => {
+                emit('updated', form.data())
+                emit('close')
+                form.reset()
+            },
         })
     } else {
         form.post('/events', {
@@ -70,177 +92,160 @@ function cancel() {
 </script>
 
 <template>
-    <!-- Modal Overlay -->
-    <div v-if="isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-slate-900 p-6 rounded-lg w-full max-w-2xl shadow-lg max-h-[90vh] overflow-y-auto">
-            <!-- Header -->
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-white mb-2">
+    <Dialog :open="isOpen" @update:open="cancel">
+        <DialogContent class="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+                <DialogTitle class="text-2xl font-bold tracking-tight">
                     {{ isEditing ? 'Edit Event' : 'Create New Event' }}
-                </h2>
-                <p class="text-gray-400">
-                    {{ isEditing ? 'Update the details of this event' : 'Set up a new event with all necessary details' }}
-                </p>
-            </div>
+                </DialogTitle>
+                <DialogDescription class="text-lg">
+                    {{ isEditing
+                        ? 'Update the event details and settings'
+                        : 'Fill in the details to create a new event'
+                    }}
+                </DialogDescription>
+            </DialogHeader>
 
-        <!-- Error Display -->
-        <div v-if="form.errors && Object.keys(form.errors).length" class="mb-4 p-3 bg-red-900 text-red-200 rounded">
-            <p class="font-semibold">Please fix the following errors:</p>
-            <ul class="list-disc list-inside mt-1">
-                <li v-for="(error, field) in form.errors" :key="field">{{ error }}</li>
-            </ul>
-        </div>
+            <!-- Error Alert -->
+            <Alert v-if="form.errors && Object.keys(form.errors).length" variant="destructive">
+                <AlertDescription>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li v-for="(error, field) in form.errors" :key="field">{{ error }}</li>
+                    </ul>
+                </AlertDescription>
+            </Alert>
 
-        <form @submit.prevent="submit" class="space-y-6">
-            <!-- Event Details Section -->
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-white border-b border-gray-700 pb-2">Event Details</h3>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Event Title</label>
-                    <input 
-                        v-model="form.title" 
-                        type="text" 
-                        placeholder="Enter event title"
-                        class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        :required="!props.isEditing"
-                    />
-                    <div v-if="form.errors.title" class="text-red-500 text-sm mt-1">{{ form.errors.title }}</div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Description</label>
-                    <textarea 
-                        v-model="form.description" 
-                        rows="4"
-                        placeholder="Enter event description"
-                        class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    ></textarea>
-                    <div v-if="form.errors.description" class="text-red-500 text-sm mt-1">{{ form.errors.description }}</div>
-                </div>
+            <form @submit.prevent="submit" class="space-y-6">
+                <!-- Basic Information Card -->
+                <Card>
+                    <CardContent class="pt-6 space-y-4">
+                        <div class="space-y-2">
+                            <Label for="title" class="text-sm font-medium">Event Title</Label>
+                            <Input id="title" v-model="form.title" placeholder="Enter event title" :required="true"
+                                class="w-full" />
+                        </div>
 
-            <div class="flex gap-4">
-                <div class="w-1/2">
-                <label class="block text-sm font-medium text-gray-300 mb-1">Event Date</label>
-                    <input 
-                        v-model="form.date" 
-                        type="date" 
-                        class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        :required="!props.isEditing"
-                    />
-                    <div v-if="form.errors.date" class="text-red-500 text-sm mt-1">{{ form.errors.date }}</div>
-                </div>
+                        <div class="space-y-2">
+                            <Label for="description" class="text-sm font-medium">Description</Label>
+                            <Textarea id="description" v-model="form.description" placeholder="Describe your event..."
+                                rows="4" class="w-full resize-none" />
+                        </div>
+                    </CardContent>
+                </Card>
 
-                <div class="w-1/2">
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Event Time</label>
-                        <input 
-                            v-model="form.time" 
-                            type="time" 
-                            class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            :required="!props.isEditing"
-                        />
-                        <div v-if="form.errors.time" class="text-red-500 text-sm mt-1">{{ form.errors.time }}</div>
-                </div>
-            </div>
-        </div>
+                <!-- Date & Time Card -->
+                <Card>
+                    <CardContent class="pt-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <Label for="date" class="text-sm font-medium flex items-center gap-2">
+                                    <Calendar class="h-4 w-4" />
+                                    Event Date
+                                </Label>
+                                <Input id="date" v-model="form.date" type="date" :required="true" />
+                            </div>
 
-            <!-- Location Section -->
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-white border-b border-gray-700 pb-2">Location</h3>
-            
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Venue</label>
-                    <input 
-                        v-model="form.venue" 
-                        type="text" 
-                        placeholder="Enter venue name"
-                        class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        :required="!props.isEditing"
-                    />
-                    <div v-if="form.errors.venue" class="text-red-500 text-sm mt-1">{{ form.errors.venue }}</div>
-                </div>
+                            <div class="space-y-2">
+                                <Label for="time" class="text-sm font-medium flex items-center gap-2">
+                                    <Clock class="h-4 w-4" />
+                                    Event Time
+                                </Label>
+                                <Input id="time" v-model="form.time" type="time" :required="true" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Address</label>
-                    <input 
-                        v-model="form.address" 
-                        type="text" 
-                        placeholder="Enter full address"
-                        class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <div v-if="form.errors.address" class="text-red-500 text-sm mt-1">{{ form.errors.address }}</div>
-                </div>
+                <!-- Location Card -->
+                <Card>
+                    <CardContent class="pt-6 space-y-4">
+                        <div class="space-y-2">
+                            <Label for="venue" class="text-sm font-medium flex items-center gap-2">
+                                <MapPin class="h-4 w-4" />
+                                Venue
+                            </Label>
+                            <Input id="venue" v-model="form.venue" placeholder="Enter venue name" :required="true" />
+                        </div>
 
-                <!-- Map Preview Placeholder -->
-                <div class="bg-gray-700 border border-gray-600 rounded p-8 text-center">
-                    <MapPin class="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p class="text-gray-400 text-sm">Map preview will appear here</p>
-                </div>
-            </div>
+                        <div class="space-y-2">
+                            <Label for="address" class="text-sm font-medium">Full Address</Label>
+                            <Input id="address" v-model="form.address" placeholder="Enter complete address" />
+                        </div>
 
-            <!-- Participant Settings Section -->
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-white border-b border-gray-700 pb-2">Participant Settings</h3>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Maximum Capacity</label>
-                    <input 
-                        v-model="form.max_capacity" 
-                        type="number" 
-                        placeholder="Enter maximum participants"
-                        class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        min="1"
-                    />
-                        <div v-if="form.errors.max_capacity" class="text-red-500 text-sm mt-1">{{ form.errors.max_capacity }}</div>
-                </div>
+                        <!-- Map Preview Placeholder -->
+                        <div class="bg-muted/50 border rounded-lg p-8 text-center">
+                            <MapPin class="w-12 h-12 mx-auto mb-3 text-muted-foreground/60" />
+                            <p class="text-muted-foreground text-sm">Location preview will be shown here</p>
+                        </div>
+                    </CardContent>
+                </Card>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-1">Registration Fee</label>
-                <input 
-                    v-model="form.registration_fee" 
-                    type="number" 
-                    step="0.01"
-                    placeholder="Enter fee amount (optional)"
-                    class="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    min="0"
-                />
-                <div v-if="form.errors.registration_fee" class="text-red-500 text-sm mt-1">{{ form.errors.registration_fee }}</div>
-            </div>
+                <!-- Capacity & Organizer Card -->
+                <Card>
+                    <CardContent class="pt-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <Label for="max_capacity" class="text-sm font-medium flex items-center gap-2">
+                                    <Users class="h-4 w-4" />
+                                    Maximum Capacity
+                                </Label>
+                                <Input id="max_capacity" v-model="form.max_capacity" type="number" placeholder="0"
+                                    min="1" />
+                            </div>
 
-            <div class="flex items-center">
-                <input 
-                    v-model="form.requires_approval" 
-                    type="checkbox" 
-                    id="requires_approval"
-                    class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-                />
-                <label for="requires_approval" class="ml-2 text-sm text-gray-300">
-                Require approval for registration
-                </label>
-            </div>
-        </div>
+                            <div class="space-y-2">
+                                <Label for="organizer" class="text-sm font-medium">Organizer</Label>
+                                <Input id="organizer" v-model="form.organizer" placeholder="Enter organizer name"
+                                    :required="true" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-            <!-- Form Actions -->
-            <div class="flex justify-end gap-2 pt-4">
-                <button
-                    type="button"
-                    @click="cancel"
-                    class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white transition-colors"
-                    :disabled="form.processing"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                    <span v-if="form.processing">
-                        {{ isEditing ? 'Updating Event...' : 'Creating Event...' }}
-                    </span>
-                    <span v-else>
-                        {{ isEditing ? 'Update Event' : 'Create Event' }}
-                    </span>
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+                <!-- Status Card -->
+                <Card>
+                    <CardContent class="pt-6">
+                        <div class="space-y-2">
+                            <Label class="text-sm font-medium flex items-center gap-2">
+                                <Shield class="h-4 w-4" />
+                                Event Status
+                            </Label>
+                            <div class="flex gap-4">
+                                <div class="flex items-center space-x-2">
+                                    <Checkbox id="status-upcoming" :checked="form.status === 'Upcoming'"
+                                        @update:checked="form.status = 'Upcoming'" />
+                                    <Label for="status-upcoming" class="text-sm font-normal">Upcoming</Label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <Checkbox id="status-ongoing" :checked="form.status === 'Ongoing'"
+                                        @update:checked="form.status = 'Ongoing'" />
+                                    <Label for="status-ongoing" class="text-sm font-normal">Ongoing</Label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <Checkbox id="status-completed" :checked="form.status === 'Completed'"
+                                        @update:checked="form.status = 'Completed'" />
+                                    <Label for="status-completed" class="text-sm font-normal">Completed</Label>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <!-- Form Actions -->
+                <DialogFooter class="flex justify-between items-center pt-6 border-t">
+                    <Button variant="outline" type="button" @click="cancel" class="flex-1 sm:flex-none">
+                        Cancel
+                    </Button>
+                    <Button type="submit" :disabled="form.processing" class="flex-1 sm:flex-none">
+                        <span v-if="form.processing">
+                            {{ isEditing ? 'Updating...' : 'Creating...' }}
+                        </span>
+                        <span v-else>
+                            {{ isEditing ? 'Update Event' : 'Create Event' }}
+                        </span>
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+    </Dialog>
 </template>

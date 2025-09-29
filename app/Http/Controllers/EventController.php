@@ -1,86 +1,122 @@
 <?php
+// app/Http/Controllers/EventController.php
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class EventController extends Controller
 {
-    public function index()
+    public function index(Request $request): Response
     {
-        return Inertia::render('Event', [
-            'stats' => [
-                'totalEvents' => 24,
-                'activeRegistrations' => 187,
-                'upcomingEvents' => 8,
-                'averageAttendance' => 94.2,
-            ],
-            'recentEvents' => [
-                [
-                    'title' => 'PSITS Tech Summit 2025',
-                    'date' => 'September 15, 2025',
-                    'time' => '09:00 AM',
-                    'location' => 'PSITS Auditorium',
-                    'status' => 'Upcoming',
-                    'registered' => '87/150'
-                ],
-                [
-                    'title' => 'Coding Bootcamp',
-                    'date' => 'September 20, 2025',
-                    'time' => '10:00 AM',
-                    'location' => 'Computer Lab 1',
-                    'status' => 'Ongoing',
-                    'registered' => '28/30'
-                ],
-            ],
-            'recentActivity' => [
-                ['message' => 'New registration from Maria Santos', 'time' => '3 hours ago'],
-                ['message' => 'Event details updated', 'time' => '1 day ago'],
-                ['message' => 'Reminder sent to 87 attendees', 'time' => '2 days ago'],
-            ],
-        ]);
-    }
+        $status = $request->get('status', 'All');
 
-    public function create()
-    {
-        return Inertia::render('Components/EventForm'); 
+        $events = Event::with('user')
+            ->when($status !== 'All', function ($query) use ($status) {
+                return $query->where('status', $status);
+            })
+            ->latest()
+            ->get()
+            ->map(function ($event) {
+                return $this->formatEvent($event);
+            });
+
+        return Inertia::render('Event', [
+            'events' => $events,
+            'filters' => $request->only(['status']),
+            'stats' => $this->getStats(),
+        ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'date' => 'required|date',
-            'time' => 'required',
+            'time' => 'required|date_format:H:i',
             'venue' => 'required|string|max:255',
-            'address' => 'required|string',
-            'max_capacity' => 'nullable|integer|min:1',
-            'registration_fee' => 'nullable|numeric|min:0',
-            'requires_approval' => 'boolean',
+            'address' => 'required|string|max:255',
+            'status' => 'required|in:Upcoming,Ongoing,Completed',
+            'max_capacity' => 'required|integer|min:1',
+            'organizer' => 'required|string|max:255',
         ]);
 
-        return redirect()->route('events.index')->with('success', 'Event created successfully!');
+        Event::create([
+            ...$validated,
+            'user_id' => $request->user()->id,
+            'registered' => 0,
+        ]);
+
+        return redirect()->back()->with('success', 'Event created successfully');
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Event $event)
     {
-        // validate for now
+        // Manual authorization check
+        if ($event->user_id !== $request->user()->id) {
+            return redirect()->back()->with('error', 'Unauthorized to update this event');
+        }
+
         $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
-            'date'  => 'nullable|date',
-            'time'  => 'nullable',
-            'venue' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'date' => 'required|date',
+            'time' => 'required|date_format:H:i',
+            'venue' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'status' => 'required|in:Upcoming,Ongoing,Completed',
+            'max_capacity' => 'required|integer|min:1',
+            'organizer' => 'required|string|max:255',
         ]);
 
-        return redirect()->back()->with('success', "Event #{$id} updated successfully (mock).");
+        $event->update($validated);
+
+        return redirect()->back()->with('success', 'Event updated successfully');
     }
-    public function destroy($id)
+
+    public function destroy(Request $request, Event $event)
     {
-        // pretend the event was deleted
-        return redirect()->route('events.index')
-            ->with('success', "Event #{$id} deleted successfully (mock).");
+        // Manual authorization check
+        if ($event->user_id !== $request->user()->id) {
+            return redirect()->back()->with('error', 'Unauthorized to delete this event');
+        }
+
+        $event->delete();
+
+        return redirect()->back()->with('success', 'Event deleted successfully');
+    }
+
+    private function getStats(): array
+    {
+        return [
+            'total_events' => Event::count(),
+            'active_registrations' => Event::sum('registered'),
+            'upcoming_events' => Event::where('status', 'Upcoming')->count(),
+            'average_attendance' => Event::where('status', 'Completed')
+                ->avg('registered') ?? 0,
+        ];
+    }
+
+    private function formatEvent(Event $event): array
+    {
+        return [
+            'id' => $event->id,
+            'title' => $event->title,
+            'description' => $event->description,
+            'date' => $event->formatted_date,
+            'time' => $event->formatted_time,
+            'venue' => $event->venue,
+            'address' => $event->address,
+            'status' => $event->status,
+            'registered' => (string) $event->registered,
+            'max_capacity' => $event->max_capacity,
+            'organizer' => $event->organizer,
+            'created_at' => $event->created_at,
+            'updated_at' => $event->updated_at,
+        ];
     }
 }

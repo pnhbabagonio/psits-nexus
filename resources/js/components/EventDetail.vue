@@ -1,19 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { router } from '@inertiajs/vue3'
-import { Calendar, Clock, MapPin, Users, Edit, Trash2 } from 'lucide-vue-next'
+import { ref, computed } from 'vue'
+import { router } from "@inertiajs/vue3"
+import { Calendar, MapPin, Clock, Users, FileText, Edit, Trash2 } from "lucide-vue-next"
+
+// shadcn-vue components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface Event {
     id: number
     title: string
-    description: string
-    date: string
     time: string
+    date: string
     venue: string
     address: string
-    status: 'Upcoming' | 'Ongoing' | 'Completed'
+    description: string
     registered: string
     max_capacity: number
+    status: "Upcoming" | "Ongoing" | "Completed"
     organizer: string
 }
 
@@ -25,147 +32,181 @@ const props = defineProps<{
 const emit = defineEmits<{
     close: []
     edit: [event: Event]
+    delete: [eventId: number]
 }>()
 
-const showDeleteConfirm = ref(false)
+const showDeleteDialog = ref(false)
 
-function editEvent() {
+function handleEdit() {
     emit('edit', props.event)
 }
 
-function deleteEvent() {
-    router.delete(`/events/${props.event.id}`, {
-        onSuccess: () => {
-        emit('close')
-        }
-    })
+function handleDelete() {
+    emit('delete', props.event.id)
+    showDeleteDialog.value = false
 }
 
-function cancel() {
-    emit('close')
+function getStatusVariant(status: string) {
+    switch (status) {
+        case 'Upcoming': return 'default'
+        case 'Ongoing': return 'secondary'
+        case 'Completed': return 'outline'
+        default: return 'default'
+    }
 }
+
+function getStatusColor(status: string) {
+    switch (status) {
+        case 'Upcoming': return 'text-blue-600 bg-blue-50 border-blue-200'
+        case 'Ongoing': return 'text-emerald-600 bg-emerald-50 border-emerald-200'
+        case 'Completed': return 'text-gray-600 bg-gray-50 border-gray-200'
+        default: return 'text-gray-600 bg-gray-50 border-gray-200'
+    }
+}
+
+// Calculate registration percentage
+const registrationPercentage = computed(() => {
+    const registered = parseInt(props.event.registered) || 0
+    const maxCapacity = props.event.max_capacity || 1
+    return Math.round((registered / maxCapacity) * 100)
+})
 </script>
 
 <template>
-    <div v-if="isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-900 rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <!-- Header -->
-            <div class="p-6 border-b border-gray-700">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h1 class="text-2xl font-bold text-white mb-2">{{ event.title }}</h1>
-                        <span
-                        class="px-3 py-1 rounded-full text-sm font-medium"
-                        :class="{
-                            'bg-blue-600 text-white': event.status === 'Upcoming',
-                            'bg-green-600 text-white': event.status === 'Ongoing',
-                            'bg-gray-600 text-white': event.status === 'Completed',
-                        }"
-                        >
+    <Dialog :open="isOpen" @update:open="emit('close')">
+        <DialogContent class="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+                <div class="flex items-center justify-between">
+                    <DialogTitle class="text-2xl font-bold tracking-tight">
+                        {{ event.title }}
+                    </DialogTitle>
+                    <Badge :variant="getStatusVariant(event.status)" :class="getStatusColor(event.status)">
                         {{ event.status }}
-                        </span>
-                    </div>
-                    <button
-                        @click="cancel"
-                        class="text-gray-400 hover:text-white transition-colors"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    </Badge>
                 </div>
-                <p class="text-gray-300">{{ event.description }}</p>
-            </div>
+                <DialogDescription class="text-lg text-muted-foreground">
+                    Organized by {{ event.organizer }}
+                </DialogDescription>
+            </DialogHeader>
 
-        <!-- Event Details -->
-        <div class="p-6 space-y-6">
-            <!-- Details Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div class="flex items-center">
-                        <Calendar class="w-5 h-5 text-blue-400 mr-3" />
-                        <div>
-                            <p class="text-sm text-gray-400">Date</p>
-                            <p class="text-white">{{ event.date }}</p>
+            <div class="space-y-6">
+                <!-- Event Details Card -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle class="text-lg flex items-center gap-2">
+                            <Calendar class="h-5 w-5" />
+                            Event Details
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-2 text-muted-foreground">
+                                    <Calendar class="h-4 w-4" />
+                                    <span class="font-medium">Date:</span>
+                                </div>
+                                <span>{{ event.date }}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-2 text-muted-foreground">
+                                    <Clock class="h-4 w-4" />
+                                    <span class="font-medium">Time:</span>
+                                </div>
+                                <span>{{ event.time }}</span>
+                            </div>
+                            <div class="flex items-center gap-3 md:col-span-2">
+                                <div class="flex items-center gap-2 text-muted-foreground">
+                                    <MapPin class="h-4 w-4" />
+                                    <span class="font-medium">Venue:</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium">{{ event.venue }}</p>
+                                    <p class="text-sm text-muted-foreground">{{ event.address }}</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </CardContent>
+                </Card>
 
-                    <div class="flex items-center">
-                        <Clock class="w-5 h-5 text-blue-400 mr-3" />
-                        <div>
-                            <p class="text-sm text-gray-400">Time</p>
-                            <p class="text-white">{{ event.time }}</p>
+                <!-- Registration Stats Card -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle class="text-lg flex items-center gap-2">
+                            <Users class="h-5 w-5" />
+                            Registration
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium">Progress</span>
+                                <span class="text-sm text-muted-foreground">
+                                    {{ event.registered }} / {{ event.max_capacity }} ({{ registrationPercentage }}%)
+                                </span>
+                            </div>
+                            <div class="w-full bg-secondary rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full transition-all duration-300" :class="{
+                                    'bg-blue-500': event.status === 'Upcoming',
+                                    'bg-emerald-500': event.status === 'Ongoing',
+                                    'bg-gray-500': event.status === 'Completed'
+                                }" :style="{ width: `${Math.min(registrationPercentage, 100)}%` }"></div>
+                            </div>
                         </div>
-                    </div>
+                    </CardContent>
+                </Card>
+
+                <!-- Description Card -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle class="text-lg flex items-center gap-2">
+                            <FileText class="h-5 w-5" />
+                            Description
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p class="text-muted-foreground leading-relaxed">
+                            {{ event.description || "No description provided for this event." }}
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div class="flex justify-between items-center pt-6 border-t">
+                <Button variant="outline" @click="emit('close')">
+                    Close
+                </Button>
+
+                <div class="flex gap-2">
+                    <Button variant="outline" @click="handleEdit" class="flex items-center gap-2">
+                        <Edit class="h-4 w-4" />
+                        Edit Event
+                    </Button>
+
+                    <AlertDialog v-model:open="showDeleteDialog">
+                        <AlertDialogTrigger as-child>
+                            <Button variant="destructive" class="flex items-center gap-2">
+                                <Trash2 class="h-4 w-4" />
+                                Delete Event
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the event
+                                    "{{ event.title }}" and remove all associated data.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction @click="handleDelete" variant="destructive">
+                                    Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
-
-            <div class="space-y-4">
-                <div class="flex items-center">
-                    <MapPin class="w-5 h-5 text-blue-400 mr-3" />
-                    <div>
-                        <p class="text-sm text-gray-400">Location</p>
-                        <p class="text-white">{{ event.venue }}</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center">
-                    <Users class="w-5 h-5 text-blue-400 mr-3" />
-                    <div>
-                        <p class="text-sm text-gray-400">Registration</p>
-                        <p class="text-white">{{ event.registered }} registered</p>
-                    </div>
-                </div>
             </div>
-        </div>
-
-            <hr class="border-gray-700">
-
-            <!-- Organizer -->
-            <div>
-                <h3 class="text-lg font-semibold text-white mb-3">Organizer</h3>
-                <p class="text-gray-300 font-medium">Philippine Society of IT Students</p>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex gap-3 pt-4">
-                <button
-                    @click="editEvent"
-                    class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    <Edit class="w-4 h-4" />
-                    Edit Event
-                </button>
-                <button
-                    @click="showDeleteConfirm = true"
-                    class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                    <Trash2 class="w-4 h-4" />
-                    Delete
-                </button>
-            </div>
-        </div>
-
-        <!-- Delete Confirmation Modal -->
-        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
-            <div class="bg-gray-800 p-6 rounded-lg max-w-md mx-4">
-                <h3 class="text-lg font-semibold text-white mb-4">Confirm Deletion</h3>
-                <p class="text-gray-300 mb-6">Are you sure you want to delete this event? This action cannot be undone.</p>
-            <div class="flex gap-3 justify-end">
-                <button
-                    @click="showDeleteConfirm = false"
-                    class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition-colors"
-                >
-                Cancel
-                </button>
-                <button
-                    @click="deleteEvent"
-                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                >
-                Delete
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-</div>
+        </DialogContent>
+    </Dialog>
 </template>
