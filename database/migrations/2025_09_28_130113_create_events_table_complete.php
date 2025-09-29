@@ -1,5 +1,5 @@
 <?php
-// database/migrations/2025_09_28_000001_create_events_table_complete.php
+// database/migrations/2025_09_28_130113_create_events_table_complete.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,10 +9,6 @@ return new class extends Migration
 {
     public function up()
     {
-        // Drop the old table if it exists
-        Schema::dropIfExists('events');
-
-        // Create the complete table
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->string('title');
