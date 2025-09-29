@@ -7,6 +7,7 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -77,6 +78,30 @@ class EventController extends Controller
             'created_event' => $this->formatEvent($event) // Return the formatted event
         ]);
     }
+
+    public function updateRegistration(Request $request, Event $event)
+    {
+        // Authorization check - only event owner can update
+        if ($event->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'registered' => 'required|integer|min:0|max:' . $event->max_capacity,
+        ]);
+
+        try {
+            $event->update([
+                'registered' => $validated['registered'],
+            ]);
+
+            // Return a simple redirect back instead of JSON
+            return back()->with('success', 'Registration count updated successfully');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to update registration');
+        }
+    }
+
 
     public function update(Request $request, Event $event)
     {

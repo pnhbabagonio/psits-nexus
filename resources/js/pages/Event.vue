@@ -153,6 +153,7 @@ function closeEventDetail() {
     showEventDetail.value = false
 }
 
+
 // Function to handle new event creation with optimistic update
 async function handleEventCreated(newEvent: AppEvent) {
     console.log('🎯 handleEventCreated called with:', newEvent)
@@ -219,15 +220,18 @@ function handleEditEvent(event: AppEvent) {
     showEventDetail.value = false
 }
 
-// When form is saved, update existing event
-async function handleEventUpdated(updatedEvent: AppEvent) {
-    console.log('🔄 handleEventUpdated called with:', updatedEvent)
-    showForm.value = false
-    isEditing.value = false
-    selectedEvent.value = null
+// Add this to your main Event.vue component
+function handleEventUpdated(updatedEvent: AppEvent) {
+    console.log('🔄 Event updated:', updatedEvent)
 
-    await loadEvents(eventFilter.value)
-    console.log('✅ Events reloaded after update')
+    // Update the event in the list
+    const index = recentEvents.value.findIndex(e => e.id === updatedEvent.id)
+    if (index !== -1) {
+        recentEvents.value[index] = updatedEvent
+    }
+
+    // Reload stats to ensure they're accurate
+    loadEvents(eventFilter.value)
 }
 
 
@@ -347,7 +351,7 @@ onMounted(() => {
 
             <!-- Event Detail Modal -->
             <EventDetail v-if="selectedEvent" :event="selectedEvent" :isOpen="showEventDetail" @close="closeEventDetail"
-                @edit="handleEditEvent" @delete="handleEventDeleted" />
+                @edit="handleEditEvent" @delete="handleEventDeleted" @update="handleEventUpdated" />
 
             <!-- Loading State -->
             <div v-if="isLoading" class="flex justify-center items-center py-8">
