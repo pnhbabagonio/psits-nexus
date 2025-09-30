@@ -1,6 +1,7 @@
+<!-- resources/js/components/EventDetail.vue -->
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { router } from "@inertiajs/vue3"
+import { router, usePage } from "@inertiajs/vue3"
 import { Calendar, MapPin, Clock, Users, FileText, Edit, Trash2, Check } from "lucide-vue-next"
 
 // shadcn-vue components
@@ -10,6 +11,8 @@ import { Badge } from "@/components/ui/badge"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import RegistrationButton from '@/components/RegistrationButton.vue'
+import RegistrantsList from '@/components/RegistrantsList.vue'
 
 interface AppEvent {
     id: number
@@ -19,12 +22,18 @@ interface AppEvent {
     venue: string
     address: string
     description: string
-    registered: string
+    registered: string // Old manual count - we'll transition from this
+    registered_count?: number // New dynamic count from registrations
     max_capacity: number
     status: "Upcoming" | "Ongoing" | "Completed"
     organizer: string
+    user_id: number
     created_at: string
     updated_at: string
+    // New properties for registration system
+    has_available_spots?: boolean
+    is_user_registered?: boolean
+    is_user_waitlisted?: boolean
 }
 
 const props = defineProps<{
@@ -36,14 +45,43 @@ const emit = defineEmits<{
     close: []
     edit: [event: AppEvent]
     delete: [eventId: number]
-    update: [event: AppEvent] // Add update event
+    update: [event: AppEvent]
 }>()
 
 // Declare all reactive variables
 const showDeleteDialog = ref(false)
-const isUpdatingRegistration = ref(false)
-const showSaveSuccess = ref(false)
-const currentRegistered = ref(parseInt(props.event.registered) || 0)
+const showRegistrantsList = ref(false)
+const page = usePage()
+
+// Computed properties
+const isEventOwner = computed(() => props.event.user_id === page.props.auth.user.id)
+const isUserRegistered = computed(() => props.event.is_user_registered || false)
+const isUserWaitlisted = computed(() => props.event.is_user_waitlisted || false)
+
+// Use new registered_count if available, fallback to old registered
+const currentRegisteredCount = computed(() => {
+    return props.event.registered_count !== undefined
+        ? props.event.registered_count
+        : parseInt(props.event.registered) || 0
+})
+
+// Calculate registration percentage
+const registrationPercentage = computed(() => {
+    const registered = currentRegisteredCount.value
+    const maxCapacity = props.event.max_capacity || 1
+    return Math.round((registered / maxCapacity) * 100)
+})
+
+// Enhanced event object for RegistrationButton
+const registrationEvent = computed(() => ({
+    id: props.event.id,
+    title: props.event.title,
+    registered_count: currentRegisteredCount.value,
+    max_capacity: props.event.max_capacity,
+    has_available_spots: props.event.has_available_spots !== undefined
+        ? props.event.has_available_spots
+        : currentRegisteredCount.value < props.event.max_capacity
+}))
 
 function handleEdit() {
     emit('edit', props.event)
@@ -72,53 +110,12 @@ function getStatusColor(status: string) {
     }
 }
 
-// Calculate registration percentage
-const registrationPercentage = computed(() => {
-    const registered = currentRegistered.value
-    const maxCapacity = props.event.max_capacity || 1
-    return Math.round((registered / maxCapacity) * 100)
-})
-
-function handleInputChange(value: string | number) {
-    // Convert to number and ensure it's within bounds
-    const numValue = typeof value === 'string' ? parseInt(value) || 0 : value
-    currentRegistered.value = Math.max(0, Math.min(numValue, props.event.max_capacity))
+function handleRegistrationUpdate() {
+    emit('update', props.event)
 }
 
-function saveRegistration() {
-    if (isUpdatingRegistration.value) return
-
-    isUpdatingRegistration.value = true
-    showSaveSuccess.value = false
-
-    router.patch(`/events/${props.event.id}/registration`, {
-        registered: currentRegistered.value
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            console.log('✅ Registration updated successfully')
-            // Show success message
-            showSaveSuccess.value = true
-            setTimeout(() => {
-                showSaveSuccess.value = false
-            }, 2000)
-
-            // Emit update to parent to refresh data
-            const updatedEvent = {
-                ...props.event,
-                registered: currentRegistered.value.toString()
-            }
-            emit('update', updatedEvent)
-        },
-        onError: (errors: any) => {
-            console.error('❌ Failed to update registration:', errors)
-            // Revert on error
-            currentRegistered.value = parseInt(props.event.registered) || 0
-        },
-        onFinish: () => {
-            isUpdatingRegistration.value = false
-        }
-    })
+function handleEventUpdated() {
+    emit('update', props.event)
 }
 </script>
 
@@ -183,7 +180,7 @@ function saveRegistration() {
                     <CardHeader>
                         <CardTitle class="text-lg flex items-center gap-2">
                             <Users class="h-5 w-5" />
-                            Registration Management
+                            Registration
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -193,8 +190,8 @@ function saveRegistration() {
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm font-medium">Registration Progress</span>
                                     <span class="text-sm text-muted-foreground">
-                                        {{ currentRegistered }} / {{ event.max_capacity }} ({{ registrationPercentage
-                                        }}%)
+                                        {{ currentRegisteredCount }} / {{ event.max_capacity }} ({{
+                                            registrationPercentage }}%)
                                     </span>
                                 </div>
                                 <div class="w-full bg-secondary rounded-full h-3">
@@ -206,49 +203,17 @@ function saveRegistration() {
                                 </div>
                             </div>
 
-                            <!-- Registration Controls -->
-                            <div class="border rounded-lg p-4 bg-muted/50">
-                                <div class="flex items-center justify-between mb-3">
-                                    <span class="text-sm font-medium">Manage Registrations</span>
-                                    <Badge variant="outline" class="text-xs">
-                                        Admin Control
-                                    </Badge>
-                                </div>
+                            <!-- Registration Button -->
+                            <RegistrationButton :event="registrationEvent" :is-user-registered="isUserRegistered"
+                                :is-user-waitlisted="isUserWaitlisted" @updated="handleRegistrationUpdate" />
 
-                                <div class="space-y-3">
-                                    <!-- Input Field -->
-                                    <div class="text-center">
-                                        <Input id="registered-input" type="number" :model-value="currentRegistered"
-                                            @update:model-value="handleInputChange" :min="0" :max="event.max_capacity"
-                                            class="text-center font-medium text-lg"
-                                            :disabled="isUpdatingRegistration" />
-                                    </div>
-
-                                    <!-- Save Button -->
-                                    <Button @click="saveRegistration"
-                                        :disabled="isUpdatingRegistration || currentRegistered === parseInt(event.registered)"
-                                        class="w-full">
-                                        <span v-if="isUpdatingRegistration" class="flex items-center gap-2">
-                                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white">
-                                            </div>
-                                            Saving...
-                                        </span>
-                                        <span v-else-if="showSaveSuccess" class="flex items-center gap-2">
-                                            <Check class="h-4 w-4" />
-                                            Saved!
-                                        </span>
-                                        <span v-else class="flex items-center gap-2">
-                                            <Check class="h-4 w-4" />
-                                            Save Registration Count
-                                        </span>
-                                    </Button>
-
-                                    <!-- Status Info -->
-                                    <div class="flex justify-between items-center text-xs text-muted-foreground">
-                                        <span>Current: {{ currentRegistered }}</span>
-                                        <span>Capacity: {{ event.max_capacity }}</span>
-                                    </div>
-                                </div>
+                            <!-- Admin Controls -->
+                            <div v-if="isEventOwner" class="border-t pt-4 mt-4">
+                                <Button variant="outline" @click="showRegistrantsList = true"
+                                    class="w-full flex items-center gap-2">
+                                    <Users class="h-4 w-4" />
+                                    View Registrants ({{ currentRegisteredCount }})
+                                </Button>
                             </div>
                         </div>
                     </CardContent>
@@ -308,4 +273,8 @@ function saveRegistration() {
             </div>
         </DialogContent>
     </Dialog>
+
+    <!-- Registrants List Modal -->
+    <RegistrantsList v-if="event" :event="event" :open="showRegistrantsList" @close="showRegistrantsList = false"
+        @updated="handleEventUpdated" />
 </template>

@@ -32,18 +32,20 @@ class EventController extends Controller
         ]);
     }
 
+    // In your EventController data() method
     public function data(Request $request)
     {
         $status = $request->get('status', 'All');
+        $user = $request->user();
 
-        $events = Event::with('user')
+        $events = Event::with(['user', 'registrations'])
             ->when($status !== 'All', function ($query) use ($status) {
                 return $query->where('status', $status);
             })
             ->latest()
             ->get()
-            ->map(function ($event) {
-                return $this->formatEvent($event);
+            ->map(function ($event) use ($user) {
+                return $this->formatEvent($event, $user);
             });
 
         return response()->json([
@@ -150,7 +152,8 @@ class EventController extends Controller
         ];
     }
 
-    private function formatEvent(Event $event): array
+    // Update the formatEvent method to include registration data
+    private function formatEvent(Event $event, $user = null): array
     {
         return [
             'id' => $event->id,
@@ -161,11 +164,17 @@ class EventController extends Controller
             'venue' => $event->venue,
             'address' => $event->address,
             'status' => $event->status,
-            'registered' => (string) $event->registered,
+            'registered' => (string) $event->registered, // Keep old for compatibility
+            'registered_count' => $event->registered_count, // NEW
             'max_capacity' => $event->max_capacity,
             'organizer' => $event->organizer,
+            'user_id' => $event->user_id,
             'created_at' => $event->created_at,
             'updated_at' => $event->updated_at,
+            // NEW registration properties
+            'has_available_spots' => $event->has_available_spots,
+            'is_user_registered' => $user ? $event->isUserRegistered($user->id) : false,
+            'is_user_waitlisted' => $user ? $event->isUserWaitlisted($user->id) : false,
         ];
     }
 }

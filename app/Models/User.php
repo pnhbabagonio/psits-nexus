@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\QueuedResetPasswordNotification;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class User extends Authenticatable
 {
@@ -23,12 +25,12 @@ class User extends Authenticatable
         'name',       // still used by Laravel auth
         'email',
         'password',
-        'student_id', 
+        'student_id',
         'program',
         'year',
         'role',
         'status',
-        'last_login', 
+        'last_login',
     ];
 
     /**
@@ -94,5 +96,16 @@ class User extends Authenticatable
     public function scopeRole($query, $role)
     {
         return $query->where('role', $role);
+    }
+
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    public function registeredEvents(): HasManyThrough
+    {
+        return $this->hasManyThrough(Event::class, Registration::class, 'user_id', 'id', 'id', 'event_id')
+            ->where('registrations.status', 'registered');
     }
 }

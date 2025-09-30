@@ -10,6 +10,7 @@ use App\Http\Controllers\HelpSupportController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use Inertia\Inertia;
@@ -71,6 +72,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     Route::patch('/events/{event}/registration', [EventController::class, 'updateRegistration'])->name('events.registration.update');
+});
+
+
+// routes/web.php
+Route::middleware(['auth'])->group(function () {
+    Route::post('/events/{event}/register', [RegistrationController::class, 'store']);
+    Route::delete('/events/{event}/register', [RegistrationController::class, 'destroy']);
+    Route::get('/events/{event}/registrants', [RegistrationController::class, 'getRegistrants']);
+    Route::delete('/events/{event}/registrants/{registration}', [RegistrationController::class, 'removeRegistrant']);
 });
 
 // Attendee Management Routes

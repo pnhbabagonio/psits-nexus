@@ -4,6 +4,7 @@ import { Head, router, usePage } from '@inertiajs/vue3'
 import { type BreadcrumbItem } from '@/types'
 import { CalendarDays, Users2, CalendarCheck2, Award, Plus, Filter, ChevronDown } from 'lucide-vue-next'
 import EventForm from '@/components/EventForm.vue'
+import RegistrantsList from '@/components/RegistrantsList.vue' // ADD THIS IMPORT
 import EventDetail from '@/components/EventDetail.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 
@@ -41,6 +42,7 @@ interface AppEvent {
     organizer: string
     created_at: string
     updated_at: string
+    user_id: number
 }
 
 interface Activity {
@@ -65,7 +67,11 @@ async function loadEvents(statusFilter = 'All') {
         }
 
         const data = await response.json()
-
+        // Ensure each event has user_id (fallback to 0 if missing)
+        recentEvents.value = data.events.map((event: any) => ({
+            ...event,
+            user_id: event.user_id ?? 0
+        }))
         recentEvents.value = data.events
         stats.value = {
             total_events: data.stats.total_events,
@@ -121,6 +127,7 @@ function openCreateForm() {
 const showForm = ref(false)
 const selectedEvent = ref<AppEvent | null>(null)
 const showEventDetail = ref(false)
+const showRegistrantsList = ref(false)
 
 // Event Filter
 const eventFilter = ref('All')
@@ -353,6 +360,9 @@ onMounted(() => {
             <EventDetail v-if="selectedEvent" :event="selectedEvent" :isOpen="showEventDetail" @close="closeEventDetail"
                 @edit="handleEditEvent" @delete="handleEventDeleted" @update="handleEventUpdated" />
 
+            <!-- Add this after EventDetail in your Event.vue -->
+            <RegistrantsList v-if="selectedEvent" :event="selectedEvent" :open="showRegistrantsList"
+                @close="showRegistrantsList = false" @updated="() => loadEvents(eventFilter)" />
             <!-- Loading State -->
             <div v-if="isLoading" class="flex justify-center items-center py-8">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
