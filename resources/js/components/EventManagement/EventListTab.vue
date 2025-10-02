@@ -42,7 +42,6 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Search, Edit, Trash2, MapPin, Calendar, Users, Loader2, RotateCcw } from 'lucide-vue-next'
 
-// Types
 interface Event {
     id: number
     title: string
@@ -57,13 +56,14 @@ interface Event {
     is_full: boolean
 }
 
-// Props
-const props = defineProps<{
+interface Props {
     events: Event[]
     filters: {
         search: string
     }
-}>()
+}
+
+const props = defineProps<Props>()
 
 // State
 const searchQuery = ref(props.filters.search)
@@ -133,7 +133,7 @@ const openEditDialog = (event: Event) => {
 const saveEvent = () => {
     isSubmitting.value = true
 
-    const url = isEditing.value ? `/api/events/${form.id}` : '/api/events'
+    const url = isEditing.value ? `/events/${form.id}` : '/events'
     const method = isEditing.value ? 'put' : 'post'
 
     router[method](url, form, {
@@ -158,7 +158,7 @@ const openDeleteDialog = (id: number) => {
 const deleteEvent = () => {
     if (!eventToDelete.value) return
 
-    router.delete(`/api/events/${eventToDelete.value}`, {
+    router.delete(`/events/${eventToDelete.value}`, {
         onSuccess: () => {
             isDeleteDialogOpen.value = false
             eventToDelete.value = null

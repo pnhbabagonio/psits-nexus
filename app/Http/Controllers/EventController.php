@@ -2,85 +2,142 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class EventController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('Event', [
-            'stats' => [
-                'totalEvents' => 24,
-                'activeRegistrations' => 187,
-                'upcomingEvents' => 8,
-                'averageAttendance' => 94.2,
-            ],
-            'recentEvents' => [
-                [
-                    'title' => 'PSITS Tech Summit 2025',
-                    'date' => 'September 15, 2025',
-                    'time' => '09:00 AM',
-                    'location' => 'PSITS Auditorium',
-                    'status' => 'Upcoming',
-                    'registered' => '87/150'
-                ],
-                [
-                    'title' => 'Coding Bootcamp',
-                    'date' => 'September 20, 2025',
-                    'time' => '10:00 AM',
-                    'location' => 'Computer Lab 1',
-                    'status' => 'Ongoing',
-                    'registered' => '28/30'
-                ],
-            ],
-            'recentActivity' => [
-                ['message' => 'New registration from Maria Santos', 'time' => '3 hours ago'],
-                ['message' => 'Event details updated', 'time' => '1 day ago'],
-                ['message' => 'Reminder sent to 87 attendees', 'time' => '2 days ago'],
-            ],
-        ]);
-    }
+        $search = $request->query('search', '');
+        
+        $events = Event::withCount(['attendees as registered_count' => function($query) {
+                $query->where('attendance_status', '!=', 'cancelled');
+            }])
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('location', 'like', "%{$search}%")
+                      ->orWhere('category', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('date', 'desc')
+            ->orderBy('time', 'desc')
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'description' => $event->description,
+                    'date' => $event->date->format('Y-m-d'),
+                    'time' => $event->time->format('H:i'),
+                    'location' => $event->location,
+                    'capacity' => $event->capacity,
+                    'registered' => $event->registered_count,
+                    'status' => $event->status,
+                    'category' => $event->category,
+                    'is_full' => $event->registered_count >= $event->capacity,
+                    'created_at' => $event->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $event->updated_at->format('Y-m-d H:i:s'),
+                ];
+            });
 
-    public function create()
-    {
-        return Inertia::render('Components/EventForm'); 
+        return Inertia::render('EventManagement', [
+            'events' => $events,
+            'filters' => ['search' => $search],
+        ]);
     }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'time' => 'required',
-            'venue' => 'required|string|max:255',
-            'address' => 'required|string',
-            'max_capacity' => 'nullable|integer|min:1',
-            'registration_fee' => 'nullable|numeric|min:0',
-            'requires_approval' => 'boolean',
+{
+    $validated = $request->validate([
+        'title' => ['required', 'string', 'max:255'],
+        'description' => ['required', 'string'],
+        'date' => ['required', 'date', 'after_or_equal:today'],
+        'time' => ['required', 'date_format:H:i'],
+        'location' => ['required', 'string', 'max:255'],
+        'capacity' => ['required', 'integer', 'min:1'],
+        'category' => ['required', 'string', 'max:255'],
+        'status' => ['required', 'in:upcoming,ongoing,completed,cancelled'],
+    ]);
+
+        $event = Event::create([
+        'title' => $validated['title'],
+        'description' => $validated['description'],
+        'date' => $validated['date'],
+        'time' => $validated['time'],
+        'location' => $validated['location'],
+        'capacity' => $validated['capacity'],
+        'category' => $validated['category'],
+        'status' => $validated['status'],
         ]);
 
-        return redirect()->route('events.index')->with('success', 'Event created successfully!');
+        return redirect()->route('event-management')->with('success', 'Event created successfully!');
     }
 
-    public function update(Request $request, $id)
+    public function show(Event $event)
     {
-        // validate for now
+        return response()->json([
+            'id' => $event->id,
+            'title' => $event->title,
+            'description' => $event->description,
+            'date' => $event->date->format('Y-m-d'),
+            'time' => $event->time->format('H:i'),
+            'location' => $event->location,
+            'capacity' => $event->capacity,
+            'registered' => $event->registered,
+            'status' => $event->status,
+            'category' => $event->category,
+            'is_full' => $event->is_full,
+        ]);
+    }
+
+    public function update(Request $request, Event $event)
+    {
         $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
-            'date'  => 'nullable|date',
-            'time'  => 'nullable',
-            'venue' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'date' => ['required', 'date'],
+            'time' => ['required', 'date_format:H:i'],
+            'location' => ['required', 'string', 'max:255'],
+            'capacity' => ['required', 'integer', 'min:1'],
+            'category' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'in:upcoming,ongoing,completed,cancelled'],
         ]);
 
-        return redirect()->back()->with('success', "Event #{$id} updated successfully (mock).");
+        // Ensure capacity is not less than current registered count
+        $currentRegistered = $event->attendees()->where('attendance_status', '!=', 'cancelled')->count();
+        if ($validated['capacity'] < $currentRegistered) {
+            return redirect()->back()->with('error', 'Capacity cannot be less than current registered attendees (' . $currentRegistered . ').');
+        }
+
+        $event->update($validated);
+
+        return redirect()->route('event-management')->with('success', 'Event updated successfully!');
     }
-    public function destroy($id)
+
+    public function destroy(Event $event)
     {
-        // pretend the event was deleted
-        return redirect()->route('events.index')
-            ->with('success', "Event #{$id} deleted successfully (mock).");
+        $event->delete();
+
+        return redirect()->route('event-management')->with('success', 'Event deleted successfully!');
+    }
+
+    public function getStats()
+    {
+        $totalEvents = Event::count();
+        $upcomingEvents = Event::where('status', 'upcoming')->count();
+        $ongoingEvents = Event::where('status', 'ongoing')->count();
+        $completedEvents = Event::where('status', 'completed')->count();
+
+        return response()->json([
+            'total_events' => $totalEvents,
+            'upcoming_events' => $upcomingEvents,
+            'ongoing_events' => $ongoingEvents,
+            'completed_events' => $completedEvents,
+        ]);
     }
 }
