@@ -46,11 +46,6 @@ const mainNavItems: NavItem[] = [
         icon: Banknote,
     },
     {
-        title: 'Event Management', // ← Add as main item
-        href: '/event-management', // ← This should match your route
-        icon: Calendar,
-    },
-    {
         title: 'Reports',
         href: '/reports',
         icon: BarChart3,
@@ -67,7 +62,7 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-// Financial management sub-items (keep this collapsible if needed)
+// Financial management sub-items
 const financialManagementItems = [
     {
         title: 'Transactions',
@@ -86,6 +81,25 @@ const financialManagementItems = [
     },
 ];
 
+// Event Management sub-items
+const eventManagementItems = [
+    {
+        title: 'Events',
+        href: '/events',
+        icon: Calendar,
+    },
+    {
+        title: 'Attendee Management',
+        href: '/attendees',
+        icon: Users,
+    },
+    {
+        title: 'Event Analytics',
+        href: '/analytics',
+        icon: BarChart3,
+    },
+];
+
 const footerNavItems: NavItem[] = [
     {
         title: 'PSITS Portal',
@@ -94,7 +108,7 @@ const footerNavItems: NavItem[] = [
     },
     {
         title: 'Platform Guide',
-        href: route('platform-guide'),
+        href: route('platform-guide'), // ✅ gi-fix ni diri
         icon: BookOpen,
     },
 ];
@@ -135,7 +149,7 @@ const footerNavItems: NavItem[] = [
                     </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <!-- Collapsible Financial Management (keep if needed) -->
+                <!-- Collapsible Financial Management -->
                 <Collapsible class="group/collapsible">
                     <SidebarMenuItem>
                         <CollapsibleTrigger as-child>
@@ -161,18 +175,34 @@ const footerNavItems: NavItem[] = [
                     </SidebarMenuItem>
                 </Collapsible>
 
-                <!-- Event Management as main item (like Payment) -->
-                <SidebarMenuItem>
-                    <SidebarMenuButton as-child>
-                        <Link :href="mainNavItems[2].href"> <!-- This points to /event-management -->
-                        <component :is="mainNavItems[2].icon" />
-                        <span>{{ mainNavItems[2].title }}</span>
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
+                <!-- Collapsible Event Management -->
+                <Collapsible class="group/collapsible">
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger as-child>
+                            <SidebarMenuButton>
+                                <Calendar />
+                                <span>Event Management</span>
+                                <ChevronRight
+                                    class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenuSub>
+                                <SidebarMenuSubItem v-for="subItem in eventManagementItems" :key="subItem.title">
+                                    <SidebarMenuButton as-child size="sm">
+                                        <Link :href="subItem.href">
+                                        <component :is="subItem.icon" />
+                                        <span>{{ subItem.title }}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
+                    </SidebarMenuItem>
+                </Collapsible>
 
                 <!-- Remaining nav items -->
-                <SidebarMenuItem v-for="item in mainNavItems.slice(3)" :key="item.title">
+                <SidebarMenuItem v-for="item in mainNavItems.slice(1)" :key="item.title">
                     <SidebarMenuButton as-child>
                         <Link :href="item.href">
                         <component :is="item.icon" />
