@@ -73,12 +73,6 @@ const getTabIcon = (iconType: string) => {
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-6 text-gray-200">
-            <!-- Header -->
-            <div class="mb-6">
-                <h1 class="text-2xl font-bold text-white">User Management</h1>
-                <p class="text-gray-400 mt-1">Manage system users, roles, and permissions</p>
-            </div>
-
             <!-- Tabs Navigation -->
             <div class="flex space-x-1 border-b border-gray-800 mb-6">
                 <button

@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
 import {
     Search,
@@ -24,6 +19,7 @@ import {
     CheckCircle,
     Clock,
     AlertTriangle,
+    X,
 } from "lucide-vue-next"
 
 // --- Types ---
@@ -176,7 +172,7 @@ function getStatus(req: Requirement): "Pending" | "Overdue" | "Done" {
     return "Done"
 }
 
-function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+function getStatusVariant(status: string) {
     switch (status) {
         case "Pending": return "outline"
         case "Overdue": return "destructive"
@@ -221,87 +217,100 @@ const totalPages = computed(() => {
 </script>
 
 <template>
-    <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-6">
+    <div class="p-6 text-foreground">
         <!-- Header -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-bold text-foreground">Payment Requirements</h1>
-                <p class="text-muted-foreground">Manage and track payment requirements for members</p>
+                <h2 class="text-2xl font-bold">Payment Requirements</h2>
+                <p class="text-muted-foreground">Manage and track all payment requirements</p>
             </div>
-            <Dialog v-model:open="showModal">
-                <DialogTrigger as-child>
-                    <Button @click="openAddModal" class="gap-2">
-                        <Plus class="h-4 w-4" />
-                        Add Requirement
-                    </Button>
-                </DialogTrigger>
-            </Dialog>
+            <div class="flex gap-2">
+                <Button
+                    @click="isGridView = !isGridView"
+                    variant="outline"
+                    size="icon"
+                >
+                    <component :is="isGridView ? List : LayoutGrid" class="w-4 h-4" />
+                </Button>
+                <Button
+                    @click="openAddModal"
+                    class="gap-2"
+                >
+                    <Plus class="w-4 h-4" /> Add Requirement
+                </Button>
+            </div>
         </div>
 
-        <!-- Search + Filter + View Toggle -->
-        <div class="flex flex-wrap items-center gap-3">
+        <!-- Search + Filter -->
+        <div class="flex items-center gap-3 mb-6">
             <!-- Search -->
-            <div class="relative flex-1 min-w-[300px]">
-                <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
+            <div class="flex items-center flex-1 bg-muted border border-border rounded-lg px-3 py-2">
+                <Search class="w-4 h-4 text-muted-foreground" />
+                <input
                     v-model="search"
+                    type="text"
                     placeholder="Search requirements..."
-                    class="pl-9"
+                    class="ml-2 flex-1 bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground"
                 />
             </div>
 
-            <!-- Filter Dropdown -->
-            <DropdownMenu v-model:open="isFilterOpen">
-                <DropdownMenuTrigger as-child>
-                    <Button variant="outline" class="gap-2">
-                        <Filter class="h-4 w-4" />
-                        {{ requirementFilter }}
-                        <ChevronDown 
-                            class="h-4 w-4 transition-transform"
-                            :class="{ 'rotate-180': isFilterOpen }"
-                        />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem 
-                        v-for="option in filterOptions" 
+            <!-- Filter -->
+            <div class="relative">
+                <Button
+                    @click="isFilterOpen = !isFilterOpen"
+                    variant="outline"
+                    class="gap-2"
+                >
+                    <Filter class="w-4 h-4" />
+                    <span>{{ requirementFilter }}</span>
+                    <ChevronDown
+                        class="w-4 h-4 transition-transform"
+                        :class="{ 'rotate-180': isFilterOpen }"
+                    />
+                </Button>
+
+                <!-- Dropdown -->
+                <div
+                    v-if="isFilterOpen"
+                    class="absolute right-0 mt-2 w-32 bg-card border border-border rounded-lg shadow-lg z-10 overflow-hidden"
+                >
+                    <button
+                        v-for="option in filterOptions"
                         :key="option"
-                        @click="requirementFilter = option"
-                        :class="{ 'bg-accent': requirementFilter === option }"
+                        @click="
+                            requirementFilter = option;
+                            isFilterOpen = false
+                        "
+                        class="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                        :class="{ 'bg-muted': requirementFilter === option }"
                     >
                         {{ option }}
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                    </button>
+                </div>
+            </div>
 
-            <!-- Clear Filters -->
+            <!-- Clear Filter -->
             <Button
                 v-if="requirementFilter !== 'All' || search"
                 @click="clearFilters"
-                variant="destructive"
-                size="sm"
+                variant="outline"
             >
                 Clear Filters
-            </Button>
-
-            <!-- Toggle View -->
-            <Button
-                @click="isGridView = !isGridView"
-                variant="outline"
-                size="icon"
-            >
-                <component :is="isGridView ? List : LayoutGrid" class="h-4 w-4" />
             </Button>
         </div>
 
         <!-- Grid View -->
-        <div v-if="isGridView" class="grid gap-6 md:grid-cols-2">
-            <Card v-for="req in paginatedRequirements" :key="req.id" class="overflow-hidden">
+        <div v-if="isGridView" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <Card 
+                v-for="req in paginatedRequirements" 
+                :key="req.id" 
+                class="overflow-hidden border-border bg-card"
+            >
                 <CardHeader class="pb-4">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <CardTitle class="text-lg">{{ req.title }}</CardTitle>
-                            <CardDescription>{{ req.description }}</CardDescription>
+                            <CardDescription class="text-muted-foreground">{{ req.description }}</CardDescription>
                         </div>
                         <Badge 
                             :variant="getStatusVariant(getStatus(req))"
@@ -344,21 +353,21 @@ const totalPages = computed(() => {
 
                     <!-- Stats Grid -->
                     <div class="grid grid-cols-3 gap-3">
-                        <div class="rounded-lg bg-blue-50 dark:bg-blue-950 p-3 text-center">
+                        <div class="rounded-lg bg-blue-50 dark:bg-blue-950 p-3 text-center border border-blue-200 dark:border-blue-800">
                             <div class="flex items-center justify-center gap-1 text-blue-600 dark:text-blue-400">
                                 <Users class="h-4 w-4" />
                                 <span class="font-semibold text-lg">{{ req.totalUsers }}</span>
                             </div>
                             <p class="text-xs text-muted-foreground">Total</p>
                         </div>
-                        <div class="rounded-lg bg-green-50 dark:bg-green-950 p-3 text-center">
+                        <div class="rounded-lg bg-green-50 dark:bg-green-950 p-3 text-center border border-green-200 dark:border-green-800">
                             <div class="flex items-center justify-center gap-1 text-green-600 dark:text-green-400">
                                 <CheckCircle class="h-4 w-4" />
                                 <span class="font-semibold text-lg">{{ req.paid }}</span>
                             </div>
                             <p class="text-xs text-muted-foreground">Paid</p>
                         </div>
-                        <div class="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-center">
+                        <div class="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-center border border-red-200 dark:border-red-800">
                             <div class="flex items-center justify-center gap-1 text-red-600 dark:text-red-400">
                                 <Clock class="h-4 w-4" />
                                 <span class="font-semibold text-lg">{{ req.unpaid }}</span>
@@ -393,233 +402,214 @@ const totalPages = computed(() => {
         </div>
 
         <!-- List View -->
-        <Card v-else>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="border-b">
-                        <tr class="text-left">
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Title</th>
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Amount</th>
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Deadline</th>
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Progress</th>
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Total</th>
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Paid</th>
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Unpaid</th>
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Status</th>
-                            <th class="px-4 py-3 text-sm font-medium text-muted-foreground">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr 
-                            v-for="req in paginatedRequirements" 
-                            :key="req.id"
-                            class="border-b hover:bg-muted/50"
-                        >
-                            <td class="px-4 py-3">
-                                <div>
-                                    <p class="font-medium">{{ req.title }}</p>
-                                    <p class="text-xs text-muted-foreground">{{ req.description }}</p>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 font-medium">₱{{ req.amount.toLocaleString() }}</td>
-                            <td class="px-4 py-3 text-sm">{{ new Date(req.deadline).toLocaleDateString() }}</td>
-                            <td class="px-4 py-3">
-                                <div class="flex items-center gap-2 min-w-[120px]">
-                                    <Progress 
-                                        :value="(req.paid / req.totalUsers) * 100" 
-                                        class="flex-1 h-2"
-                                    />
-                                    <span class="text-xs text-muted-foreground whitespace-nowrap">
-                                        {{ req.paid }}/{{ req.totalUsers }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-blue-600 dark:text-blue-400 font-medium">{{ req.totalUsers }}</td>
-                            <td class="px-4 py-3 text-green-600 dark:text-green-400 font-medium">{{ req.paid }}</td>
-                            <td class="px-4 py-3 text-red-600 dark:text-red-400 font-medium">{{ req.unpaid }}</td>
-                            <td class="px-4 py-3">
-                                <Badge 
-                                    :variant="getStatusVariant(getStatus(req))"
-                                    class="gap-1"
-                                >
-                                    <component :is="getStatusIcon(getStatus(req))" class="h-3 w-3" />
-                                    {{ getStatus(req) }}
-                                </Badge>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="flex gap-1">
-                                    <Button 
-                                        @click="openEditModal(req)"
-                                        variant="ghost"
-                                        size="icon"
-                                        class="h-8 w-8"
-                                    >
-                                        <Pencil class="h-4 w-4" />
-                                    </Button>
-                                    <Button 
-                                        @click="deleteRequirement(req.id)"
-                                        variant="ghost"
-                                        size="icon"
-                                        class="h-8 w-8 text-red-500 hover:text-red-600"
-                                    >
-                                        <Trash2 class="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </Card>
-
-        <!-- Add/Edit Modal -->
-        <Dialog v-model:open="showModal">
-            <DialogContent class="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>
-                        {{ editingRequirement ? "Edit Requirement" : "Add New Requirement" }}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {{ editingRequirement ? "Update the requirement details below." : "Fill in the details for the new payment requirement." }}
-                    </DialogDescription>
-                </DialogHeader>
-                
-                <form @submit.prevent="saveRequirement" class="space-y-4">
-                    <div class="space-y-2">
-                        <Label for="title">Title</Label>
-                        <Input
-                            id="title"
-                            v-model="newRequirement.title"
-                            placeholder="Enter requirement title"
-                        />
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <Label for="description">Description</Label>
-                        <Textarea
-                            id="description"
-                            v-model="newRequirement.description"
-                            placeholder="Enter requirement description"
-                            rows="3"
-                        />
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <Label for="amount">Amount (₱)</Label>
-                            <Input
-                                id="amount"
-                                v-model.number="newRequirement.amount"
-                                type="number"
-                                placeholder="0"
-                                min="0"
-                                step="0.01"
-                            />
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <Label for="totalUsers">Total Users</Label>
-                            <Input
-                                id="totalUsers"
-                                v-model.number="newRequirement.totalUsers"
-                                type="number"
-                                placeholder="0"
-                                min="1"
-                            />
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <Label for="deadline">Deadline</Label>
-                        <Input
-                            id="deadline"
-                            v-model="newRequirement.deadline"
-                            type="date"
-                        />
-                    </div>
-                </form>
-                
-                <DialogFooter>
-                    <Button 
-                        type="button" 
-                        variant="outline" 
-                        @click="showModal = false"
+        <div v-else class="overflow-x-auto rounded-xl border border-border bg-card">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-muted uppercase text-xs">
+                    <tr>
+                        <th class="px-4 py-3 text-muted-foreground">Title</th>
+                        <th class="px-4 py-3 text-muted-foreground">Amount</th>
+                        <th class="px-4 py-3 text-muted-foreground">Deadline</th>
+                        <th class="px-4 py-3 text-muted-foreground">Progress</th>
+                        <th class="px-4 py-3 text-muted-foreground">Total</th>
+                        <th class="px-4 py-3 text-muted-foreground">Paid</th>
+                        <th class="px-4 py-3 text-muted-foreground">Unpaid</th>
+                        <th class="px-4 py-3 text-muted-foreground">Status</th>
+                        <th class="px-4 py-3 text-muted-foreground">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr 
+                        v-for="req in paginatedRequirements" 
+                        :key="req.id"
+                        class="border-t border-border hover:bg-muted/50 transition-colors"
                     >
-                        Cancel
-                    </Button>
-                    <Button @click="saveRequirement">
-                        {{ editingRequirement ? "Save Changes" : "Add Requirement" }}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                        <td class="px-4 py-3">
+                            <div>
+                                <p class="font-medium">{{ req.title }}</p>
+                                <p class="text-xs text-muted-foreground">{{ req.description }}</p>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 font-medium">₱{{ req.amount.toLocaleString() }}</td>
+                        <td class="px-4 py-3 text-sm">{{ new Date(req.deadline).toLocaleDateString() }}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2 min-w-[120px]">
+                                <Progress 
+                                    :value="(req.paid / req.totalUsers) * 100" 
+                                    class="flex-1 h-2"
+                                />
+                                <span class="text-xs text-muted-foreground whitespace-nowrap">
+                                    {{ req.paid }}/{{ req.totalUsers }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-blue-600 dark:text-blue-400 font-medium">{{ req.totalUsers }}</td>
+                        <td class="px-4 py-3 text-green-600 dark:text-green-400 font-medium">{{ req.paid }}</td>
+                        <td class="px-4 py-3 text-red-600 dark:text-red-400 font-medium">{{ req.unpaid }}</td>
+                        <td class="px-4 py-3">
+                            <Badge 
+                                :variant="getStatusVariant(getStatus(req))"
+                                class="gap-1"
+                            >
+                                <component :is="getStatusIcon(getStatus(req))" class="h-3 w-3" />
+                                {{ getStatus(req) }}
+                            </Badge>
+                        </td>
+                        <td class="px-4 py-3 flex gap-2">
+                            <Button
+                                @click="openEditModal(req)"
+                                variant="ghost"
+                                size="icon"
+                            >
+                                <Pencil class="w-4 h-4" />
+                            </Button>
+                            <Button
+                                @click="deleteRequirement(req.id)"
+                                variant="ghost"
+                                size="icon"
+                            >
+                                <Trash2 class="w-4 h-4" />
+                            </Button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <!-- Empty State -->
-        <div v-if="filteredRequirements.length === 0" class="text-center py-12">
-            <div class="mx-auto mb-4 h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                <DollarSign class="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 class="text-lg font-medium mb-2">No requirements found</h3>
-            <p class="text-muted-foreground mb-4">
-                {{ search || requirementFilter !== 'All' 
-                    ? 'Try adjusting your filters or search terms.' 
-                    : 'Get started by adding your first payment requirement.'
-                }}
-            </p>
-            <Button v-if="!search && requirementFilter === 'All'" @click="openAddModal" class="gap-2">
+        <div v-if="filteredRequirements.length === 0" class="text-center py-8 text-muted-foreground">
+            <DollarSign class="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No payment requirements found</p>
+            <Button 
+                v-if="!search && requirementFilter === 'All'" 
+                @click="openAddModal" 
+                class="gap-2 mt-4"
+            >
                 <Plus class="h-4 w-4" />
                 Add First Requirement
             </Button>
         </div>
 
+        <!-- Add/Edit Modal -->
+        <div
+            v-if="showModal"
+            class="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50"
+        >
+            <div class="bg-card border border-border rounded-xl p-6 w-full max-w-md shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">
+                        {{ editingRequirement ? "Edit Requirement" : "Add Requirement" }}
+                    </h3>
+                    <Button @click="showModal = false" variant="ghost" size="icon">
+                        <X class="w-5 h-5" />
+                    </Button>
+                </div>
+                <form @submit.prevent="saveRequirement" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-muted-foreground mb-1">Title</label>
+                        <input
+                            v-model="newRequirement.title"
+                            type="text"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                            placeholder="Enter requirement title"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-muted-foreground mb-1">Description</label>
+                        <textarea
+                            v-model="newRequirement.description"
+                            rows="3"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm resize-none"
+                            placeholder="Enter requirement description"
+                        />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-muted-foreground mb-1">Amount (₱)</label>
+                            <input
+                                v-model.number="newRequirement.amount"
+                                type="number"
+                                class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                                placeholder="0"
+                                min="0"
+                                step="0.01"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-muted-foreground mb-1">Total Users</label>
+                            <input
+                                v-model.number="newRequirement.totalUsers"
+                                type="number"
+                                class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                                placeholder="0"
+                                min="1"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-muted-foreground mb-1">Deadline</label>
+                        <input
+                            v-model="newRequirement.deadline"
+                            type="date"
+                            class="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                        />
+                    </div>
+
+                    <div class="flex justify-end gap-2 mt-6">
+                        <Button
+                            type="button"
+                            @click="showModal = false"
+                            variant="outline"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                        >
+                            {{ editingRequirement ? "Save Changes" : "Add" }}
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Pagination Footer -->
-        <div v-if="filteredRequirements.length > 0" class="flex items-center justify-between pt-4 border-t">
-            <div class="text-sm text-muted-foreground">
+        <div class="flex items-center justify-between p-4 text-sm text-muted-foreground mt-4">
+            <span>
                 Showing {{ ((currentPage - 1) * rowsPerPage) + 1 }} to 
                 {{ Math.min(currentPage * rowsPerPage, filteredRequirements.length) }} of 
-                {{ filteredRequirements.length }} requirements
-            </div>
+                {{ filteredRequirements.length }} requirements (page {{ currentPage }} of {{ totalPages }})
+            </span>
 
             <div class="flex items-center gap-2">
-                <span class="text-sm text-muted-foreground">Rows per page:</span>
-                <DropdownMenu>
-                    <DropdownMenuTrigger as-child>
-                        <Button variant="outline" size="sm">
-                            {{ rowsPerPage }}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem @click="rowsPerPage = 10">10</DropdownMenuItem>
-                        <DropdownMenuItem @click="rowsPerPage = 25">25</DropdownMenuItem>
-                        <DropdownMenuItem @click="rowsPerPage = 50">50</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
+                <span>Rows per page:</span>
+                <select
+                    v-model="rowsPerPage"
+                    class="bg-background border border-border rounded px-2 py-1"
+                >
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                </select>
                 <Button
-                    :disabled="currentPage <= 1"
                     @click="currentPage--"
+                    :disabled="currentPage <= 1"
                     variant="outline"
                     size="sm"
                 >
                     Previous
                 </Button>
-                
-                <div class="flex items-center gap-1">
-                    <Button
-                        v-for="page in Math.min(totalPages, 5)"
-                        :key="page"
-                        :variant="currentPage === page ? 'default' : 'outline'"
-                        size="sm"
-                        class="w-8 h-8"
-                        @click="currentPage = page"
-                    >
-                        {{ page }}
-                    </Button>
-                </div>
-                
+                <Button 
+                    v-for="page in Math.min(totalPages, 5)" 
+                    :key="page"
+                    @click="currentPage = page"
+                    :variant="currentPage === page ? 'default' : 'outline'"
+                    size="sm"
+                >
+                    {{ page }}
+                </Button>
                 <Button
-                    :disabled="currentPage >= totalPages"
                     @click="currentPage++"
+                    :disabled="currentPage >= totalPages"
                     variant="outline"
                     size="sm"
                 >

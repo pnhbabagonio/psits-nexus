@@ -41,6 +41,11 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Events',
+        href: '/event-management',
+        icon: Calendar,
+    },
+    {
         title: 'Payment',
         href: '/payment',
         icon: Banknote,
@@ -81,24 +86,7 @@ const financialManagementItems = [
     },
 ];
 
-// Event Management sub-items
-const eventManagementItems = [
-    {
-        title: 'Events',
-        href: '/events',
-        icon: Calendar,
-    },
-    {
-        title: 'Attendee Management',
-        href: '/attendees',
-        icon: Users,
-    },
-    {
-        title: 'Event Analytics',
-        href: '/analytics',
-        icon: BarChart3,
-    },
-];
+
 
 const footerNavItems: NavItem[] = [
     {
@@ -163,32 +151,6 @@ const footerNavItems: NavItem[] = [
                         <CollapsibleContent>
                             <SidebarMenuSub>
                                 <SidebarMenuSubItem v-for="subItem in financialManagementItems" :key="subItem.title">
-                                    <SidebarMenuButton as-child size="sm">
-                                        <Link :href="subItem.href">
-                                        <component :is="subItem.icon" />
-                                        <span>{{ subItem.title }}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuSubItem>
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </SidebarMenuItem>
-                </Collapsible>
-
-                <!-- Collapsible Event Management -->
-                <Collapsible class="group/collapsible">
-                    <SidebarMenuItem>
-                        <CollapsibleTrigger as-child>
-                            <SidebarMenuButton>
-                                <Calendar />
-                                <span>Event Management</span>
-                                <ChevronRight
-                                    class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                            </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                            <SidebarMenuSub>
-                                <SidebarMenuSubItem v-for="subItem in eventManagementItems" :key="subItem.title">
                                     <SidebarMenuButton as-child size="sm">
                                         <Link :href="subItem.href">
                                         <component :is="subItem.icon" />
