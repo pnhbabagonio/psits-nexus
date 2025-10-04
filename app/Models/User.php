@@ -95,4 +95,35 @@ class User extends Authenticatable
     {
         return $query->where('role', $role);
     }
+    /**
+     * Many-to-Many relationship with Requirements through payments
+     */
+    public function requirements()
+    {
+        return $this->belongsToMany(Requirement::class, 'payments')
+                    ->withPivot('paid_at', 'amount_paid', 'status')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get paid requirements
+     */
+    public function paidRequirements()
+    {
+        return $this->belongsToMany(Requirement::class, 'payments')
+                    ->wherePivot('status', 'paid')
+                    ->withPivot('paid_at', 'amount_paid')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get unpaid requirements
+     */
+    public function unpaidRequirements()
+    {
+        return $this->belongsToMany(Requirement::class, 'payments')
+                    ->wherePivot('status', 'pending')
+                    ->withPivot('paid_at', 'amount_paid')
+                    ->withTimestamps();
+    }
 }

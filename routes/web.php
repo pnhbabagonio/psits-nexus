@@ -10,8 +10,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HelpSupportController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RequirementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,17 +94,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Payment
+| Payment Management
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/payment', fn() => Inertia::render('Payment'))->name('payment.index');
+    // Main payment page with tabs
+    Route::get('/payment', function () {
+        return Inertia::render('PaymentManagement');
+    })->name('payment.index');
 
-    Route::prefix('payments')->name('payments.')->group(function () {
-        Route::get('/qr-generator', fn() => Inertia::render('QrGenerator'))->name('qr-generator');
-        Route::get('/record', fn() => Inertia::render('RecordPayment'))->name('record');
-        Route::post('/record', [PaymentController::class, 'record'])->name('record.store');
-    });
+    // Requirements CRUD routes
+    Route::get('/requirements', [RequirementController::class, 'index'])->name('requirements.index');
+    Route::post('/requirements', [RequirementController::class, 'store'])->name('requirements.store');
+    Route::put('/requirements/{requirement}', [RequirementController::class, 'update'])->name('requirements.update');
+    Route::delete('/requirements/{requirement}', [RequirementController::class, 'destroy'])->name('requirements.destroy');
 });
 
 /*

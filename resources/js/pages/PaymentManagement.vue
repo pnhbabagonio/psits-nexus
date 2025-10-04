@@ -2,9 +2,9 @@
 import { ref } from "vue"
 import AppLayout from '@/layouts/AppLayout.vue'
 import { type BreadcrumbItem } from '@/types'
-import Requirements from "@/components/Requirements.vue"
-import Records from "@/components/Records.vue"
-import Profiles from "@/components/Profiles.vue"
+import Requirements from "@/components/PaymentManagement/Requirements.vue"
+import Records from "@/components/PaymentManagement/Records.vue"
+import Profiles from "@/components/PaymentManagement/Profiles.vue"
 
 const activeTab = ref("requirements")
 
